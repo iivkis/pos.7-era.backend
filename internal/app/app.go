@@ -1,7 +1,39 @@
 package app
 
-import "log"
+import (
+	"fmt"
+
+	"github.com/iivkis/pos-ninja-backend/internal/handler"
+	"github.com/iivkis/pos-ninja-backend/internal/myservice"
+	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos-ninja-backend/internal/server"
+)
 
 func Launch() {
-	log.Println("App is Run! =D")
+	welcomInfo()
+	fmt.Println("Server launching... \\-0.0-/")
+
+	//internal
+	_repo := repository.NewRepository()
+	_service := myservice.NewMyService(_repo)
+	_handler := handler.NewHttpHandler(_service)
+	_server := server.NewServer(_handler)
+
+	//run server
+	var done = make(chan byte)
+	go func() {
+		if err := _server.Listen(); err != nil {
+			panic(err)
+		}
+	}()
+
+	fmt.Print("Server launched =D\n\n")
+	<-done
+}
+
+func welcomInfo() {
+	fmt.Println("------------------------------------------------------")
+	fmt.Println("[APP NAME] POS-Ninja-Backend (version: 0.1-alpha)")
+	fmt.Println("[CREATED BY] Ivan Razmolodin (vk.com/ivan.razmolodin)")
+	fmt.Println("------------------------------------------------------")
 }
