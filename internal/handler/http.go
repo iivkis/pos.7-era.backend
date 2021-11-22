@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos-ninja-backend/internal/myservice"
 )
@@ -28,6 +30,10 @@ func (h *HttpHandler) Init() *gin.Engine {
 	api := root.Group("/api")
 
 	h.connectApiV1(api.Group("/v1"))
+
+	root.GET("/", func(c *gin.Context) {
+		c.String(http.StatusOK, "POS-Ninja-Backend (version: 1.0)")
+	})
 
 	return h.engine
 }
