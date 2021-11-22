@@ -32,7 +32,7 @@ func (h *HttpHandler) Init() *gin.Engine {
 	h.connectApiV1(api.Group("/v1"))
 
 	root.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "POS-Ninja-Backend (version: 1.0)")
+		c.String(http.StatusOK, "POS-Ninja-Backend (version: 0.1-alpha)")
 	})
 
 	return h.engine
