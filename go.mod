@@ -1,5 +1,6 @@
 module github.com/iivkis/pos-ninja-backend
 
+// +heroku goVersion go1.17
 go 1.17
 
 require (
