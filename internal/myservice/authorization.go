@@ -2,6 +2,7 @@ package myservice
 
 import (
 	"net/http"
+	"net/mail"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
@@ -45,7 +46,14 @@ func (s *authorization) SignUp(c *gin.Context) {
 	case "org":
 		var input signUpInput
 
+		//parse body
 		if err := c.ShouldBindJSON(&input); err != nil {
+			c.String(http.StatusBadRequest, err.Error())
+			return
+		}
+
+		//validate email
+		if _, err := mail.ParseAddress(input.Email); err != nil {
 			c.String(http.StatusBadRequest, err.Error())
 			return
 		}
@@ -68,7 +76,7 @@ func (s *authorization) SignUp(c *gin.Context) {
 	}
 }
 
-//@Summary Логин для организации, либо сотрудника
+//@Summary Вход для организации, либо сотрудника
 //@Param type query string false "`org`(default) or `employee`"
 //@Param json body signInInput true "Объект с обязательными полями `email` и `password`"
 //@Accept json

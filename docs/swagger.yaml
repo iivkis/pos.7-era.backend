@@ -52,7 +52,7 @@ paths:
           description: Bad Request
           schema:
             type: string
-      summary: Логин для организации, либо сотрудника
+      summary: Вход для организации, либо сотрудника
   /auth/signUp:
     post:
       consumes:

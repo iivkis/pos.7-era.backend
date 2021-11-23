@@ -33,7 +33,7 @@ var doc = `{
                 "produces": [
                     "text/plain"
                 ],
-                "summary": "Логин для организации, либо сотрудника",
+                "summary": "Вход для организации, либо сотрудника",
                 "parameters": [
                     {
                         "type": "string",

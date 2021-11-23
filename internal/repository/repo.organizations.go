@@ -31,6 +31,7 @@ func newOrganizationsRepository(db *gorm.DB, authjwt authjwt.AuthJWT) *organizat
 }
 
 func (r *organizations) Create(m *OrganizationModel) error {
+
 	h, err := bcrypt.GenerateFromPassword([]byte(m.Password), 7)
 	if err != nil {
 		return err
