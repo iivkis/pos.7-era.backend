@@ -1,15 +1,16 @@
 package repository
 
 import (
+	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 type Repository struct {
-	Organizations iOrganizations
+	Organizations OrganizationsRepository
 }
 
-func NewRepository() Repository {
+func NewRepository(authjwt authjwt.AuthJWT) Repository {
 	db, err := gorm.Open(sqlite.Open("pos-ninja.sqlite3"), &gorm.Config{})
 	if err != nil {
 		panic(err)
@@ -20,6 +21,6 @@ func NewRepository() Repository {
 	)
 
 	return Repository{
-		Organizations: newOrganizationsRepo(db),
+		Organizations: newOrganizationsRepository(db, authjwt),
 	}
 }

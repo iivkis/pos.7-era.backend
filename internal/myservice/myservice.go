@@ -3,11 +3,11 @@ package myservice
 import "github.com/iivkis/pos-ninja-backend/internal/repository"
 
 type MyService struct {
-	Organizations iOrganizations
+	Authorization AuthorizationService
 }
 
 func NewMyService(repo repository.Repository) MyService {
 	return MyService{
-		Organizations: newOrganizations(repo),
+		Authorization: newAuthorizationService(repo),
 	}
 }

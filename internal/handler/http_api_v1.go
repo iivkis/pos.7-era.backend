@@ -11,10 +11,10 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		c.String(http.StatusOK, "all okey!")
 	})
 
-	//organizations
-	orgApi := r.Group("/organizations")
+	//authorization
+	authApi := r.Group("/auth")
 	{
-		orgApi.GET("/", h.service.Organizations.GetAllOrganizations)
-		orgApi.POST("/", h.service.Organizations.AddOrganization)
+		authApi.POST("/signUp", h.service.Authorization.SignUp)
+		authApi.POST("/signIn", h.service.Authorization.SignIn)
 	}
 }
