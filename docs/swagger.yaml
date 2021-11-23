@@ -1,0 +1,83 @@
+basePath: /api/v1
+definitions:
+  myservice.signInInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  myservice.signUpInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+info:
+  contact:
+    email: razmolodinivan@mail.ru
+  title: POS-Ninja Backend API
+  version: 0.1-alpha
+paths:
+  /auth/signIn:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: '`org`(default) or `employee`'
+        in: query
+        name: type
+        type: string
+      - description: Объект с обязательными полями `email` и `password`
+        in: body
+        name: json
+        required: true
+        schema:
+          $ref: '#/definitions/myservice.signInInput'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Возвращает `jwt токен` при успешной авторизации
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Логин для организации, либо сотрудника
+  /auth/signUp:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: '`org`(default) or `employee`'
+        in: query
+        name: type
+        type: string
+      - description: Объект с обязательными полями `email` и `password`
+        in: body
+        name: json
+        required: true
+        schema:
+          $ref: '#/definitions/myservice.signUpInput'
+      produces:
+      - text/plain
+      responses:
+        "200":
+          description: Возвращает `created` при успешной регистрации
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Регистрация организации, либо сотрудника
+swagger: "2.0"

@@ -22,14 +22,28 @@ func newAuthorizationService(repo repository.Repository) *authorization {
 	}
 }
 
+type signUpInput struct {
+	Email    string `json:"email" binding:"required,max=45"`
+	Password string `json:"password" binding:"required,max=45"`
+}
+
+type signInInput struct {
+	Email    string `json:"email" binding:"required,max=45"`
+	Password string `json:"password" binding:"required,max=45"`
+}
+
+//@Summary Регистрация организации, либо сотрудника
+//@Param type query string false "`org`(default) or `employee`"
+//@Param json body signUpInput true "Объект с обязательными полями `email` и `password`"
+//@Accept json
+//@Produce plain
+//@Success 200 {string} string "Возвращает `created` при успешной регистрации"
+//@Failure 400 {string} string
+//@Router /auth/signUp [post]
 func (s *authorization) SignUp(c *gin.Context) {
 	switch tp := c.DefaultQuery("type", "org"); tp {
 	case "org":
-		var input struct {
-			Name     string `json:"name" binding:"max=45"`
-			Email    string `json:"email" binding:"required,max=45"`
-			Password string `json:"password" binding:"required,max=45"`
-		}
+		var input signUpInput
 
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.String(http.StatusBadRequest, err.Error())
@@ -37,7 +51,6 @@ func (s *authorization) SignUp(c *gin.Context) {
 		}
 
 		model := repository.OrganizationModel{
-			Name:     input.Name,
 			Email:    input.Email,
 			Password: input.Password,
 		}
@@ -55,13 +68,18 @@ func (s *authorization) SignUp(c *gin.Context) {
 	}
 }
 
+//@Summary Логин для организации, либо сотрудника
+//@Param type query string false "`org`(default) or `employee`"
+//@Param json body signInInput true "Объект с обязательными полями `email` и `password`"
+//@Accept json
+//@Produce plain
+//@Success 200 {string} string "Возвращает `jwt токен` при успешной авторизации"
+//@Failure 400 {string} string
+//@Router /auth/signIn [post]
 func (s *authorization) SignIn(c *gin.Context) {
 	switch tp := c.DefaultQuery("type", "org"); tp {
 	case "org":
-		var input struct {
-			Email    string `json:"email" binding:"required,max=45"`
-			Password string `json:"password" binding:"required,max=45"`
-		}
+		var input signInInput
 
 		if err := c.ShouldBindJSON(&input); err != nil {
 			c.String(http.StatusBadRequest, err.Error())

@@ -1,0 +1,129 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "title": "POS-Ninja Backend API",
+        "contact": {
+            "email": "razmolodinivan@mail.ru"
+        },
+        "version": "0.1-alpha"
+    },
+    "basePath": "/api/v1",
+    "paths": {
+        "/auth/signIn": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Логин для организации, либо сотрудника",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "`org`(default) or `employee`",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Объект с обязательными полями `email` и `password`",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/myservice.signInInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Возвращает `jwt токен` при успешной авторизации",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signUp": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "text/plain"
+                ],
+                "summary": "Регистрация организации, либо сотрудника",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "`org`(default) or `employee`",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "description": "Объект с обязательными полями `email` и `password`",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/myservice.signUpInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Возвращает `created` при успешной регистрации",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "myservice.signInInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.signUpInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

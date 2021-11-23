@@ -41,7 +41,7 @@ func (r *organizations) Create(m *OrganizationModel) error {
 
 func (r *organizations) SignIn(email string, password string) (token string, err error) {
 	var model OrganizationModel
-	if err = r.db.Where("email = ?", email).Find(&model).Error; err != nil {
+	if err = r.db.Where("email = ?", email).First(&model).Error; err != nil {
 		return "", err
 	}
 
