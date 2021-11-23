@@ -47,7 +47,7 @@ func (s *authorization) SignUp(c *gin.Context) {
 			return
 		}
 
-		c.String(http.StatusOK, "")
+		c.String(http.StatusOK, "created")
 
 	case "employee":
 	default:

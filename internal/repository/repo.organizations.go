@@ -19,7 +19,7 @@ type organizations struct {
 type OrganizationModel struct {
 	gorm.Model
 	Name     string
-	Email    string
+	Email    string `gorm:"unique"`
 	Password string
 }
 
