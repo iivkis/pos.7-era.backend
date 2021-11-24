@@ -69,6 +69,7 @@ var doc = `{
         },
         "/auth/signUp": {
             "post": {
+                "description": "Метод позволяет зарегистрировать организацию или сотрудника данной огранизации.\nРегистрация сотрудника возможна только с ` + "`" + `jwt токеном` + "`" + ` организации.",
                 "consumes": [
                     "application/json"
                 ],
@@ -84,20 +85,20 @@ var doc = `{
                         "in": "query"
                     },
                     {
-                        "description": "Объект с обязательными полями ` + "`" + `email` + "`" + ` и ` + "`" + `password` + "`" + `",
+                        "description": "Объект для регитсрации огранизации. Обязательные поля:` + "`" + `email` + "`" + `, ` + "`" + `password` + "`" + `",
                         "name": "json",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/myservice.signUpInput"
+                            "$ref": "#/definitions/myservice.signUpOrgInput"
                         }
                     }
                 ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Возвращаемый объкт при регистрации огранизации",
                         "schema": {
-                            "$ref": "#/definitions/myservice.signUpOutput"
+                            "$ref": "#/definitions/myservice.signUpOrgOutput"
                         }
                     },
                     "401": {
@@ -140,14 +141,18 @@ var doc = `{
                 }
             }
         },
-        "myservice.signUpInput": {
+        "myservice.signUpOrgInput": {
             "type": "object",
             "required": [
                 "email",
+                "name",
                 "password"
             ],
             "properties": {
                 "email": {
+                    "type": "string"
+                },
+                "name": {
                     "type": "string"
                 },
                 "password": {
@@ -155,7 +160,7 @@ var doc = `{
                 }
             }
         },
-        "myservice.signUpOutput": {
+        "myservice.signUpOrgOutput": {
             "type": "object",
             "properties": {
                 "email": {

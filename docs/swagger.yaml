@@ -19,17 +19,20 @@ definitions:
     - email
     - password
     type: object
-  myservice.signUpInput:
+  myservice.signUpOrgInput:
     properties:
       email:
+        type: string
+      name:
         type: string
       password:
         type: string
     required:
     - email
+    - name
     - password
     type: object
-  myservice.signUpOutput:
+  myservice.signUpOrgOutput:
     properties:
       email:
         type: string
@@ -73,24 +76,28 @@ paths:
     post:
       consumes:
       - application/json
+      description: |-
+        Метод позволяет зарегистрировать организацию или сотрудника данной огранизации.
+        Регистрация сотрудника возможна только с `jwt токеном` организации.
       parameters:
       - description: '`org`(default) or `employee`'
         in: query
         name: type
         type: string
-      - description: Объект с обязательными полями `email` и `password`
+      - description: Объект для регитсрации огранизации. Обязательные поля:`email`,
+          `password`
         in: body
         name: json
         required: true
         schema:
-          $ref: '#/definitions/myservice.signUpInput'
+          $ref: '#/definitions/myservice.signUpOrgInput'
       produces:
       - application/json
       responses:
         "201":
-          description: Created
+          description: Возвращаемый объкт при регистрации огранизации
           schema:
-            $ref: '#/definitions/myservice.signUpOutput'
+            $ref: '#/definitions/myservice.signUpOrgOutput'
         "401":
           description: Unauthorized
           schema:

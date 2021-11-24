@@ -8,6 +8,8 @@ import (
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
 )
 
+//BasePath /auth/
+
 type AuthorizationService interface {
 	SignUp(c *gin.Context)
 	SignIn(c *gin.Context)
@@ -23,12 +25,13 @@ func newAuthorizationService(repo repository.Repository) *authorization {
 	}
 }
 
-type signUpInput struct {
+type signUpOrgInput struct {
+	Name     string `json:"name" binding:"required,max=45"`
 	Email    string `json:"email" binding:"required,max=45"`
 	Password string `json:"password" binding:"required,max=45"`
 }
 
-type signUpOutput struct {
+type signUpOrgOutput struct {
 	ID    uint   `json:"id"`
 	Email string `json:"email"`
 }
@@ -39,11 +42,13 @@ type signInInput struct {
 }
 
 //@Summary Регистрация организации, либо сотрудника
+//@Description Метод позволяет зарегистрировать организацию или сотрудника данной огранизации.
+//@Description Регистрация сотрудника возможна только с `jwt токеном` организации.
 //@Param type query string false "`org`(default) or `employee`"
-//@Param json body signUpInput true "Объект с обязательными полями `email` и `password`"
+//@Param json body signUpOrgInput true "Объект для регитсрации огранизации. Обязательные поля:`email`, `password`"
 //@Accept json
 //@Produce json
-//@Success 201 {object} signUpOutput
+//@Success 201 {object} signUpOrgOutput "Возвращаемый объкт при регистрации огранизации"
 //@Failure 401 {object} myServiceError
 //@Router /auth/signUp [post]
 func (s *authorization) SignUp(c *gin.Context) {
@@ -51,7 +56,7 @@ func (s *authorization) SignUp(c *gin.Context) {
 
 	//case for organization
 	case "org":
-		var input signUpInput
+		var input signUpOrgInput
 
 		//parse body
 		if err := c.ShouldBindJSON(&input); err != nil {
@@ -67,6 +72,7 @@ func (s *authorization) SignUp(c *gin.Context) {
 
 		//create model and add in db
 		model := repository.OrganizationModel{
+			Name:     input.Name,
 			Email:    input.Email,
 			Password: input.Password,
 		}
@@ -77,7 +83,7 @@ func (s *authorization) SignUp(c *gin.Context) {
 		}
 
 		//output result
-		output := signUpOutput{
+		output := signUpOrgOutput{
 			ID:    model.ID,
 			Email: model.Email,
 		}
