@@ -11,7 +11,7 @@ type Repository struct {
 }
 
 func NewRepository(authjwt authjwt.AuthJWT) Repository {
-	url := "f0602327_posninja:AjKZwdoH@tcp(141.8.193.236)/f0602327_posninja"
+	url := "f0602327_posninja:AjKZwdoH@tcp(141.8.193.236)/f0602327_posninja?parseTime=True"
 	db, err := gorm.Open(mysql.Open(url), &gorm.Config{})
 	if err != nil {
 		panic(err)

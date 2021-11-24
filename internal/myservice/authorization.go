@@ -1,11 +1,13 @@
 package myservice
 
 import (
+	"errors"
 	"net/http"
 	"net/mail"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 //BasePath /auth/
@@ -28,7 +30,7 @@ func newAuthorizationService(repo repository.Repository) *authorization {
 type signUpOrgInput struct {
 	Name     string `json:"name" binding:"required,max=45"`
 	Email    string `json:"email" binding:"required,max=45"`
-	Password string `json:"password" binding:"required,max=45"`
+	Password string `json:"password" binding:"required,max=45,min=6"`
 }
 
 type signUpOrgOutput struct {
@@ -36,9 +38,13 @@ type signUpOrgOutput struct {
 	Email string `json:"email"`
 }
 
-type signInInput struct {
+type signInOrgInput struct {
 	Email    string `json:"email" binding:"required,max=45"`
 	Password string `json:"password" binding:"required,max=45"`
+}
+
+type signInOrgOutput struct {
+	Token string `json:"token"`
 }
 
 //@Summary Регистрация организации, либо сотрудника
@@ -48,25 +54,23 @@ type signInInput struct {
 //@Param json body signUpOrgInput true "Объект для регитсрации огранизации. Обязательные поля:`email`, `password`"
 //@Accept json
 //@Produce json
-//@Success 201 {object} signUpOrgOutput "Возвращаемый объкт при регистрации огранизации"
+//@Success 201 {object} signUpOrgOutput "Возвращаемый объект при регистрации огранизации"
 //@Failure 401 {object} myServiceError
 //@Router /auth/signUp [post]
 func (s *authorization) SignUp(c *gin.Context) {
 	switch tp := c.DefaultQuery("type", "org"); tp {
-
 	//case for organization
 	case "org":
-		var input signUpOrgInput
-
 		//parse body
+		var input signUpOrgInput
 		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusUnauthorized, errIncorrectInputData(err.Error()))
+			c.JSON(http.StatusUnauthorized, ERR_INCORRECT_INPUT_DATA(err.Error()))
 			return
 		}
 
 		//validate email
 		if _, err := mail.ParseAddress(input.Email); err != nil {
-			c.JSON(http.StatusUnauthorized, errIncorrectEmail(err.Error()))
+			c.JSON(http.StatusUnauthorized, ERR_INCORRECT_EMAIL(err.Error()))
 			return
 		}
 
@@ -78,7 +82,16 @@ func (s *authorization) SignUp(c *gin.Context) {
 		}
 
 		if err := s.repo.Organizations.Create(&model); err != nil {
-			c.String(http.StatusUnauthorized, err.Error())
+			if dberr, ok := isDatabaseError(err); ok {
+				switch dberr.Number {
+				case 1062:
+					c.JSON(http.StatusUnauthorized, ERR_EMAIL_ALREADY_EXISTS())
+				default:
+					c.JSON(http.StatusUnauthorized, ERR_UNKNOWN_DATABASE(dberr.Error()))
+				}
+				return
+			}
+			c.JSON(http.StatusUnauthorized, ERR_UNKNOWN_SERVER(err.Error()))
 			return
 		}
 
@@ -94,38 +107,47 @@ func (s *authorization) SignUp(c *gin.Context) {
 
 	//default case
 	default:
-		c.JSON(http.StatusUnauthorized, errIncorrectQueryType("incorrect argument for parametr `type`"))
+		c.JSON(http.StatusUnauthorized, ERR_INCORRECT_QUERY_TYPE())
 	}
 }
 
 //@Summary Вход для организации, либо сотрудника
+//@Description Метод позволяет войти в аккаунт организации, либо сотрудника.
+//@Description Для входа сотрудника требуется `jwt токен` соотвествующей ему огранизации.
 //@Param type query string false "`org`(default) or `employee`"
-//@Param json body signInInput true "Объект с обязательными полями `email` и `password`"
+//@Param json body signInOrgInput true "Объект для входа в огранизацию. Обязательные поля:`email`, `password`"
 //@Accept json
-//@Produce plain
-//@Success 200 {string} string "Возвращает `jwt токен` при успешной авторизации"
-//@Failure 400 {string} string
+//@Produce json
+//@Success 200 {object} signInOrgOutput "Возвращает `jwt токен` при успешной авторизации"
+//@Failure 401 {object} myServiceError
 //@Router /auth/signIn [post]
 func (s *authorization) SignIn(c *gin.Context) {
-	switch tp := c.DefaultQuery("type", "org"); tp {
+	switch queryType := c.DefaultQuery("type", "org"); queryType {
 	case "org":
-		var input signInInput
-
+		var input signInOrgInput
 		if err := c.ShouldBindJSON(&input); err != nil {
-			c.String(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusUnauthorized, ERR_INCORRECT_INPUT_DATA(err.Error()))
 			return
 		}
 
 		token, err := s.repo.Organizations.SignIn(input.Email, input.Password)
 		if err != nil {
-			c.String(http.StatusBadRequest, err.Error())
+			if dberr, ok := isDatabaseError(err); ok {
+				c.JSON(http.StatusUnauthorized, ERR_UNKNOWN_DATABASE(dberr.Error()))
+				return
+			}
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				c.JSON(http.StatusUnauthorized, ERR_EMAIL_NOT_FOUND())
+				return
+			}
+			c.JSON(http.StatusUnauthorized, ERR_UNKNOWN_SERVER(err.Error()))
 			return
 		}
 
-		c.String(http.StatusOK, token)
-
+		output := signInOrgOutput{Token: token}
+		c.JSON(http.StatusOK, output)
 	case "employee":
 	default:
-		c.String(http.StatusBadRequest, "undefined argument `%s` in parametr `type`", tp)
+		c.JSON(http.StatusUnauthorized, ERR_INCORRECT_QUERY_TYPE())
 	}
 }

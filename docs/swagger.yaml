@@ -9,7 +9,7 @@ definitions:
       error:
         type: string
     type: object
-  myservice.signInInput:
+  myservice.signInOrgInput:
     properties:
       email:
         type: string
@@ -18,6 +18,11 @@ definitions:
     required:
     - email
     - password
+    type: object
+  myservice.signInOrgOutput:
+    properties:
+      token:
+        type: string
     type: object
   myservice.signUpOrgInput:
     properties:
@@ -49,28 +54,31 @@ paths:
     post:
       consumes:
       - application/json
+      description: |-
+        Метод позволяет войти в аккаунт организации, либо сотрудника.
+        Для входа сотрудника требуется `jwt токен` соотвествующей ему огранизации.
       parameters:
       - description: '`org`(default) or `employee`'
         in: query
         name: type
         type: string
-      - description: Объект с обязательными полями `email` и `password`
+      - description: Объект для входа в огранизацию. Обязательные поля:`email`, `password`
         in: body
         name: json
         required: true
         schema:
-          $ref: '#/definitions/myservice.signInInput'
+          $ref: '#/definitions/myservice.signInOrgInput'
       produces:
-      - text/plain
+      - application/json
       responses:
         "200":
           description: Возвращает `jwt токен` при успешной авторизации
           schema:
-            type: string
-        "400":
-          description: Bad Request
+            $ref: '#/definitions/myservice.signInOrgOutput'
+        "401":
+          description: Unauthorized
           schema:
-            type: string
+            $ref: '#/definitions/myservice.myServiceError'
       summary: Вход для организации, либо сотрудника
   /auth/signUp:
     post:
@@ -95,7 +103,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: Возвращаемый объкт при регистрации огранизации
+          description: Возвращаемый объект при регистрации огранизации
           schema:
             $ref: '#/definitions/myservice.signUpOrgOutput'
         "401":

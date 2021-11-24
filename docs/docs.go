@@ -27,11 +27,12 @@ var doc = `{
     "paths": {
         "/auth/signIn": {
             "post": {
+                "description": "Метод позволяет войти в аккаунт организации, либо сотрудника.\nДля входа сотрудника требуется ` + "`" + `jwt токен` + "`" + ` соотвествующей ему огранизации.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "summary": "Вход для организации, либо сотрудника",
                 "parameters": [
@@ -42,12 +43,12 @@ var doc = `{
                         "in": "query"
                     },
                     {
-                        "description": "Объект с обязательными полями ` + "`" + `email` + "`" + ` и ` + "`" + `password` + "`" + `",
+                        "description": "Объект для входа в огранизацию. Обязательные поля:` + "`" + `email` + "`" + `, ` + "`" + `password` + "`" + `",
                         "name": "json",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/myservice.signInInput"
+                            "$ref": "#/definitions/myservice.signInOrgInput"
                         }
                     }
                 ],
@@ -55,13 +56,13 @@ var doc = `{
                     "200": {
                         "description": "Возвращает ` + "`" + `jwt токен` + "`" + ` при успешной авторизации",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/myservice.signInOrgOutput"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/myservice.myServiceError"
                         }
                     }
                 }
@@ -96,7 +97,7 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "Возвращаемый объкт при регистрации огранизации",
+                        "description": "Возвращаемый объект при регистрации огранизации",
                         "schema": {
                             "$ref": "#/definitions/myservice.signUpOrgOutput"
                         }
@@ -126,7 +127,7 @@ var doc = `{
                 }
             }
         },
-        "myservice.signInInput": {
+        "myservice.signInOrgInput": {
             "type": "object",
             "required": [
                 "email",
@@ -137,6 +138,14 @@ var doc = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.signInOrgOutput": {
+            "type": "object",
+            "properties": {
+                "token": {
                     "type": "string"
                 }
             }
