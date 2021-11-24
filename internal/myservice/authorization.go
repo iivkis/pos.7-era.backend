@@ -28,6 +28,11 @@ type signUpInput struct {
 	Password string `json:"password" binding:"required,max=45"`
 }
 
+type signUpOutput struct {
+	ID    uint   `json:"id"`
+	Email string `json:"email"`
+}
+
 type signInInput struct {
 	Email    string `json:"email" binding:"required,max=45"`
 	Password string `json:"password" binding:"required,max=45"`
@@ -37,42 +42,53 @@ type signInInput struct {
 //@Param type query string false "`org`(default) or `employee`"
 //@Param json body signUpInput true "Объект с обязательными полями `email` и `password`"
 //@Accept json
-//@Produce plain
-//@Success 200 {string} string "Возвращает `created` при успешной регистрации"
-//@Failure 400 {string} string
+//@Produce json
+//@Success 201 {object} signUpOutput
+//@Failure 401 {object} myServiceError
 //@Router /auth/signUp [post]
 func (s *authorization) SignUp(c *gin.Context) {
 	switch tp := c.DefaultQuery("type", "org"); tp {
+
+	//case for organization
 	case "org":
 		var input signUpInput
 
 		//parse body
 		if err := c.ShouldBindJSON(&input); err != nil {
-			c.String(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusUnauthorized, errIncorrectInputData(err.Error()))
 			return
 		}
 
 		//validate email
 		if _, err := mail.ParseAddress(input.Email); err != nil {
-			c.String(http.StatusBadRequest, err.Error())
+			c.JSON(http.StatusUnauthorized, errIncorrectEmail(err.Error()))
 			return
 		}
 
+		//create model and add in db
 		model := repository.OrganizationModel{
 			Email:    input.Email,
 			Password: input.Password,
 		}
 
 		if err := s.repo.Organizations.Create(&model); err != nil {
-			c.String(http.StatusBadRequest, err.Error())
+			c.String(http.StatusUnauthorized, err.Error())
 			return
 		}
 
-		c.String(http.StatusOK, "created")
+		//output result
+		output := signUpOutput{
+			ID:    model.ID,
+			Email: model.Email,
+		}
+		c.JSON(http.StatusCreated, output)
 
+	//case for employee
 	case "employee":
+
+	//default case
 	default:
-		c.String(http.StatusBadRequest, "undefined argument `%s` in parametr `type`", tp)
+		c.JSON(http.StatusUnauthorized, errIncorrectQueryType("incorrect argument for parametr `type`"))
 	}
 }
 

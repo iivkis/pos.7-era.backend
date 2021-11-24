@@ -73,7 +73,7 @@ var doc = `{
                     "application/json"
                 ],
                 "produces": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "summary": "Регистрация организации, либо сотрудника",
                 "parameters": [
@@ -94,16 +94,16 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
-                        "description": "Возвращает ` + "`" + `created` + "`" + ` при успешной регистрации",
+                    "201": {
+                        "description": "Created",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/myservice.signUpOutput"
                         }
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/myservice.myServiceError"
                         }
                     }
                 }
@@ -111,6 +111,20 @@ var doc = `{
         }
     },
     "definitions": {
+        "myservice.myServiceError": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "error": {
+                    "type": "string"
+                }
+            }
+        },
         "myservice.signInInput": {
             "type": "object",
             "required": [
@@ -138,6 +152,17 @@ var doc = `{
                 },
                 "password": {
                     "type": "string"
+                }
+            }
+        },
+        "myservice.signUpOutput": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 }
             }
         }

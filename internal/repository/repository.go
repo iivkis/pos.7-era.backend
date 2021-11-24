@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
-	"gorm.io/driver/sqlite"
+	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
@@ -11,7 +11,8 @@ type Repository struct {
 }
 
 func NewRepository(authjwt authjwt.AuthJWT) Repository {
-	db, err := gorm.Open(sqlite.Open("pos-ninja.sqlite3"), &gorm.Config{})
+	url := "f0602327_posninja:AjKZwdoH@tcp(141.8.193.236)/f0602327_posninja"
+	db, err := gorm.Open(mysql.Open(url), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}

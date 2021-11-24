@@ -1,5 +1,14 @@
 basePath: /api/v1
 definitions:
+  myservice.myServiceError:
+    properties:
+      code:
+        type: integer
+      description:
+        type: string
+      error:
+        type: string
+    type: object
   myservice.signInInput:
     properties:
       email:
@@ -19,6 +28,13 @@ definitions:
     required:
     - email
     - password
+    type: object
+  myservice.signUpOutput:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
     type: object
 info:
   contact:
@@ -69,15 +85,15 @@ paths:
         schema:
           $ref: '#/definitions/myservice.signUpInput'
       produces:
-      - text/plain
+      - application/json
       responses:
-        "200":
-          description: Возвращает `created` при успешной регистрации
+        "201":
+          description: Created
           schema:
-            type: string
-        "400":
-          description: Bad Request
+            $ref: '#/definitions/myservice.signUpOutput'
+        "401":
+          description: Unauthorized
           schema:
-            type: string
+            $ref: '#/definitions/myservice.myServiceError'
       summary: Регистрация организации, либо сотрудника
 swagger: "2.0"
