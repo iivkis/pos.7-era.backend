@@ -1,6 +1,6 @@
 basePath: /api/v1
 definitions:
-  myservice.myServiceError:
+  myservice.serviceError:
     properties:
       code:
         type: integer
@@ -37,19 +37,39 @@ definitions:
     - name
     - password
     type: object
-  myservice.signUpOrgOutput:
-    properties:
-      email:
-        type: string
-      id:
-        type: integer
-    type: object
 info:
   contact:
     email: razmolodinivan@mail.ru
   title: POS-Ninja Backend API
   version: 0.1-alpha
 paths:
+  /auth/emailConfirm:
+    get:
+      parameters:
+      - description: '`org`(default) or `employee`'
+        in: query
+        name: type
+        type: string
+      - description: параметр `email` хранит в себе почтовый адрес получателя письма
+          с кодом для подтверждения
+        in: query
+        name: email
+        type: string
+      - description: параметр `code` хранит в себе код подтверждения из письма. Данный
+          параметр игнорируется при заданном параметре `email`
+        in: query
+        name: code
+        type: string
+      responses:
+        "200":
+          description: Возвращает пустой объект в случае успеха
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Подтверждение email адреса
   /auth/signIn:
     post:
       consumes:
@@ -78,7 +98,7 @@ paths:
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/myservice.myServiceError'
+            $ref: '#/definitions/myservice.serviceError'
       summary: Вход для организации, либо сотрудника
   /auth/signUp:
     post:
@@ -105,10 +125,10 @@ paths:
         "201":
           description: Возвращаемый объект при регистрации огранизации
           schema:
-            $ref: '#/definitions/myservice.signUpOrgOutput'
+            type: object
         "401":
           description: Unauthorized
           schema:
-            $ref: '#/definitions/myservice.myServiceError'
+            $ref: '#/definitions/myservice.serviceError'
       summary: Регистрация организации, либо сотрудника
 swagger: "2.0"

@@ -25,6 +25,45 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/auth/emailConfirm": {
+            "get": {
+                "summary": "Подтверждение email адреса",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "` + "`" + `org` + "`" + `(default) or ` + "`" + `employee` + "`" + `",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "параметр ` + "`" + `email` + "`" + ` хранит в себе почтовый адрес получателя письма с кодом для подтверждения",
+                        "name": "email",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "параметр ` + "`" + `code` + "`" + ` хранит в себе код подтверждения из письма. Данный параметр игнорируется при заданном параметре ` + "`" + `email` + "`" + `",
+                        "name": "code",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Возвращает пустой объект в случае успеха",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/auth/signIn": {
             "post": {
                 "description": "Метод позволяет войти в аккаунт организации, либо сотрудника.\nДля входа сотрудника требуется ` + "`" + `jwt токен` + "`" + ` соотвествующей ему огранизации.",
@@ -62,7 +101,7 @@ var doc = `{
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/myservice.myServiceError"
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -99,13 +138,13 @@ var doc = `{
                     "201": {
                         "description": "Возвращаемый объект при регистрации огранизации",
                         "schema": {
-                            "$ref": "#/definitions/myservice.signUpOrgOutput"
+                            "type": "object"
                         }
                     },
                     "401": {
                         "description": "Unauthorized",
                         "schema": {
-                            "$ref": "#/definitions/myservice.myServiceError"
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -113,7 +152,7 @@ var doc = `{
         }
     },
     "definitions": {
-        "myservice.myServiceError": {
+        "myservice.serviceError": {
             "type": "object",
             "properties": {
                 "code": {
@@ -166,17 +205,6 @@ var doc = `{
                 },
                 "password": {
                     "type": "string"
-                }
-            }
-        },
-        "myservice.signUpOrgOutput": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 }
             }
         }

@@ -10,11 +10,10 @@ import (
 	"gorm.io/gorm"
 )
 
-//BasePath /auth/
-
 type AuthorizationService interface {
 	SignUp(c *gin.Context)
 	SignIn(c *gin.Context)
+	EmailConfirm(c *gin.Context)
 }
 
 type authorization struct {
@@ -33,11 +32,6 @@ type signUpOrgInput struct {
 	Password string `json:"password" binding:"required,max=45,min=6"`
 }
 
-type signUpOrgOutput struct {
-	ID    uint   `json:"id"`
-	Email string `json:"email"`
-}
-
 type signInOrgInput struct {
 	Email    string `json:"email" binding:"required,max=45"`
 	Password string `json:"password" binding:"required,max=45"`
@@ -54,8 +48,8 @@ type signInOrgOutput struct {
 //@Param json body signUpOrgInput true "Объект для регитсрации огранизации. Обязательные поля:`email`, `password`"
 //@Accept json
 //@Produce json
-//@Success 201 {object} signUpOrgOutput "Возвращаемый объект при регистрации огранизации"
-//@Failure 401 {object} myServiceError
+//@Success 201 {object} object "Возвращаемый объект при регистрации огранизации"
+//@Failure 401 {object} serviceError
 //@Router /auth/signUp [post]
 func (s *authorization) SignUp(c *gin.Context) {
 	switch tp := c.DefaultQuery("type", "org"); tp {
@@ -64,13 +58,13 @@ func (s *authorization) SignUp(c *gin.Context) {
 		//parse body
 		var input signUpOrgInput
 		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusUnauthorized, ERR_INCORRECT_INPUT_DATA(err.Error()))
+			newResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
 			return
 		}
 
 		//validate email
 		if _, err := mail.ParseAddress(input.Email); err != nil {
-			c.JSON(http.StatusUnauthorized, ERR_INCORRECT_EMAIL(err.Error()))
+			newResponse(c, http.StatusUnauthorized, errIncorrectEmail(err.Error()))
 			return
 		}
 
@@ -85,29 +79,23 @@ func (s *authorization) SignUp(c *gin.Context) {
 			if dberr, ok := isDatabaseError(err); ok {
 				switch dberr.Number {
 				case 1062:
-					c.JSON(http.StatusUnauthorized, ERR_EMAIL_ALREADY_EXISTS())
+					newResponse(c, http.StatusUnauthorized, errEmailExists())
 				default:
-					c.JSON(http.StatusUnauthorized, ERR_UNKNOWN_DATABASE(dberr.Error()))
+					newResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
 				}
 				return
 			}
-			c.JSON(http.StatusUnauthorized, ERR_UNKNOWN_SERVER(err.Error()))
+			newResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
 			return
 		}
 
-		//output result
-		output := signUpOrgOutput{
-			ID:    model.ID,
-			Email: model.Email,
-		}
-		c.JSON(http.StatusCreated, output)
-
+		newResponse(c, http.StatusCreated, nil)
 	//case for employee
 	case "employee":
 
 	//default case
 	default:
-		c.JSON(http.StatusUnauthorized, ERR_INCORRECT_QUERY_TYPE())
+		newResponse(c, http.StatusUnauthorized, errIncorrectQuery())
 	}
 }
 
@@ -119,35 +107,46 @@ func (s *authorization) SignUp(c *gin.Context) {
 //@Accept json
 //@Produce json
 //@Success 200 {object} signInOrgOutput "Возвращает `jwt токен` при успешной авторизации"
-//@Failure 401 {object} myServiceError
+//@Failure 401 {object} serviceError
 //@Router /auth/signIn [post]
 func (s *authorization) SignIn(c *gin.Context) {
 	switch queryType := c.DefaultQuery("type", "org"); queryType {
 	case "org":
 		var input signInOrgInput
 		if err := c.ShouldBindJSON(&input); err != nil {
-			c.JSON(http.StatusUnauthorized, ERR_INCORRECT_INPUT_DATA(err.Error()))
+			newResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
 			return
 		}
 
 		token, err := s.repo.Organizations.SignIn(input.Email, input.Password)
 		if err != nil {
 			if dberr, ok := isDatabaseError(err); ok {
-				c.JSON(http.StatusUnauthorized, ERR_UNKNOWN_DATABASE(dberr.Error()))
+				newResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
 				return
 			}
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				c.JSON(http.StatusUnauthorized, ERR_EMAIL_NOT_FOUND())
+				newResponse(c, http.StatusUnauthorized, errEmailNotFound())
 				return
 			}
-			c.JSON(http.StatusUnauthorized, ERR_UNKNOWN_SERVER(err.Error()))
+			newResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
 			return
 		}
 
 		output := signInOrgOutput{Token: token}
-		c.JSON(http.StatusOK, output)
+		newResponse(c, http.StatusOK, output)
 	case "employee":
 	default:
-		c.JSON(http.StatusUnauthorized, ERR_INCORRECT_QUERY_TYPE())
+		newResponse(c, http.StatusUnauthorized, errIncorrectQuery())
 	}
+}
+
+//@Summary Подтверждение email адреса
+//@Param type query string false "`org`(default) or `employee`"
+//@Param email query string false "параметр `email` хранит в себе почтовый адрес получателя письма с кодом для подтверждения"
+//@Param code query string false "параметр `code` хранит в себе код подтверждения из письма. Данный параметр игнорируется при заданном параметре `email`"
+//@Success 200 {object} object "Возвращает пустой объект в случае успеха"
+//@Failure 400 {object} serviceError
+//@Router /auth/emailConfirm [get]
+func (s *authorization) EmailConfirm(c *gin.Context) {
+
 }

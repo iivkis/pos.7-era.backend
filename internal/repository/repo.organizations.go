@@ -21,6 +21,8 @@ type OrganizationModel struct {
 	Name     string
 	Email    string `gorm:"unique"`
 	Password string
+
+	EmailConfirmed bool
 }
 
 func newOrganizationsRepository(db *gorm.DB, authjwt authjwt.AuthJWT) *organizations {
