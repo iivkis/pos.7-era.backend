@@ -9,9 +9,9 @@ type serviceError struct {
 }
 
 func newServiceError(code uint16, err string, description string) func(editErr ...string) *serviceError {
-	return func(editErr ...string) *serviceError {
-		if len(editErr) != 0 {
-			err = editErr[0]
+	return func(editError ...string) *serviceError {
+		if len(editError) != 0 {
+			err = editError[0]
 		}
 		return &serviceError{Code: code, Error: err, Description: description}
 	}

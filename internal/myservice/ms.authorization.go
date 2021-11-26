@@ -110,7 +110,7 @@ func (s *authorization) SignUp(c *gin.Context) {
 //@Failure 401 {object} serviceError
 //@Router /auth/signIn [post]
 func (s *authorization) SignIn(c *gin.Context) {
-	switch queryType := c.DefaultQuery("type", "org"); queryType {
+	switch c.DefaultQuery("type", "org") {
 	case "org":
 		var input signInOrgInput
 		if err := c.ShouldBindJSON(&input); err != nil {
@@ -136,7 +136,7 @@ func (s *authorization) SignIn(c *gin.Context) {
 		newResponse(c, http.StatusOK, output)
 	case "employee":
 	default:
-		newResponse(c, http.StatusUnauthorized, errIncorrectQuery())
+		newResponse(c, http.StatusUnauthorized, errIncorrectQuery("unknown argument for parametr `type`"))
 	}
 }
 
@@ -148,5 +148,10 @@ func (s *authorization) SignIn(c *gin.Context) {
 //@Failure 400 {object} serviceError
 //@Router /auth/emailConfirm [get]
 func (s *authorization) EmailConfirm(c *gin.Context) {
+	switch c.DefaultQuery("type", "org") {
+	case "org":
 
+	default:
+		newResponse(c, http.StatusUnauthorized, errIncorrectQuery("unknown argument for parametr `type`"))
+	}
 }

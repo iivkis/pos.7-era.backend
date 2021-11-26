@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -17,10 +19,11 @@ type organizations struct {
 }
 
 type OrganizationModel struct {
-	gorm.Model
-	Name     string
-	Email    string `gorm:"unique"`
-	Password string
+	ID        uint
+	CreatedAt time.Time
+	Name      string
+	Email     string `gorm:"unique"`
+	Password  string
 
 	EmailConfirmed bool
 }
