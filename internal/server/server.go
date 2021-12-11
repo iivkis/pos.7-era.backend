@@ -12,6 +12,6 @@ func NewServer(httphandler handler.HttpHandler) Server {
 	}
 }
 
-func (s *Server) Listen(port string) error {
+func (s *Server) Listen() error {
 	return s.httphandler.Init().Run()
 }
