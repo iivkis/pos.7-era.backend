@@ -46,7 +46,7 @@ func Launch() {
 	//run server
 	var done = make(chan byte)
 	go func() {
-		if err := _server.Listen(config.Env.Host, config.Env.Port); err != nil {
+		if err := _server.Listen(config.Env.Port); err != nil {
 			panic(err)
 		}
 	}()
