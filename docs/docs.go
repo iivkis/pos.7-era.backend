@@ -25,40 +25,55 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/auth/emailConfirm": {
+        "/auth/confirmCode": {
             "get": {
-                "summary": "Подтверждение email адреса",
+                "summary": "Проверка кода подтверждения",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "` + "`" + `org` + "`" + `(default) or ` + "`" + `employee` + "`" + `",
+                        "description": "` + "`" + `org` + "`" + ` or ` + "`" + `employee` + "`" + `",
                         "name": "type",
                         "in": "query"
                     },
                     {
                         "type": "string",
-                        "description": "параметр ` + "`" + `email` + "`" + ` хранит в себе почтовый адрес получателя письма с кодом для подтверждения",
-                        "name": "email",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "параметр ` + "`" + `code` + "`" + ` хранит в себе код подтверждения из письма. Данный параметр игнорируется при заданном параметре ` + "`" + `email` + "`" + `",
+                        "description": "адрес на который будет отправлено письмо (например: email@exmp.ru)",
                         "name": "code",
                         "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Возвращает пустой объект в случае успеха",
+                        "description": "возвращает пустой объект",
                         "schema": {
                             "type": "object"
                         }
+                    }
+                }
+            }
+        },
+        "/auth/sendCode": {
+            "get": {
+                "summary": "Отправка кода подтверждения почты",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "` + "`" + `org` + "`" + ` or ` + "`" + `employee` + "`" + `",
+                        "name": "type",
+                        "in": "query"
                     },
-                    "400": {
-                        "description": "Bad Request",
+                    {
+                        "type": "string",
+                        "description": "адрес на который будет отправлено письмо (например: email@exmp.ru)",
+                        "name": "email",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
                         "schema": {
-                            "$ref": "#/definitions/myservice.serviceError"
+                            "type": "object"
                         }
                     }
                 }
@@ -77,7 +92,7 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "` + "`" + `org` + "`" + `(default) or ` + "`" + `employee` + "`" + `",
+                        "description": "` + "`" + `org` + "`" + ` or ` + "`" + `employee` + "`" + `",
                         "name": "type",
                         "in": "query"
                     },
@@ -157,9 +172,6 @@ var doc = `{
             "properties": {
                 "code": {
                     "type": "integer"
-                },
-                "description": {
-                    "type": "string"
                 },
                 "error": {
                     "type": "string"

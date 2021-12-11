@@ -48,6 +48,12 @@ github.com/gofrs/uuid v4.0.0+incompatible/go.mod h1:b2aQJv3Z4Fp6yNu3cdSllBxTCLRx
 github.com/golang/protobuf v1.3.3 h1:gyjaxf+svBWX08ZjK86iN9geUJF0H6gp2IRKX6Nf6/I=
 github.com/golang/protobuf v1.3.3/go.mod h1:vzj43D7+SQXF/4pzW/hwtAqwc6iTitCiVSaWz5lYuqw=
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
+github.com/iivkis/strcode v0.0.0-20211205123444-98a04e5c4e4d h1:XKXpjVp0IHWL/FUEx7bcSJqdaN+tbmRfLcLRAIsU5uU=
+github.com/iivkis/strcode v0.0.0-20211205123444-98a04e5c4e4d/go.mod h1:WkohlW5ADiRF7NfYthNNqUIwILc5sjP2VFVmwUXyMqg=
+github.com/iivkis/strcode v0.0.0-20211205132558-4177db41160f h1:YLUBOBXILBL8UvBAHRdtMCiin5IhrltFHUPaK28MKVU=
+github.com/iivkis/strcode v0.0.0-20211205132558-4177db41160f/go.mod h1:WkohlW5ADiRF7NfYthNNqUIwILc5sjP2VFVmwUXyMqg=
+github.com/iivkis/strcode v0.0.0-20211205141721-b5f65cffe8ad h1:pTrXota0Owq3gEVtEq2fiwhifuMLp/fIpzshv0BafrM=
+github.com/iivkis/strcode v0.0.0-20211205141721-b5f65cffe8ad/go.mod h1:WkohlW5ADiRF7NfYthNNqUIwILc5sjP2VFVmwUXyMqg=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.2 h1:eVKgfIdy9b6zbWBMgFpfDPoAMifwSZagU9HmEU6zgiI=

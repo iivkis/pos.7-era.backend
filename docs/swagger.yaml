@@ -4,8 +4,6 @@ definitions:
     properties:
       code:
         type: integer
-      description:
-        type: string
       error:
         type: string
     type: object
@@ -43,33 +41,40 @@ info:
   title: POS-Ninja Backend API
   version: 0.1-alpha
 paths:
-  /auth/emailConfirm:
+  /auth/confirmCode:
     get:
       parameters:
-      - description: '`org`(default) or `employee`'
+      - description: '`org` or `employee`'
         in: query
         name: type
         type: string
-      - description: параметр `email` хранит в себе почтовый адрес получателя письма
-          с кодом для подтверждения
-        in: query
-        name: email
-        type: string
-      - description: параметр `code` хранит в себе код подтверждения из письма. Данный
-          параметр игнорируется при заданном параметре `email`
+      - description: 'адрес на который будет отправлено письмо (например: email@exmp.ru)'
         in: query
         name: code
         type: string
       responses:
         "200":
-          description: Возвращает пустой объект в случае успеха
+          description: возвращает пустой объект
           schema:
             type: object
-        "400":
-          description: Bad Request
+      summary: Проверка кода подтверждения
+  /auth/sendCode:
+    get:
+      parameters:
+      - description: '`org` or `employee`'
+        in: query
+        name: type
+        type: string
+      - description: 'адрес на который будет отправлено письмо (например: email@exmp.ru)'
+        in: query
+        name: email
+        type: string
+      responses:
+        "200":
+          description: возвращает пустой объект
           schema:
-            $ref: '#/definitions/myservice.serviceError'
-      summary: Подтверждение email адреса
+            type: object
+      summary: Отправка кода подтверждения почты
   /auth/signIn:
     post:
       consumes:
@@ -78,7 +83,7 @@ paths:
         Метод позволяет войти в аккаунт организации, либо сотрудника.
         Для входа сотрудника требуется `jwt токен` соотвествующей ему огранизации.
       parameters:
-      - description: '`org`(default) or `employee`'
+      - description: '`org` or `employee`'
         in: query
         name: type
         type: string

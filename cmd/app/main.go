@@ -1,6 +1,9 @@
 package main
 
-import "github.com/iivkis/pos-ninja-backend/internal/app"
+import (
+	"github.com/iivkis/pos-ninja-backend/internal/app"
+	_ "github.com/iivkis/pos-ninja-backend/internal/config"
+)
 
 //@BasePath /api/v1
 //@Title POS-Ninja Backend API

@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"time"
 
 	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
@@ -11,6 +12,8 @@ import (
 type OrganizationsRepository interface {
 	Create(m *OrganizationModel) error
 	SignIn(email string, password string) (token string, err error)
+	ConfirmEmailTrue(email string) error
+	EmailExists(email string) (ok bool, err error)
 }
 
 type organizations struct {
@@ -21,9 +24,10 @@ type organizations struct {
 type OrganizationModel struct {
 	ID        uint
 	CreatedAt time.Time
-	Name      string
-	Email     string `gorm:"unique"`
-	Password  string
+
+	Name     string
+	Email    string `gorm:"unique"`
+	Password string
 
 	EmailConfirmed bool
 }
@@ -36,13 +40,26 @@ func newOrganizationsRepository(db *gorm.DB, authjwt authjwt.AuthJWT) *organizat
 }
 
 func (r *organizations) Create(m *OrganizationModel) error {
-
 	h, err := bcrypt.GenerateFromPassword([]byte(m.Password), 7)
 	if err != nil {
 		return err
 	}
 	m.Password = string(h)
 	return r.db.Create(m).Error
+}
+
+func (r *organizations) ConfirmEmailTrue(email string) error {
+	return r.db.Model(&OrganizationModel{}).Where("email = ?", email).Update("email_confirmed", true).Error
+}
+
+func (r *organizations) EmailExists(email string) (bool, error) {
+	err := r.db.Model(&OrganizationModel{}).Where("email = ?", email).First(nil).Error
+	if err == nil {
+		return true, nil
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false, nil
+	}
+	return false, err
 }
 
 func (r *organizations) SignIn(email string, password string) (token string, err error) {
