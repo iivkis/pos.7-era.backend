@@ -14,8 +14,12 @@ import (
 )
 
 type AuthorizationService interface {
-	SignUp(c *gin.Context)
-	SignIn(c *gin.Context)
+	SignUpOrg(c *gin.Context)
+	SignUpEmployee(c *gin.Context)
+
+	SignInOrg(c *gin.Context)
+	SignInEmployee(c *gin.Context)
+
 	SendCode(c *gin.Context)
 	ConfirmCode(c *gin.Context)
 }
@@ -35,70 +39,116 @@ func newAuthorizationService(repo repository.Repository, strcode *strcode.Strcod
 }
 
 type signUpOrgInput struct {
-	Name     string `json:"name" binding:"required,max=45"`
+	Name     string `json:"name" binding:"required,max=45,min=3"`
 	Email    string `json:"email" binding:"required,max=45"`
 	Password string `json:"password" binding:"required,max=45,min=6"`
 }
 
-//@Summary Регистрация организации, либо сотрудника
-//@Description Метод позволяет зарегистрировать организацию или сотрудника данной огранизации.
-//@Description Регистрация сотрудника возможна только с `jwt токеном` организации.
-//@Param type query string false "`org`(default) or `employee`"
-//@Param json body signUpOrgInput true "Объект для регитсрации огранизации. Обязательные поля:`email`, `password`"
+//@Summary Регистрация организации
+//@Description Метод позволяет зарегистрировать организацию
+//@Param json body signUpOrgInput true "Объект для регитсрации огранизации."
 //@Accept json
 //@Produce json
 //@Success 201 {object} object "Возвращаемый объект при регистрации огранизации"
 //@Failure 401 {object} serviceError
-//@Router /auth/signUp [post]
-func (s *authorization) SignUp(c *gin.Context) {
-	switch tp := c.DefaultQuery("type", "org"); tp {
-	//case for organization
-	case "org":
-		{
-			//parse body
-			var input signUpOrgInput
-			if err := c.ShouldBindJSON(&input); err != nil {
-				newResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
-				return
-			}
-
-			//validate email
-			if _, err := mail.ParseAddress(input.Email); err != nil {
-				newResponse(c, http.StatusUnauthorized, errIncorrectEmail(err.Error()))
-				return
-			}
-
-			//create model and add in db
-			model := repository.OrganizationModel{
-				Name:     input.Name,
-				Email:    input.Email,
-				Password: input.Password,
-			}
-
-			if err := s.repo.Organizations.Create(&model); err != nil {
-				if dberr, ok := isDatabaseError(err); ok {
-					switch dberr.Number {
-					case 1062:
-						newResponse(c, http.StatusUnauthorized, errEmailExists())
-					default:
-						newResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
-					}
-					return
-				}
-				newResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
-				return
-			}
-
-			newResponse(c, http.StatusCreated, nil)
-		}
-	//case for employee
-	case "employee":
-		{
-		}
-	//default case
-	default:
-		newResponse(c, http.StatusUnauthorized, errIncorrectInputData())
+//@Router /auth/signUp.Org [post]
+func (s *authorization) SignUpOrg(c *gin.Context) {
+	//parse body
+	var input signUpOrgInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
 	}
+
+	//validate email
+	if _, err := mail.ParseAddress(input.Email); err != nil {
+		NewResponse(c, http.StatusUnauthorized, errIncorrectEmail(err.Error()))
+		return
+	}
+
+	//create model and add in db
+	model := repository.OrganizationModel{
+		Name:     input.Name,
+		Email:    input.Email,
+		Password: input.Password,
+	}
+
+	if err := s.repo.Organizations.Create(&model); err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			switch dberr.Number {
+			case 1062:
+				NewResponse(c, http.StatusUnauthorized, errEmailExists())
+			default:
+				NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
+			}
+			return
+		}
+		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		return
+	}
+
+	NewResponse(c, http.StatusCreated, nil)
+}
+
+type signUpEmployeeInput struct {
+	Surname    string `json:"surname" binding:"required,min=2,max=100"`
+	Name       string `json:"name" binding:"required,min=2,max=100"`
+	Patronymic string `json:"patronymic" binding:"required,min=2,max=100"`
+
+	Email    string `json:"email" binding:"required,min=3,max=45"`
+	Password string `json:"password" binding:"required,min=3,max=45"`
+
+	RoleID int `json:"role_id" binding:"min=1,max=1"`
+}
+
+//@Summary Регистрация сотрудника
+//@Description Метод позволяет зарегистрировать ссотрудника. Работает только с токеном организации.
+//@Param json body signUpEmployeeInput true "Объект для регитсрации сотрудника."
+//@Accept json
+//@Produce json
+//@Success 201 {object} object "Возвращаемый объект при регистрации сотрудника"
+//@Failure 400 {object} serviceError
+//@Router /auth/signUp.Employee [post]
+func (s *authorization) SignUpEmployee(c *gin.Context) {
+	var orgID uint = c.MustGet("claims_org_id").(uint)
+
+	//parse JSON body
+	var input signUpEmployeeInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	//validate email
+	if _, err := mail.ParseAddress(input.Email); err != nil {
+		NewResponse(c, http.StatusUnauthorized, errIncorrectEmail(err.Error()))
+		return
+	}
+
+	model := repository.EmployeeModel{
+		Surname:    input.Surname,
+		Name:       input.Name,
+		Patronymic: input.Patronymic,
+		Email:      input.Email,
+		Password:   input.Password,
+		RoleID:     input.RoleID,
+		OrgID:      orgID,
+	}
+
+	if err := s.repo.Employees.Create(&model); err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			switch dberr.Number {
+			case 1062:
+				NewResponse(c, http.StatusUnauthorized, errEmailExists())
+			default:
+				NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
+			}
+			return
+		}
+		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		return
+	}
+	NewResponse(c, http.StatusCreated, nil)
 }
 
 type signInOrgInput struct {
@@ -110,54 +160,84 @@ type signInOrgOutput struct {
 	Token string `json:"token"`
 }
 
-//@Summary Вход для организации, либо сотрудника
-//@Description Метод позволяет войти в аккаунт организации, либо сотрудника.
-//@Description Для входа сотрудника требуется `jwt токен` соотвествующей ему огранизации.
-//@Param type query string false "`org` or `employee`"
-//@Param json body signInOrgInput true "Объект для входа в огранизацию. Обязательные поля:`email`, `password`"
+//@Summary Вход для организации
+//@Description Метод позволяет войти в аккаунт организации.
+//@Param json body signInOrgInput true "Объект для входа в огранизацию."
 //@Accept json
 //@Produce json
 //@Success 200 {object} signInOrgOutput "Возвращает `jwt токен` при успешной авторизации"
 //@Failure 401 {object} serviceError
-//@Router /auth/signIn [post]
-func (s *authorization) SignIn(c *gin.Context) {
-	switch c.Query("type") {
-	case "org":
-		{
-			var input signInOrgInput
-			if err := c.ShouldBindJSON(&input); err != nil {
-				newResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
-				return
-			}
-
-			token, err := s.repo.Organizations.SignIn(input.Email, input.Password)
-			if err != nil {
-				if dberr, ok := isDatabaseError(err); ok {
-					newResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
-					return
-				}
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					newResponse(c, http.StatusUnauthorized, errEmailNotFound())
-					return
-				}
-				newResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
-				return
-			}
-
-			output := signInOrgOutput{Token: token}
-			newResponse(c, http.StatusOK, output)
-		}
-	case "employee":
-		{
-		}
-	default:
-		newResponse(c, http.StatusUnauthorized, errIncorrectInputData("unknown argument for parametr `type`"))
+//@Router /auth/signIn.Org [post]
+func (s *authorization) SignInOrg(c *gin.Context) {
+	var input signInOrgInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		NewResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
+		return
 	}
+
+	token, err := s.repo.Organizations.SignIn(input.Email, input.Password)
+	if err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
+			return
+		}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			NewResponse(c, http.StatusUnauthorized, errEmailNotFound())
+			return
+		}
+		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		return
+	}
+
+	output := signInOrgOutput{Token: token}
+	NewResponse(c, http.StatusOK, output)
+}
+
+type signInEmployeeInput struct {
+	Email    string `json:"email" binding:"required,max=45"`
+	Password string `json:"password" binding:"required,max=45"`
+}
+
+type signInEmployeeOutput struct {
+	Token string `json:"token"`
+}
+
+//@Summary Вход для сотрудника
+//@Description Метод позволяет войти в аккаунт сотрудника. Работает только с токеном огранизации.
+//@Param json body signInEmployeeInput true "Объект для входа в огранизацию."
+//@Accept json
+//@Produce json
+//@Success 200 {object} signInEmployeeOutput "Возвращает `jwt токен` при успешной авторизации"
+//@Failure 401 {object} serviceError
+//@Router /auth/signIn.Employee [post]
+func (s *authorization) SignInEmployee(c *gin.Context) {
+	var input signInEmployeeInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		NewResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	token, err := s.repo.Employees.SignIn(input.Email, input.Password, c.MustGet("claims_org_id").(uint))
+	if err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
+			return
+		}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			NewResponse(c, http.StatusUnauthorized, errRecordNotFound())
+			return
+		}
+		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		return
+	}
+
+	output := signInEmployeeOutput{Token: token}
+	NewResponse(c, http.StatusOK, output)
 }
 
 type sendCodeInputQuery struct {
-	Type  string `form:"type,min=1"`
-	Email string `form:"email,min=1,max=45"`
+	Type  string `form:"type" binding:"required"`
+	Email string `form:"email" binding:"required"`
 }
 
 //@Summary Отправка кода подтверждения почты
@@ -168,7 +248,7 @@ type sendCodeInputQuery struct {
 func (s *authorization) SendCode(c *gin.Context) {
 	var inputQ sendCodeInputQuery
 	if err := c.ShouldBindQuery(&inputQ); err != nil {
-		newResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
@@ -176,9 +256,9 @@ func (s *authorization) SendCode(c *gin.Context) {
 	case "org":
 		{
 			if ok, err := s.repo.Organizations.EmailExists(inputQ.Email); err != nil {
-				newResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 			} else if !ok {
-				newResponse(c, http.StatusBadRequest, errEmailNotFound())
+				NewResponse(c, http.StatusBadRequest, errEmailNotFound())
 			} else {
 				s.mailagent.SendTemplate(inputQ.Email, "confirm_code.html", mailagent.Value{
 					"code":     s.strcode.Encode(inputQ.Email),
@@ -188,10 +268,10 @@ func (s *authorization) SendCode(c *gin.Context) {
 					"type":     "org",
 				})
 				if err != nil {
-					newResponse(c, http.StatusInternalServerError, errUnknownServer("error on send email"))
+					NewResponse(c, http.StatusInternalServerError, errUnknownServer("error on send email"))
 					return
 				}
-				newResponse(c, http.StatusOK, nil)
+				NewResponse(c, http.StatusOK, nil)
 			}
 		}
 	case "employee":
@@ -199,14 +279,14 @@ func (s *authorization) SendCode(c *gin.Context) {
 
 		}
 	default:
-		newResponse(c, http.StatusBadRequest, errIncorrectInputData())
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData())
 	}
 
 }
 
 type confirmCodeInputQuery struct {
-	Type string `form:"type,min=1"`
-	Code string `form:"code,min=1"`
+	Type string `form:"type" binding:"required"`
+	Code string `form:"code" binding:"required"`
 }
 
 //@Summary Проверка кода подтверждения
@@ -217,7 +297,7 @@ type confirmCodeInputQuery struct {
 func (s *authorization) ConfirmCode(c *gin.Context) {
 	var inputQ confirmCodeInputQuery
 	if err := c.ShouldBindQuery(&inputQ); err != nil {
-		newResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
@@ -226,18 +306,16 @@ func (s *authorization) ConfirmCode(c *gin.Context) {
 		{
 			email, err := s.strcode.Decode(inputQ.Code)
 			if err != nil {
-				newResponse(c, http.StatusBadRequest, errIncorrectConfirmCode(err.Error()))
+				NewResponse(c, http.StatusBadRequest, errIncorrectConfirmCode(err.Error()))
 				return
 			}
 
 			if err := s.repo.Organizations.ConfirmEmailTrue(email); err != nil {
-				newResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 				return
 			}
 		}
 	default:
-		newResponse(c, http.StatusBadRequest, errIncorrectInputData())
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData())
 	}
-
-	newResponse(c, http.StatusOK, nil)
 }

@@ -7,7 +7,7 @@ type response struct {
 	Data   interface{} `json:"data"`
 }
 
-func newResponse(c *gin.Context, code int, data interface{}) {
+func NewResponse(c *gin.Context, code int, data interface{}) {
 	var obj response
 
 	if data == nil {

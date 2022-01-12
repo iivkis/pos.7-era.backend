@@ -45,7 +45,7 @@ func TestLoadTemplatesFromDir(t *testing.T) {
 func TestSend(t *testing.T) {
 	mailagent := NewMailAgent(envEmailSender, envPasswordSender)
 	err := mailagent.Send(envEmailTestRecipient, "hello")
-	fmt.Println(err)
+	fmt.Println(err, envEmailSender, envEmailTestRecipient, envPasswordSender)
 }
 
 func TestSendTemplate(t *testing.T) {

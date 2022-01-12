@@ -14,6 +14,7 @@ type OrganizationsRepository interface {
 	SignIn(email string, password string) (token string, err error)
 	ConfirmEmailTrue(email string) error
 	EmailExists(email string) (ok bool, err error)
+	SetPassword(id uint, pwd string) error
 }
 
 type organizations struct {
@@ -32,7 +33,7 @@ type OrganizationModel struct {
 	EmailConfirmed bool
 }
 
-func newOrganizationsRepository(db *gorm.DB, authjwt authjwt.AuthJWT) *organizations {
+func newOrganizationsRepo(db *gorm.DB, authjwt authjwt.AuthJWT) *organizations {
 	return &organizations{
 		db:      db,
 		authjwt: authjwt,
@@ -40,12 +41,32 @@ func newOrganizationsRepository(db *gorm.DB, authjwt authjwt.AuthJWT) *organizat
 }
 
 func (r *organizations) Create(m *OrganizationModel) error {
-	h, err := bcrypt.GenerateFromPassword([]byte(m.Password), 7)
+	// h, err := bcrypt.GenerateFromPassword([]byte(m.Password), 7)
+	// if err != nil {
+	// 	return err
+	// }
+	// m.Password = string(h)
+	if err := r.db.Create(m).Error; err != nil {
+		return err
+	}
+
+	if err := r.SetPassword(m.ID, m.Password); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *organizations) SetPassword(id uint, pwd string) error {
+	cpwd, err := bcrypt.GenerateFromPassword([]byte(pwd), 7)
 	if err != nil {
 		return err
 	}
-	m.Password = string(h)
-	return r.db.Create(m).Error
+
+	if err := r.db.Model(&OrganizationModel{}).Where("id = ?", id).Update("password", string(cpwd)).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *organizations) ConfirmEmailTrue(email string) error {

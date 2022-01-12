@@ -1,5 +1,8 @@
 package app
 
+//POS-Ninja Backend
+//Created by Ivan Razmolodin (vk.com/ivan.razmolodin)
+
 import (
 	"fmt"
 	"time"
@@ -15,7 +18,6 @@ import (
 )
 
 func Launch() {
-	welcomInfo()
 	fmt.Println("Server launching... \\-0.0-/")
 
 	//pkg
@@ -27,24 +29,15 @@ func Launch() {
 	}
 
 	_mailagent := mailagent.NewMailAgent(config.Env.EmailLogin, config.Env.EmailPwd)
-	_mailagent.LoadTemplatesFromDir(config.File.EmailTmplDir)
-	if err := _mailagent.SendTemplate(config.Env.EmailForNotify, "service_run.html", mailagent.Value{
-		"name":     config.Env.ServerName,
-		"protocol": config.Env.Protocol,
-		"host":     config.Env.Host,
-		"port":     config.Env.Port,
-	}); err != nil {
-		panic(err)
-	}
 
 	//internal
 	_repo := repository.NewRepository(_authjwt)
 	_service := myservice.NewMyService(_repo, _strcode, _mailagent)
-	_handler := handler.NewHttpHandler(_service)
+	_handler := handler.NewHttpHandler(_service, _authjwt)
 	_server := server.NewServer(_handler)
 
 	//run server
-	var done = make(chan byte)
+	var done = make(chan uint8)
 	go func() {
 		if err := _server.Listen(); err != nil {
 			panic(err)
@@ -53,11 +46,4 @@ func Launch() {
 
 	fmt.Print("Server launched =D\n\n")
 	<-done
-}
-
-func welcomInfo() {
-	fmt.Println("------------------------------------------------------")
-	fmt.Println("[APP NAME] POS-Ninja-Backend (version: 0.1-alpha)")
-	fmt.Println("[CREATED BY] Ivan Razmolodin (vk.com/ivan.razmolodin)")
-	fmt.Println("------------------------------------------------------")
 }

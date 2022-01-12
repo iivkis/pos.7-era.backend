@@ -63,25 +63,56 @@
                 }
             }
         },
-        "/auth/signIn": {
+        "/auth/signIn.Employee": {
             "post": {
-                "description": "Метод позволяет войти в аккаунт организации, либо сотрудника.\nДля входа сотрудника требуется `jwt токен` соотвествующей ему огранизации.",
+                "description": "Метод позволяет войти в аккаунт сотрудника. Работает только с токеном огранизации.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Вход для организации, либо сотрудника",
+                "summary": "Вход для сотрудника",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "`org` or `employee`",
-                        "name": "type",
-                        "in": "query"
+                        "description": "Объект для входа в огранизацию.",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/myservice.signInEmployeeInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Возвращает `jwt токен` при успешной авторизации",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.signInEmployeeOutput"
+                        }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signIn.Org": {
+            "post": {
+                "description": "Метод позволяет войти в аккаунт организации.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Вход для организации",
+                "parameters": [
                     {
-                        "description": "Объект для входа в огранизацию. Обязательные поля:`email`, `password`",
+                        "description": "Объект для входа в огранизацию.",
                         "name": "json",
                         "in": "body",
                         "required": true,
@@ -106,25 +137,56 @@
                 }
             }
         },
-        "/auth/signUp": {
+        "/auth/signUp.Employee": {
             "post": {
-                "description": "Метод позволяет зарегистрировать организацию или сотрудника данной огранизации.\nРегистрация сотрудника возможна только с `jwt токеном` организации.",
+                "description": "Метод позволяет зарегистрировать ссотрудника. Работает только с токеном организации.",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Регистрация организации, либо сотрудника",
+                "summary": "Регистрация сотрудника",
                 "parameters": [
                     {
-                        "type": "string",
-                        "description": "`org`(default) or `employee`",
-                        "name": "type",
-                        "in": "query"
+                        "description": "Объект для регитсрации сотрудника.",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/myservice.signUpEmployeeInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Возвращаемый объект при регистрации сотрудника",
+                        "schema": {
+                            "type": "object"
+                        }
                     },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/signUp.Org": {
+            "post": {
+                "description": "Метод позволяет зарегистрировать организацию",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Регистрация организации",
+                "parameters": [
                     {
-                        "description": "Объект для регитсрации огранизации. Обязательные поля:`email`, `password`",
+                        "description": "Объект для регитсрации огранизации.",
                         "name": "json",
                         "in": "body",
                         "required": true,
@@ -162,6 +224,29 @@
                 }
             }
         },
+        "myservice.signInEmployeeInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.signInEmployeeOutput": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
         "myservice.signInOrgInput": {
             "type": "object",
             "required": [
@@ -181,6 +266,36 @@
             "type": "object",
             "properties": {
                 "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.signUpEmployeeInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password",
+                "patronymic",
+                "surname"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "patronymic": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "integer"
+                },
+                "surname": {
                     "type": "string"
                 }
             }

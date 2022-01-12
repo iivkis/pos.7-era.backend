@@ -8,6 +8,7 @@ import (
 
 type Repository struct {
 	Organizations OrganizationsRepository
+	Employees     EmployeesRepository
 }
 
 func NewRepository(authjwt authjwt.AuthJWT) Repository {
@@ -19,9 +20,11 @@ func NewRepository(authjwt authjwt.AuthJWT) Repository {
 
 	db.AutoMigrate(
 		&OrganizationModel{},
+		&EmployeeModel{},
 	)
 
 	return Repository{
-		Organizations: newOrganizationsRepository(db, authjwt),
+		Organizations: newOrganizationsRepo(db, authjwt),
+		Employees:     newEmployeeRepo(db, authjwt),
 	}
 }

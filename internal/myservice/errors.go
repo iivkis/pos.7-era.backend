@@ -9,10 +9,11 @@ type serviceError struct {
 
 func newServiceError(code uint16, err string) func(editErr ...string) *serviceError {
 	return func(editError ...string) *serviceError {
+		e := err
 		if len(editError) != 0 {
-			err = err + ": " + editError[0]
+			e = err + ": " + editError[0]
 		}
-		return &serviceError{Code: code, Error: err}
+		return &serviceError{Code: code, Error: e}
 	}
 }
 
@@ -37,6 +38,13 @@ var (
 
 // 200-299 - ошибки связанные с базой данных
 var (
-	errEmailExists   = newServiceError(201, "email already exists")
-	errEmailNotFound = newServiceError(202, "email not found")
+	errEmailExists    = newServiceError(201, "email already exists")
+	errEmailNotFound  = newServiceError(202, "email not found")
+	errRecordNotFound = newServiceError(203, "record not found")
+)
+
+//300-399 - ошибки для внешнего импорта
+var (
+	ErrParsingJWT   = newServiceError(300, "jwt token parsing error")
+	ErrUndefinedJWT = newServiceError(301, "jwt token undefined in header `Authorization`")
 )
