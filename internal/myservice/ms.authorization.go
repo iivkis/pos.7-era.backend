@@ -91,14 +91,9 @@ func (s *authorization) SignUpOrg(c *gin.Context) {
 }
 
 type signUpEmployeeInput struct {
-	Surname    string `json:"surname" binding:"required,min=2,max=100"`
-	Name       string `json:"name" binding:"required,min=2,max=100"`
-	Patronymic string `json:"patronymic" binding:"required,min=2,max=100"`
-
-	Email    string `json:"email" binding:"required,min=3,max=45"`
+	Name     string `json:"name" binding:"required,min=2,max=200"`
 	Password string `json:"password" binding:"required,min=3,max=45"`
-
-	RoleID int `json:"role_id" binding:"min=1,max=1"`
+	RoleID   int    `json:"role_id" binding:"min=1,max=1"`
 }
 
 //@Summary Регистрация сотрудника
@@ -119,20 +114,12 @@ func (s *authorization) SignUpEmployee(c *gin.Context) {
 		return
 	}
 
-	//validate email
-	if _, err := mail.ParseAddress(input.Email); err != nil {
-		NewResponse(c, http.StatusUnauthorized, errIncorrectEmail(err.Error()))
-		return
-	}
-
+	//create model and add
 	model := repository.EmployeeModel{
-		Surname:    input.Surname,
-		Name:       input.Name,
-		Patronymic: input.Patronymic,
-		Email:      input.Email,
-		Password:   input.Password,
-		RoleID:     input.RoleID,
-		OrgID:      orgID,
+		Name:     input.Name,
+		Password: input.Password,
+		RoleID:   input.RoleID,
+		OrgID:    orgID,
 	}
 
 	if err := s.repo.Employees.Create(&model); err != nil {
@@ -194,7 +181,7 @@ func (s *authorization) SignInOrg(c *gin.Context) {
 }
 
 type signInEmployeeInput struct {
-	Email    string `json:"email" binding:"required,max=45"`
+	ID       uint   `json:"id" binding:"min=1"`
 	Password string `json:"password" binding:"required,max=45"`
 }
 
@@ -217,7 +204,7 @@ func (s *authorization) SignInEmployee(c *gin.Context) {
 		return
 	}
 
-	token, err := s.repo.Employees.SignIn(input.Email, input.Password, c.MustGet("claims_org_id").(uint))
+	token, err := s.repo.Employees.SignIn(input.ID, input.Password, c.MustGet("claims_org_id").(uint))
 	if err != nil {
 		if dberr, ok := isDatabaseError(err); ok {
 			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))

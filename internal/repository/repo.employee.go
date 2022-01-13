@@ -9,8 +9,9 @@ import (
 
 type EmployeesRepository interface {
 	Create(m *EmployeeModel) error
-	SignIn(email string, password string, orgID uint) (token string, err error)
+	SignIn(id uint, password string, orgID uint) (token string, err error)
 	SetPassword(id uint, pwd string) error
+	GetAll(orgID uint) ([]EmployeeModel, error)
 }
 
 type employees struct {
@@ -29,11 +30,7 @@ type EmployeeModel struct {
 	ID        uint
 	CreatedAt time.Time
 
-	Name       string
-	Surname    string
-	Patronymic string
-
-	Email    string `gorm:"unique"`
+	Name     string
 	Password string
 
 	OrgID  uint
@@ -54,9 +51,9 @@ func (r *employees) Create(m *EmployeeModel) error {
 	return nil
 }
 
-func (r *employees) SignIn(email string, password string, orgID uint) (token string, err error) {
+func (r *employees) SignIn(id uint, password string, orgID uint) (token string, err error) {
 	var model EmployeeModel
-	if err = r.db.Where("email = ? AND org_id = ? AND password = ?", email, orgID, password).First(&model).Error; err != nil {
+	if err = r.db.Where("id = ? AND org_id = ? AND password = ?", id, orgID, password).First(&model).Error; err != nil {
 		return "", err
 	}
 
@@ -78,4 +75,12 @@ func (r *employees) SetPassword(id uint, pwd string) error {
 		return err
 	}
 	return nil
+}
+
+func (r *employees) GetAll(orgID uint) ([]EmployeeModel, error) {
+	var models []EmployeeModel
+	if err := r.db.Where("org_id = ?", orgID).Find(&models).Error; err != nil {
+		return models, err
+	}
+	return models, nil
 }

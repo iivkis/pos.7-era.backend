@@ -24,6 +24,13 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		authApi.GET("/sendCode", h.service.Authorization.SendCode)
 		authApi.GET("/confirmCode", h.service.Authorization.ConfirmCode)
 	}
+
+	//employees
+	employeesApi := r.Group("/employees")
+	{
+		employeesApi.GET("/", h.withAuthOrg(), h.service.Employees.GetAll)
+	}
+
 }
 
 func (h *HttpHandler) withAuthOrg() gin.HandlerFunc {
