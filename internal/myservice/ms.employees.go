@@ -31,6 +31,12 @@ type employeeOutputModel struct {
 
 type getAllOutput []employeeOutputModel
 
+//@Summary Список всех сотрудников
+//@Description Метод позволяет получить список всех сотрудников
+//@Produce json
+//@Success 200 {object} getAllOutput "Возвращает массив сотрудников"
+//@Failure 500 {object} serviceError
+//@Router /employees [get]
 func (s *employees) GetAll(c *gin.Context) {
 	orgID := c.MustGet("claims_org_id").(uint)
 

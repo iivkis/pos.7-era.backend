@@ -226,9 +226,49 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/employees": {
+            "get": {
+                "description": "Метод позволяет получить список всех сотрудников",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Список всех сотрудников",
+                "responses": {
+                    "200": {
+                        "description": "Возвращает массив сотрудников",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.employeeOutputModel"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "myservice.employeeOutputModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "myservice.serviceError": {
             "type": "object",
             "properties": {
@@ -243,12 +283,11 @@ var doc = `{
         "myservice.signInEmployeeInput": {
             "type": "object",
             "required": [
-                "email",
                 "password"
             ],
             "properties": {
-                "email": {
-                    "type": "string"
+                "id": {
+                    "type": "integer"
                 },
                 "password": {
                     "type": "string"
@@ -289,30 +328,18 @@ var doc = `{
         "myservice.signUpEmployeeInput": {
             "type": "object",
             "required": [
-                "email",
                 "name",
-                "password",
-                "patronymic",
-                "surname"
+                "password"
             ],
             "properties": {
-                "email": {
-                    "type": "string"
-                },
                 "name": {
                     "type": "string"
                 },
                 "password": {
                     "type": "string"
                 },
-                "patronymic": {
-                    "type": "string"
-                },
                 "role_id": {
                     "type": "integer"
-                },
-                "surname": {
-                    "type": "string"
                 }
             }
         },
