@@ -29,12 +29,12 @@ type employeeOutputModel struct {
 
 //METHODS
 
-type getAllOutput []employeeOutputModel
+type getAllEmployeesOutput []employeeOutputModel
 
 //@Summary Список всех сотрудников
 //@Description Метод позволяет получить список всех сотрудников
 //@Produce json
-//@Success 200 {object} getAllOutput "Возвращает массив сотрудников"
+//@Success 200 {object} getAllEmployeesOutput "Возвращает массив сотрудников"
 //@Failure 500 {object} serviceError
 //@Router /employees [get]
 func (s *employees) GetAll(c *gin.Context) {
@@ -50,7 +50,7 @@ func (s *employees) GetAll(c *gin.Context) {
 		return
 	}
 
-	output := make(getAllOutput, len(employees))
+	output := make(getAllEmployeesOutput, len(employees))
 
 	for i, employee := range employees {
 		output[i] = employeeOutputModel{

@@ -15,20 +15,32 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	//authorization
 	authApi := r.Group("/auth")
 	{
+		//регистрация организации исотрудника
 		authApi.POST("/signUp.Org", h.service.Authorization.SignUpOrg)
 		authApi.POST("/signUp.Employee", h.withAuthOrg(), h.service.Authorization.SignUpEmployee)
 
+		//вход в аккаунт организации и сотрудника
 		authApi.POST("/signIn.Org", h.service.Authorization.SignInOrg)
 		authApi.POST("/signIn.Employee", h.withAuthOrg(), h.service.Authorization.SignInEmployee)
 
+		//отправка код подтверждения на email и проверка
 		authApi.GET("/sendCode", h.service.Authorization.SendCode)
 		authApi.GET("/confirmCode", h.service.Authorization.ConfirmCode)
 	}
 
-	//employees
+	//api для сотрудников
 	employeesApi := r.Group("/employees")
 	{
+		//список сотрудников организации
 		employeesApi.GET("/", h.withAuthOrg(), h.service.Employees.GetAll)
+	}
+
+	//api для торговых точек
+	outletsApi := r.Group("/outlets")
+	{
+		//метод для добавления точки
+		outletsApi.POST("/", h.withAuthOrg(), h.service.Outlets.Create)
+		outletsApi.GET("/", h.withAuthOrg(), h.service.Outlets.GetAll)
 	}
 
 }

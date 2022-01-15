@@ -19,7 +19,7 @@ type employees struct {
 	authjwt authjwt.AuthJWT
 }
 
-func newEmployeeRepo(db *gorm.DB, authjwt authjwt.AuthJWT) *employees {
+func newEmployeesRepo(db *gorm.DB, authjwt authjwt.AuthJWT) *employees {
 	return &employees{
 		db:      db,
 		authjwt: authjwt,

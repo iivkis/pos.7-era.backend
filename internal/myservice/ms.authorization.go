@@ -10,6 +10,7 @@ import (
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
 	"github.com/iivkis/pos-ninja-backend/pkg/mailagent"
 	"github.com/iivkis/strcode"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
@@ -172,6 +173,11 @@ func (s *authorization) SignInOrg(c *gin.Context) {
 			NewResponse(c, http.StatusUnauthorized, errEmailNotFound())
 			return
 		}
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			NewResponse(c, http.StatusUnauthorized, errIncorrectPassword())
+			return
+		}
+
 		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
 		return
 	}

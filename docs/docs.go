@@ -252,9 +252,78 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/outlets": {
+            "get": {
+                "description": "Метод позволяет получить список всех торговых точек",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Список всех торговых точек",
+                "responses": {
+                    "200": {
+                        "description": "Возвращает массив торговых точек",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.outletOutputModel"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Метод позволяет добавить торговую точку",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Добавить торговую точку",
+                "parameters": [
+                    {
+                        "description": "Объект для добавления торговой точки.",
+                        "name": "json",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/myservice.createOutletInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "myservice.createOutletInput": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "myservice.employeeOutputModel": {
             "type": "object",
             "properties": {
@@ -266,6 +335,17 @@ var doc = `{
                 },
                 "role_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "myservice.outletOutputModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
                 }
             }
         },

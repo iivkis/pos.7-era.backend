@@ -1,5 +1,10 @@
 basePath: /api/v1
 definitions:
+  myservice.createOutletInput:
+    properties:
+      name:
+        type: string
+    type: object
   myservice.employeeOutputModel:
     properties:
       id:
@@ -8,6 +13,13 @@ definitions:
         type: string
       role_id:
         type: integer
+    type: object
+  myservice.outletOutputModel:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
     type: object
   myservice.serviceError:
     properties:
@@ -225,4 +237,44 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Список всех сотрудников
+  /outlets:
+    get:
+      description: Метод позволяет получить список всех торговых точек
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Возвращает массив торговых точек
+          schema:
+            items:
+              $ref: '#/definitions/myservice.outletOutputModel'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Список всех торговых точек
+    post:
+      consumes:
+      - application/json
+      description: Метод позволяет добавить торговую точку
+      parameters:
+      - description: Объект для добавления торговой точки.
+        in: body
+        name: json
+        required: true
+        schema:
+          $ref: '#/definitions/myservice.createOutletInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Возвращает пустой объект
+          schema:
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Добавить торговую точку
 swagger: "2.0"

@@ -9,11 +9,13 @@ import (
 type MyService struct {
 	Authorization AuthorizationService
 	Employees     EmployeesService
+	Outlets       OutletsService
 }
 
 func NewMyService(repo repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent) MyService {
 	return MyService{
 		Authorization: newAuthorizationService(repo, strcode, mailagent),
 		Employees:     newEmployeesService(repo),
+		Outlets:       newOutletsService(repo),
 	}
 }
