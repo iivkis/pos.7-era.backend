@@ -67,14 +67,14 @@ func (s *authorization) SignUpOrg(c *gin.Context) {
 		return
 	}
 
-	//create model and add in db
-	model := repository.OrganizationModel{
+	//create orgModel and add in db
+	orgModel := repository.OrganizationModel{
 		Name:     input.Name,
 		Email:    input.Email,
 		Password: input.Password,
 	}
 
-	if err := s.repo.Organizations.Create(&model); err != nil {
+	if err := s.repo.Organizations.Create(&orgModel); err != nil {
 		if dberr, ok := isDatabaseError(err); ok {
 			switch dberr.Number {
 			case 1062:
@@ -88,13 +88,62 @@ func (s *authorization) SignUpOrg(c *gin.Context) {
 		return
 	}
 
+	//Создание главной торговой точки
+	outletModel := repository.OutletModel{
+		Name:  "Главная точка продаж",
+		OrgID: orgModel.ID,
+	}
+
+	if err := s.repo.Outlets.Create(&outletModel); err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
+			return
+		}
+		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		return
+	}
+
+	//Создание аккаунта владельца
+	employeeModelOwner := repository.EmployeeModel{
+		Name:     "Управление организацией",
+		Password: "00000",
+		Role:     "owner",
+		OrgID:    orgModel.ID,
+	}
+
+	if err := s.repo.Employees.Create(&employeeModelOwner); err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
+			return
+		}
+		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		return
+	}
+
+	//Создание аккаунта кассира
+	employeeModelCashier := repository.EmployeeModel{
+		Name:     "Кассир (продажа товара)",
+		Password: "00000",
+		Role:     "cashier",
+		OrgID:    orgModel.ID,
+	}
+
+	if err := s.repo.Employees.Create(&employeeModelCashier); err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
+			return
+		}
+		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		return
+	}
+
 	NewResponse(c, http.StatusCreated, nil)
 }
 
 type signUpEmployeeInput struct {
 	Name     string `json:"name" binding:"required,min=2,max=200"`
-	Password string `json:"password" binding:"required,min=3,max=45"`
-	RoleID   int    `json:"role_id" binding:"min=1,max=1"`
+	Password string `json:"password" binding:"required,min=5,max=5"`
+	Role     string `json:"role" binding:"required,max=20"`
 }
 
 //@Summary Регистрация сотрудника
@@ -106,7 +155,7 @@ type signUpEmployeeInput struct {
 //@Failure 400 {object} serviceError
 //@Router /auth/signUp.Employee [post]
 func (s *authorization) SignUpEmployee(c *gin.Context) {
-	var orgID uint = c.MustGet("claims_org_id").(uint)
+	var orgID = c.MustGet("claims_org_id").(uint)
 
 	//parse JSON body
 	var input signUpEmployeeInput
@@ -119,7 +168,7 @@ func (s *authorization) SignUpEmployee(c *gin.Context) {
 	model := repository.EmployeeModel{
 		Name:     input.Name,
 		Password: input.Password,
-		RoleID:   input.RoleID,
+		Role:     input.Role,
 		OrgID:    orgID,
 	}
 
@@ -133,7 +182,7 @@ func (s *authorization) SignUpEmployee(c *gin.Context) {
 			}
 			return
 		}
-		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusCreated, nil)

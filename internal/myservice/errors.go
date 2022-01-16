@@ -24,8 +24,8 @@ func isDatabaseError(err error) (dberr *mysql.MySQLError, ok bool) {
 
 // 0-99 - неизвестные ошибки, данные ошибки летят в лог
 var (
-	errUnknownDatabase = newServiceError(1, "unknown database error")
-	errUnknownServer   = newServiceError(2, "unknown server error")
+	errUnknownDatabase = newServiceError(1, "database error")
+	errUnknownServer   = newServiceError(2, "server error")
 )
 
 // 100-199 - ошибки связанные с некорректно переданными данными
@@ -45,6 +45,7 @@ var (
 
 //300-399 - ошибки для внешнего импорта
 var (
-	ErrParsingJWT   = newServiceError(300, "jwt token parsing error")
-	ErrUndefinedJWT = newServiceError(301, "jwt token undefined in header `Authorization`")
+	ErrParsingJWT     = newServiceError(300, "jwt token parsing error")
+	ErrUndefinedJWT   = newServiceError(301, "jwt token undefined in header `Authorization`")
+	ErrNoAccessRights = newServiceError(302, "no access rights")
 )

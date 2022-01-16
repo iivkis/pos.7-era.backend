@@ -28,9 +28,10 @@ type OrganizationClaims struct {
 }
 
 type EmployeeClaims struct {
-	OrganizationID uint  `json:"organization_id"`
-	EmployeeID     uint  `json:"employee_id"`
-	CreatedAt      int64 `json:"created_at"`
+	OrganizationID uint   `json:"organization_id"`
+	EmployeeID     uint   `json:"employee_id"`
+	Role           string `json:"role"`
+	CreatedAt      int64  `json:"created_at"`
 	jwt.StandardClaims
 }
 

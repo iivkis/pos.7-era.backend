@@ -22,9 +22,9 @@ func newEmployeesService(repo repository.Repository) *employees {
 }
 
 type employeeOutputModel struct {
-	ID     uint   `json:"id"`
-	Name   string `json:"name"`
-	RoleID int    `json:"role_id"`
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
+	Role string `json:"role"`
 }
 
 //METHODS
@@ -38,9 +38,7 @@ type getAllEmployeesOutput []employeeOutputModel
 //@Failure 500 {object} serviceError
 //@Router /employees [get]
 func (s *employees) GetAll(c *gin.Context) {
-	orgID := c.MustGet("claims_org_id").(uint)
-
-	employees, err := s.repo.Employees.GetAll(orgID)
+	employees, err := s.repo.Employees.GetAll(c.MustGet("claims_org_id").(uint))
 	if err != nil {
 		if dberr, ok := isDatabaseError(err); ok {
 			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(dberr.Error()))
@@ -51,12 +49,11 @@ func (s *employees) GetAll(c *gin.Context) {
 	}
 
 	output := make(getAllEmployeesOutput, len(employees))
-
 	for i, employee := range employees {
 		output[i] = employeeOutputModel{
-			ID:     employee.ID,
-			Name:   employee.Name,
-			RoleID: employee.RoleID,
+			ID:   employee.ID,
+			Name: employee.Name,
+			Role: employee.Role,
 		}
 	}
 

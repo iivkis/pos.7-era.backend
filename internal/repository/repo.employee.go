@@ -33,21 +33,20 @@ type EmployeeModel struct {
 	Name     string
 	Password string
 
-	OrgID  uint
-	RoleID int
+	OrgID uint
+	Role  string
 
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func (r *employees) Create(m *EmployeeModel) error {
+	if !roleIsExists(m.Role) {
+		return errUndefinedRole
+	}
+
 	if err := r.db.Create(m).Error; err != nil {
 		return err
 	}
-
-	if err := r.SetPassword(m.ID, m.Password); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -60,6 +59,8 @@ func (r *employees) SignIn(id uint, password string, orgID uint) (token string, 
 	claims := authjwt.EmployeeClaims{
 		OrganizationID: orgID,
 		EmployeeID:     model.ID,
+
+		Role: model.Role,
 	}
 
 	token, err = r.authjwt.SignInEmployee(&claims)
