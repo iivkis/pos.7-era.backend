@@ -15,7 +15,7 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	//authorization
 	authApi := r.Group("/auth")
 	{
-		//регистрация организации и исотрудника
+		//регистрация организации и сотрудника
 		authApi.POST("/signUp.Org", h.service.Authorization.SignUpOrg)
 		authApi.POST("/signUp.Employee", h.authEmployee("owner", "admin"), h.service.Authorization.SignUpEmployee)
 

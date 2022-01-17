@@ -40,9 +40,9 @@ func newAuthorizationService(repo repository.Repository, strcode *strcode.Strcod
 }
 
 type signUpOrgInput struct {
-	Name     string `json:"name" binding:"required,max=45,min=3"`
-	Email    string `json:"email" binding:"required,max=45"`
-	Password string `json:"password" binding:"required,max=45,min=6"`
+	Name     string `json:"name" binding:"required,min=3,max=50"`
+	Email    string `json:"email" binding:"required,min=3,max=50"`
+	Password string `json:"password" binding:"required,min=6,max=45"`
 }
 
 //@Summary Регистрация организации
@@ -106,7 +106,7 @@ func (s *authorization) SignUpOrg(c *gin.Context) {
 	//Создание аккаунта владельца
 	employeeModelOwner := repository.EmployeeModel{
 		Name:     "Управление организацией",
-		Password: "00000",
+		Password: "000000",
 		Role:     "owner",
 		OrgID:    orgModel.ID,
 	}
@@ -123,7 +123,7 @@ func (s *authorization) SignUpOrg(c *gin.Context) {
 	//Создание аккаунта кассира
 	employeeModelCashier := repository.EmployeeModel{
 		Name:     "Кассир (продажа товара)",
-		Password: "00000",
+		Password: "000000",
 		Role:     "cashier",
 		OrgID:    orgModel.ID,
 	}
@@ -142,7 +142,7 @@ func (s *authorization) SignUpOrg(c *gin.Context) {
 
 type signUpEmployeeInput struct {
 	Name     string `json:"name" binding:"required,min=2,max=200"`
-	Password string `json:"password" binding:"required,min=5,max=5"`
+	Password string `json:"password" binding:"required,min=6,max=6"`
 	Role     string `json:"role" binding:"required,max=20"`
 }
 
@@ -161,6 +161,11 @@ func (s *authorization) SignUpEmployee(c *gin.Context) {
 	var input signUpEmployeeInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	if input.Role == "owner" {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("you cannot create a user with the owner role"))
 		return
 	}
 
@@ -236,7 +241,7 @@ func (s *authorization) SignInOrg(c *gin.Context) {
 }
 
 type signInEmployeeInput struct {
-	ID       uint   `json:"id" binding:"min=1"`
+	ID       uint   `json:"id"`
 	Password string `json:"password" binding:"required,max=45"`
 }
 

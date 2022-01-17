@@ -1,7 +1,7 @@
 package repository
 
 //отсутсвует роль владельца (owner), т.к. владелец может быть только один
-var rolesList = []string{"admin", "cashier"}
+var rolesList = []string{"owner", "admin", "cashier"}
 
 func roleIsExists(role string) bool {
 	for _, r := range rolesList {
