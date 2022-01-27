@@ -8,10 +8,12 @@ type OutletsRepository interface {
 }
 
 type OutletModel struct {
-	ID        uint
-	Name      string
-	OrgID     uint
-	DeletedAt gorm.DeletedAt `gorm:"index"`
+	gorm.Model
+	OrgID uint
+
+	Name string
+
+	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`
 }
 
 type outlets struct {

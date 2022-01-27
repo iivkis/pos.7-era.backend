@@ -10,6 +10,7 @@ type Repository struct {
 	Organizations OrganizationsRepository
 	Employees     EmployeesRepository
 	Outlets       OutletsRepository
+	Sessions      SessionsRepository
 }
 
 func NewRepository(authjwt authjwt.AuthJWT) Repository {
@@ -23,11 +24,17 @@ func NewRepository(authjwt authjwt.AuthJWT) Repository {
 		&OrganizationModel{},
 		&EmployeeModel{},
 		&OutletModel{},
+		&SessionModel{},
+		&ProductModel{},
+		&OrderInfoModel{},
+		&OrderListModel{},
+		&CategoryModel{},
 	)
 
 	return Repository{
 		Organizations: newOrganizationsRepo(db, authjwt),
 		Employees:     newEmployeesRepo(db, authjwt),
 		Outlets:       newOutletsRepo(db),
+		Sessions:      newSessionsRepo(db),
 	}
 }

@@ -297,6 +297,83 @@
                     }
                 }
             }
+        },
+        "/sessions": {
+            "get": {
+                "description": "Метод позволяет получить список всех сессий",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Список всех сессий",
+                "responses": {
+                    "200": {
+                        "description": "Возвращает массив сессий",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.sessionOutputModel"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Открывает сессию с id указанным в jwt токен\nполе `action` принимает два параметра `open` (для открытия сессии) и `close` (для закрытия сессии)",
+                "summary": "Открыть или закрыть сессию",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.openOrCloseSessionInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/sessions/last": {
+            "get": {
+                "description": "Метод позволяет получить последнюю сессию торговой точки, к которой привязан jwt токен",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Последняя закрытая сессия торговой точки (к которой привязан jwt токен)",
+                "responses": {
+                    "200": {
+                        "description": "Возвращает последнюю закрытую сессию точки продаж",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.sessionOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -317,8 +394,23 @@
                 "name": {
                     "type": "string"
                 },
-                "role_id": {
-                    "type": "integer"
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.openOrCloseSessionInput": {
+            "type": "object",
+            "required": [
+                "action"
+            ],
+            "properties": {
+                "action": {
+                    "description": "\"open\" or \"close\"",
+                    "type": "string"
+                },
+                "cash": {
+                    "type": "number"
                 }
             }
         },
@@ -341,6 +433,32 @@
                 },
                 "error": {
                     "type": "string"
+                }
+            }
+        },
+        "myservice.sessionOutputModel": {
+            "type": "object",
+            "properties": {
+                "cash_close": {
+                    "type": "number"
+                },
+                "cash_open": {
+                    "type": "number"
+                },
+                "date_close": {
+                    "type": "string"
+                },
+                "date_open": {
+                    "type": "string"
+                },
+                "employee_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "outlet_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -393,7 +511,8 @@
             "type": "object",
             "required": [
                 "name",
-                "password"
+                "password",
+                "role"
             ],
             "properties": {
                 "name": {
@@ -402,8 +521,8 @@
                 "password": {
                     "type": "string"
                 },
-                "role_id": {
-                    "type": "integer"
+                "role": {
+                    "type": "string"
                 }
             }
         },

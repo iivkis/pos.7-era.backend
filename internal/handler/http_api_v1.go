@@ -43,6 +43,12 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		outletsApi.GET("/", h.authOrg(), h.service.Outlets.GetAll)
 	}
 
+	sessionsApi := r.Group("/sessions")
+	{
+		sessionsApi.POST("/", h.authEmployee("owner", "admin", "cashier"), h.service.Session.OpenOrClose)
+		sessionsApi.GET("/", h.authEmployee("owner", "admin"), h.service.Session.GetAll)
+		sessionsApi.GET("/last", h.authEmployee("owner", "admin", "cashier"), h.service.Session.GetLastForOutlet)
+	}
 }
 
 func (h *HttpHandler) authOrg() gin.HandlerFunc {
@@ -104,5 +110,6 @@ func (h *HttpHandler) authEmployee(roles ...string) gin.HandlerFunc {
 
 		c.Set("claims_org_id", claims.OrganizationID)
 		c.Set("claims_employee_id", claims.EmployeeID)
+		c.Set("claims_outlet_id", claims.OutletID)
 	}
 }

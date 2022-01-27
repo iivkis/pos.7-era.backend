@@ -32,7 +32,7 @@ func Launch() {
 
 	//internal
 	_repo := repository.NewRepository(_authjwt)
-	_service := myservice.NewMyService(_repo, _strcode, _mailagent)
+	_service := myservice.NewMyService(_repo, _strcode, _mailagent, _authjwt)
 	_handler := handler.NewHttpHandler(_service, _authjwt)
 	_server := server.NewServer(_handler)
 

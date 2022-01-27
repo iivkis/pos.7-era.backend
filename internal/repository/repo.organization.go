@@ -27,7 +27,7 @@ type OrganizationModel struct {
 	CreatedAt time.Time
 
 	Name     string
-	Email    string `gorm:"unique"`
+	Email    string `gorm:"index:,unique"`
 	Password string
 
 	EmailConfirmed bool

@@ -1,6 +1,5 @@
 package repository
 
-//отсутсвует роль владельца (owner), т.к. владелец может быть только один
 var rolesList = []string{"owner", "admin", "cashier"}
 
 func roleIsExists(role string) bool {

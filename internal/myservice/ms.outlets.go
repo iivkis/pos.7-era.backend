@@ -16,18 +16,16 @@ type outlets struct {
 	repo repository.Repository
 }
 
-func newOutletsService(repo repository.Repository) *outlets {
-	return &outlets{
-		repo: repo,
-	}
-}
-
 type outletOutputModel struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
 }
 
-//METHODS
+func newOutletsService(repo repository.Repository) *outlets {
+	return &outlets{
+		repo: repo,
+	}
+}
 
 type createOutletInput struct {
 	Name string `json:"name" binding:"min=3,max=100"`

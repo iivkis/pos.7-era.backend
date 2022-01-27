@@ -15,19 +15,17 @@ type employees struct {
 	repo repository.Repository
 }
 
-func newEmployeesService(repo repository.Repository) *employees {
-	return &employees{
-		repo: repo,
-	}
-}
-
 type employeeOutputModel struct {
 	ID   uint   `json:"id"`
 	Name string `json:"name"`
 	Role string `json:"role"`
 }
 
-//METHODS
+func newEmployeesService(repo repository.Repository) *employees {
+	return &employees{
+		repo: repo,
+	}
+}
 
 type getAllEmployeesOutput []employeeOutputModel
 

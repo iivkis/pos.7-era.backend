@@ -3,5 +3,6 @@ package repository
 import "errors"
 
 var (
-	errUndefinedRole = errors.New("undefined role")
+	ErrUndefinedRole     = errors.New("undefined role")
+	ErrOnlyNumInPassword = errors.New("only numbers can be used in an employee's password")
 )

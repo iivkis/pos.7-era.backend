@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos-ninja-backend/internal/config"
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
 	"github.com/iivkis/pos-ninja-backend/pkg/mailagent"
 	"github.com/iivkis/strcode"
 	"golang.org/x/crypto/bcrypt"
@@ -29,13 +30,15 @@ type authorization struct {
 	repo      repository.Repository
 	strcode   *strcode.Strcode
 	mailagent *mailagent.MailAgent
+	authjwt   authjwt.AuthJWT
 }
 
-func newAuthorizationService(repo repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent) *authorization {
+func newAuthorizationService(repo repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent, authjwt authjwt.AuthJWT) *authorization {
 	return &authorization{
 		repo:      repo,
 		strcode:   strcode,
 		mailagent: mailagent,
+		authjwt:   authjwt,
 	}
 }
 
@@ -109,6 +112,7 @@ func (s *authorization) SignUpOrg(c *gin.Context) {
 		Password: "000000",
 		Role:     "owner",
 		OrgID:    orgModel.ID,
+		OutletID: outletModel.ID,
 	}
 
 	if err := s.repo.Employees.Create(&employeeModelOwner); err != nil {
@@ -126,6 +130,7 @@ func (s *authorization) SignUpOrg(c *gin.Context) {
 		Password: "000000",
 		Role:     "cashier",
 		OrgID:    orgModel.ID,
+		OutletID: outletModel.ID,
 	}
 
 	if err := s.repo.Employees.Create(&employeeModelCashier); err != nil {
@@ -181,13 +186,16 @@ func (s *authorization) SignUpEmployee(c *gin.Context) {
 		if dberr, ok := isDatabaseError(err); ok {
 			switch dberr.Number {
 			case 1062:
-				NewResponse(c, http.StatusUnauthorized, errEmailExists())
+				NewResponse(c, http.StatusBadRequest, errEmailExists())
 			default:
-				NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
+				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(dberr.Error()))
 			}
 			return
+		} else if errors.Is(err, repository.ErrOnlyNumInPassword) || errors.Is(err, repository.ErrUndefinedRole) {
+			NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+			return
 		}
-		NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusCreated, nil)
@@ -264,7 +272,10 @@ func (s *authorization) SignInEmployee(c *gin.Context) {
 		return
 	}
 
-	token, err := s.repo.Employees.SignIn(input.ID, input.Password, c.MustGet("claims_org_id").(uint))
+	var orgID = c.MustGet("claims_org_id").(uint)
+
+	//return employee model if find
+	empl, err := s.repo.Employees.SignIn(input.ID, input.Password, orgID)
 	if err != nil {
 		if dberr, ok := isDatabaseError(err); ok {
 			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
@@ -274,6 +285,20 @@ func (s *authorization) SignInEmployee(c *gin.Context) {
 			NewResponse(c, http.StatusUnauthorized, errRecordNotFound())
 			return
 		}
+		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		return
+	}
+
+	//create new claims
+	claims := authjwt.EmployeeClaims{
+		OrganizationID: orgID,
+		OutletID:       empl.OutletID,
+		EmployeeID:     empl.ID,
+		Role:           empl.Role,
+	}
+
+	token, err := s.authjwt.SignInEmployee(&claims)
+	if err != nil {
 		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
 		return
 	}
