@@ -52,8 +52,9 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 	categoryApi := r.Group("/category")
 	{
-		categoryApi.POST("/", h.authEmployee("owner", "admin"), h.service.Category.Create)
 		categoryApi.GET("/", h.authEmployee("owner", "admin", "cashier"), h.service.Category.GetAll)
+		categoryApi.POST("/", h.authEmployee("owner", "admin"), h.service.Category.Create)
+		categoryApi.PUT("/:id", h.authEmployee("owner", "admin"), h.service.Category.Update)
 		categoryApi.DELETE("/:id", h.authEmployee("owner", "admin"), h.service.Category.Delete)
 	}
 }

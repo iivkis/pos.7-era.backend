@@ -309,6 +309,23 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Удалить категоирю из точки
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.createCategoryInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: возвращает пустой объект
+          schema:
+            type: object
+      summary: Обновить поля категории
   /employees:
     get:
       description: Метод позволяет получить список всех сотрудников

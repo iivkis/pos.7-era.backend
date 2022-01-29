@@ -11,6 +11,7 @@ type CategoryService interface {
 	Create(*gin.Context)
 	GetAll(*gin.Context)
 	Delete(*gin.Context)
+	Update(*gin.Context)
 }
 
 type category struct {
@@ -97,6 +98,31 @@ func (s *category) Delete(c *gin.Context) {
 
 	if err := s.repo.Category.DeleteByID(c.MustGet("claims_outlet_id").(uint), id); err != nil {
 		NewResponse(c, http.StatusBadRequest, errOnDelet(err.Error()))
+		return
+	}
+
+	NewResponse(c, http.StatusOK, nil)
+}
+
+//@Summary Обновить поля категории
+//@param type body createCategoryInput false "Принимаемый объект"
+//@Accept json
+//@Produce json
+//@Success 201 {object} object "возвращает пустой объект"
+//@Router /category/:id [put]
+func (s *category) Update(c *gin.Context) {
+	var input createCategoryInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	cat := repository.CategoryModel{
+		Name: input.Name,
+	}
+
+	if err := s.repo.Category.Update(c.Param("id"), &cat); err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 

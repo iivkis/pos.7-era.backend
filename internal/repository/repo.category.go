@@ -14,6 +14,7 @@ type CategoryRepository interface {
 	Create(m *CategoryModel) error
 	GetAllByOutletID(outletID uint) (cats []CategoryModel, err error)
 	DeleteByID(outletID uint, paramCategoryID string) (err error)
+	Update(paramCategoryID string, m *CategoryModel) (err error)
 }
 
 type category struct {
@@ -40,4 +41,9 @@ func (r *category) DeleteByID(outletID uint, paramCategoryID string) (err error)
 	err = r.db.Where("id = ? AND outlet_id = ?", paramCategoryID, outletID).
 		Delete(&CategoryModel{}).Error
 	return
+}
+
+func (r *category) Update(paramCategoryID string, m *CategoryModel) (err error) {
+	err = r.db.Where("id = ?", paramCategoryID).Updates(m).Error
+	return err
 }
