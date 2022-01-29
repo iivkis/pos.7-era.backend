@@ -62,7 +62,7 @@ func (s *sessions) OpenOrClose(c *gin.Context) {
 		{
 			sess := repository.SessionModel{
 				CashSessionOpen: input.Cash,
-				DateOpen:        time.Unix(input.Date, 0),
+				DateOpen:        time.UnixMilli(input.Date),
 				EmployeeID:      c.MustGet("claims_employee_id").(uint),
 				OutletID:        c.MustGet("claims_outlet_id").(uint),
 				OrgID:           c.MustGet("claims_org_id").(uint),
@@ -75,7 +75,7 @@ func (s *sessions) OpenOrClose(c *gin.Context) {
 		}
 	case "close":
 		{
-			if err := s.repo.Sessions.CloseByEmployeeID(c.MustGet("claims_employee_id").(uint), time.Unix(input.Date, 0), input.Cash); err != nil {
+			if err := s.repo.Sessions.CloseByEmployeeID(c.MustGet("claims_employee_id").(uint), time.UnixMilli(input.Date), input.Cash); err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 				return
 			}
