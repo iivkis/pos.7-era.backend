@@ -3,6 +3,7 @@ package myservice
 import (
 	"errors"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
@@ -27,8 +28,8 @@ type sessionOutputModel struct {
 	CashOpen  float64 `json:"cash_open"`
 	CashClose float64 `json:"cash_close"`
 
-	DateOpen  string `json:"date_open"`
-	DateClose string `json:"date_close"`
+	DateOpen  int64 `json:"date_open"`
+	DateClose int64 `json:"date_close"`
 }
 
 func newSessionService(repo repository.Repository) *sessions {
@@ -39,6 +40,7 @@ func newSessionService(repo repository.Repository) *sessions {
 
 type openOrCloseSessionInput struct {
 	Action string  `json:"action" binding:"required"` // "open" or "close"
+	Date   int64   `json:"date"`
 	Cash   float64 `json:"cash"`
 }
 
@@ -60,8 +62,10 @@ func (s *sessions) OpenOrClose(c *gin.Context) {
 		{
 			sess := repository.SessionModel{
 				CashSessionOpen: input.Cash,
+				DateOpen:        time.Unix(input.Date, 0),
 				EmployeeID:      c.MustGet("claims_employee_id").(uint),
 				OutletID:        c.MustGet("claims_outlet_id").(uint),
+				OrgID:           c.MustGet("claims_org_id").(uint),
 			}
 			if err := s.repo.Sessions.Open(&sess); err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
@@ -71,7 +75,7 @@ func (s *sessions) OpenOrClose(c *gin.Context) {
 		}
 	case "close":
 		{
-			if err := s.repo.Sessions.CloseByEmployeeID(c.MustGet("claims_employee_id").(uint), input.Cash); err != nil {
+			if err := s.repo.Sessions.CloseByEmployeeID(c.MustGet("claims_employee_id").(uint), time.Unix(input.Date, 0), input.Cash); err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 				return
 			}
@@ -92,17 +96,17 @@ type getAllSessionsOutput []sessionOutputModel
 //@Failure 500 {object} serviceError
 //@Router /sessions [get]
 func (s *sessions) GetAll(c *gin.Context) {
-	models, err := s.repo.Sessions.GetAllUnscoped()
+	sessions, err := s.repo.Sessions.GetAllUnscopedByOrgID(c.MustGet("claims_org_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	var output getAllSessionsOutput = make(getAllSessionsOutput, len(models))
-	for i, sess := range models {
-		var dateClose string
+	var output getAllSessionsOutput = make(getAllSessionsOutput, len(sessions))
+	for i, sess := range sessions {
+		var dateClose int64
 		if !sess.DateClose.Time.IsZero() {
-			dateClose = sess.DateClose.Time.String()
+			dateClose = sess.DateClose.Time.Unix()
 		}
 
 		output[i] = sessionOutputModel{
@@ -111,7 +115,7 @@ func (s *sessions) GetAll(c *gin.Context) {
 			OutletID:   sess.OutletID,
 			CashOpen:   sess.CashSessionOpen,
 			CashClose:  sess.CashSessionClose,
-			DateOpen:   sess.DateOpen.String(),
+			DateOpen:   sess.DateOpen.Unix(),
 			DateClose:  dateClose,
 		}
 	}
@@ -143,8 +147,8 @@ func (s *sessions) GetLastForOutlet(c *gin.Context) {
 		OutletID:   sess.OutletID,
 		CashOpen:   sess.CashSessionOpen,
 		CashClose:  sess.CashSessionClose,
-		DateOpen:   sess.DateOpen.String(),
-		DateClose:  sess.DateClose.Time.String(),
+		DateOpen:   sess.DateOpen.Unix(),
+		DateClose:  sess.DateClose.Time.Unix(),
 	}
 	NewResponse(c, http.StatusOK, output)
 }

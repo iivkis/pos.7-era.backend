@@ -12,6 +12,7 @@ type MyService struct {
 	Employees     EmployeesService
 	Outlets       OutletsService
 	Session       SessionService
+	Category      CategoryService
 }
 
 func NewMyService(repo repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent, authjwt authjwt.AuthJWT) MyService {
@@ -20,5 +21,6 @@ func NewMyService(repo repository.Repository, strcode *strcode.Strcode, mailagen
 		Employees:     newEmployeesService(repo),
 		Outlets:       newOutletsService(repo),
 		Session:       newSessionService(repo),
+		Category:      newCategoryService(repo),
 	}
 }

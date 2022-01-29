@@ -17,15 +17,17 @@ type SessionModel struct {
 
 	EmployeeID uint `gorm:"index"`
 	OutletID   uint `gorm:"index"`
+	OrgID      uint `gorm:"index"`
 
-	EmployeeModel EmployeeModel `gorm:"foreignKey:EmployeeID"`
-	OutletModel   OutletModel   `gorm:"foreignKey:OutletID"`
+	EmployeeModel     EmployeeModel     `gorm:"foreignKey:EmployeeID"`
+	OutletModel       OutletModel       `gorm:"foreignKey:OutletID"`
+	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`
 }
 
 type SessionsRepository interface {
 	Open(m *SessionModel) error
-	CloseByEmployeeID(employeeID uint, cashClose float64) (err error)
-	GetAllUnscoped() (models []SessionModel, err error)
+	CloseByEmployeeID(employeeID uint, dateClose time.Time, cashClose float64) (err error)
+	GetAllUnscopedByOrgID(orgID uint) (models []SessionModel, err error)
 	GetLastForOutlet(outletID uint) (model SessionModel, err error)
 }
 
@@ -40,12 +42,11 @@ func newSessionsRepo(db *gorm.DB) *sessions {
 }
 
 func (r *sessions) Open(m *SessionModel) error {
-	m.DateOpen = time.Now().UTC()
 	return r.db.Create(m).Error
 }
 
-func (r *sessions) GetAllUnscoped() (models []SessionModel, err error) {
-	err = r.db.Unscoped().Order("id desc").Find(&models).Error
+func (r *sessions) GetAllUnscopedByOrgID(orgID uint) (models []SessionModel, err error) {
+	err = r.db.Unscoped().Where("org_id = ?", orgID).Order("id desc").Find(&models).Error
 	return
 }
 
@@ -59,10 +60,11 @@ func (r *sessions) GetLastForOutlet(outletID uint) (model SessionModel, err erro
 	return
 }
 
-func (r *sessions) CloseByEmployeeID(employeeID uint, cashClose float64) (err error) {
-	if err = r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).Update("cash_session_close", cashClose).Error; err != nil {
+func (r *sessions) CloseByEmployeeID(employeeID uint, dateClose time.Time, cashClose float64) (err error) {
+	if err = r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).
+		Update("cash_session_close", cashClose).
+		Update("date_close", dateClose.String()).Error; err != nil {
 		return
 	}
-	err = r.db.Where("employee_id = ?", employeeID).Delete(&SessionModel{}).Error
 	return
 }

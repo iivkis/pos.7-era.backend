@@ -11,6 +11,7 @@ type Repository struct {
 	Employees     EmployeesRepository
 	Outlets       OutletsRepository
 	Sessions      SessionsRepository
+	Category      CategoryRepository
 }
 
 func NewRepository(authjwt authjwt.AuthJWT) Repository {
@@ -36,5 +37,6 @@ func NewRepository(authjwt authjwt.AuthJWT) Repository {
 		Employees:     newEmployeesRepo(db, authjwt),
 		Outlets:       newOutletsRepo(db),
 		Sessions:      newSessionsRepo(db),
+		Category:      newCategoryRepo(db),
 	}
 }
