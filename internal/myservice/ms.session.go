@@ -68,7 +68,7 @@ func (s *sessions) OpenOrClose(c *gin.Context) {
 				OrgID:           c.MustGet("claims_org_id").(uint),
 			}
 			if err := s.repo.Sessions.Open(&sess); err != nil {
-				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 				return
 			}
 			NewResponse(c, http.StatusOK, nil)

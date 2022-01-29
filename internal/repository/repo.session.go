@@ -41,8 +41,19 @@ func newSessionsRepo(db *gorm.DB) *sessions {
 	}
 }
 
-func (r *sessions) Open(m *SessionModel) error {
-	return r.db.Create(m).Error
+func (r *sessions) Open(m *SessionModel) (err error) {
+	var n int64
+	err = r.db.Model(&SessionModel{}).Where("employee_id = ? AND date_close IS NULL", m.EmployeeID).Count(&n).Error
+	if err != nil {
+		return err
+	}
+
+	if n != 0 {
+		return ErrSessionAlreadyOpen
+	}
+
+	err = r.db.Create(m).Error
+	return
 }
 
 func (r *sessions) GetAllUnscopedByOrgID(orgID uint) (models []SessionModel, err error) {
