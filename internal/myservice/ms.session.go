@@ -45,8 +45,8 @@ type openOrCloseSessionInput struct {
 }
 
 //@Summary Открыть или закрыть сессию
-//@Description Открывает сессию с id указанным в jwt токен
-//@Description поле `action` принимает два параметра `open` (для открытия сессии) и `close` (для закрытия сессии)
+//@Description Открывает сессию с id указанным в jwt токен.
+//@Description - Поле `action` принимает два параметра `open` (для открытия сессии) и `close` (для закрытия сессии)
 //@param type body openOrCloseSessionInput false "Принимаемый объект"
 //@Success 201 {object} object "возвращает пустой объект"
 //@Router /sessions [post]

@@ -13,6 +13,7 @@ type CategoryModel struct {
 type CategoryRepository interface {
 	Create(m *CategoryModel) error
 	GetAllByOutletID(outletID uint) (cats []CategoryModel, err error)
+	DeleteByID(outletID uint, paramCategoryID string) (err error)
 }
 
 type category struct {
@@ -35,7 +36,8 @@ func (r *category) GetAllByOutletID(outletID uint) (cats []CategoryModel, err er
 	return
 }
 
-func (r *category) DeleteByID(outletID uint, categoryID uint) (err error) {
-	err = r.db.Where("id = ? AND outlet_id = ?", categoryID, outletID).Delete(&CategoryModel{}).Error
+func (r *category) DeleteByID(outletID uint, paramCategoryID string) (err error) {
+	err = r.db.Where("id = ? AND outlet_id = ?", paramCategoryID, outletID).
+		Delete(&CategoryModel{}).Error
 	return
 }

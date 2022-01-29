@@ -23,6 +23,7 @@ func isDatabaseError(err error) (dberr *mysql.MySQLError, ok bool) {
 }
 
 // 0-99 - неизвестные ошибки, данные ошибки летят в лог
+//TODO: Сделать полет в лог и сам лог
 var (
 	errUnknownDatabase = newServiceError(1, "database error")
 	errUnknownServer   = newServiceError(2, "server error")
@@ -41,6 +42,7 @@ var (
 	errEmailNotFound     = newServiceError(202, "email not found")
 	errRecordNotFound    = newServiceError(203, "record not found")
 	errIncorrectPassword = newServiceError(204, "invalid password")
+	errOnDelet           = newServiceError(205, "error deleting a record")
 )
 
 //300-399 - ошибки для внешнего импорта

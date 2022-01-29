@@ -227,6 +227,79 @@ var doc = `{
                 }
             }
         },
+        "/category": {
+            "get": {
+                "description": "Метод позволяет получить список категорий точки",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Список всех категорий точки",
+                "responses": {
+                    "200": {
+                        "description": "Возвращает массив категорий",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.categoryOutputModel"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Добавить новую категорию к точке",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.createCategoryInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/category/:id": {
+            "delete": {
+                "description": "Метод позволяет удалить категоирю из точки",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Удалить категоирю из точки",
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/employees": {
             "get": {
                 "description": "Метод позволяет получить список всех сотрудников",
@@ -340,7 +413,7 @@ var doc = `{
                 }
             },
             "post": {
-                "description": "Открывает сессию с id указанным в jwt токен\nполе ` + "`" + `action` + "`" + ` принимает два параметра ` + "`" + `open` + "`" + ` (для открытия сессии) и ` + "`" + `close` + "`" + ` (для закрытия сессии)",
+                "description": "Открывает сессию с id указанным в jwt токен.\n- Поле ` + "`" + `action` + "`" + ` принимает два параметра ` + "`" + `open` + "`" + ` (для открытия сессии) и ` + "`" + `close` + "`" + ` (для закрытия сессии)",
                 "summary": "Открыть или закрыть сессию",
                 "parameters": [
                     {
@@ -393,6 +466,25 @@ var doc = `{
         }
     },
     "definitions": {
+        "myservice.categoryOutputModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.createCategoryInput": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "myservice.createOutletInput": {
             "type": "object",
             "properties": {
@@ -427,6 +519,9 @@ var doc = `{
                 },
                 "cash": {
                     "type": "number"
+                },
+                "date": {
+                    "type": "integer"
                 }
             }
         },
@@ -462,10 +557,10 @@ var doc = `{
                     "type": "number"
                 },
                 "date_close": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "date_open": {
-                    "type": "string"
+                    "type": "integer"
                 },
                 "employee_id": {
                     "type": "integer"
