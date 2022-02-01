@@ -22,6 +22,10 @@ var Env struct {
 	EmailLogin     string
 	EmailPwd       string
 	EmailForNotify string
+
+	DatabaseLogin    string
+	DatabasePassword string
+	DatabaseIP       string
 }
 
 func init() {
@@ -53,6 +57,7 @@ func loadJSON(configFilePath string) {
 		return d
 	}
 
+	//require fields
 	{
 		File.EmailTmplDir = getField("email_tmpl_dir")
 	}
@@ -79,4 +84,9 @@ func loadEnv() {
 	Env.EmailLogin = getEnv("POSN_EMAIL_LOGIN")
 	Env.EmailPwd = getEnv("POSN_EMAIL_PWD")
 	Env.EmailForNotify = getEnv("POSN_EMAIL_TEST_RCP")
+
+	//database
+	Env.DatabaseLogin = getEnv("POSN_DATABASE_LOGIN")
+	Env.DatabasePassword = getEnv("POSN_DATABASE_PASSWORD")
+	Env.DatabaseIP = getEnv("POSN_DATABASE_IP")
 }

@@ -38,11 +38,12 @@ var (
 
 // 200-299 - ошибки связанные с базой данных
 var (
-	errEmailExists       = newServiceError(201, "email already exists")
-	errEmailNotFound     = newServiceError(202, "email not found")
-	errRecordNotFound    = newServiceError(203, "record not found")
-	errIncorrectPassword = newServiceError(204, "invalid password")
-	errOnDelet           = newServiceError(205, "error deleting a record")
+	errEmailExists         = newServiceError(201, "email already exists")
+	errEmailNotFound       = newServiceError(202, "email not found")
+	errRecordNotFound      = newServiceError(203, "record not found")
+	errIncorrectPassword   = newServiceError(204, "invalid password")
+	errOnDelet             = newServiceError(205, "error deleting a record")
+	errRecordAlreadyExists = newServiceError(206, "the record already exists")
 )
 
 //300-399 - ошибки для внешнего импорта

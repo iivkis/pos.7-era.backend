@@ -7,11 +7,7 @@ import (
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
 )
 
-type EmployeesService interface {
-	GetAll(c *gin.Context)
-}
-
-type employees struct {
+type EmployeesService struct {
 	repo repository.Repository
 }
 
@@ -21,8 +17,8 @@ type employeeOutputModel struct {
 	Role string `json:"role"`
 }
 
-func newEmployeesService(repo repository.Repository) *employees {
-	return &employees{
+func newEmployeesService(repo repository.Repository) *EmployeesService {
+	return &EmployeesService{
 		repo: repo,
 	}
 }
@@ -35,7 +31,7 @@ type getAllEmployeesOutput []employeeOutputModel
 //@Success 200 {object} getAllEmployeesOutput "Возвращает массив сотрудников"
 //@Failure 500 {object} serviceError
 //@Router /employees [get]
-func (s *employees) GetAll(c *gin.Context) {
+func (s *EmployeesService) GetAll(c *gin.Context) {
 	employees, err := s.repo.Employees.GetAll(c.MustGet("claims_org_id").(uint))
 	if err != nil {
 		if dberr, ok := isDatabaseError(err); ok {

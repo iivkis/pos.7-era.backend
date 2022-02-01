@@ -11,7 +11,7 @@ import (
 
 type OrganizationsRepository interface {
 	Create(m *OrganizationModel) error
-	SignIn(email string, password string) (token string, err error)
+	SignIn(email string, password string) (org OrganizationModel, err error)
 	ConfirmEmailTrue(email string) error
 	EmailExists(email string) (ok bool, err error)
 	SetPassword(id uint, pwd string) error
@@ -19,7 +19,7 @@ type OrganizationsRepository interface {
 
 type organizations struct {
 	db      *gorm.DB
-	authjwt authjwt.AuthJWT
+	authjwt *authjwt.AuthJWT
 }
 
 type OrganizationModel struct {
@@ -33,7 +33,7 @@ type OrganizationModel struct {
 	EmailConfirmed bool
 }
 
-func newOrganizationsRepo(db *gorm.DB, authjwt authjwt.AuthJWT) *organizations {
+func newOrganizationsRepo(db *gorm.DB, authjwt *authjwt.AuthJWT) *organizations {
 	return &organizations{
 		db:      db,
 		authjwt: authjwt,
@@ -69,33 +69,22 @@ func (r *organizations) ConfirmEmailTrue(email string) error {
 }
 
 func (r *organizations) EmailExists(email string) (bool, error) {
-	err := r.db.Model(&OrganizationModel{}).Where("email = ?", email).First(nil).Error
-	if err == nil {
-		return true, nil
-	} else if errors.Is(err, gorm.ErrRecordNotFound) {
-		return false, nil
+	err := r.db.Where("email = ?", email).First(&OrganizationModel{}).Error
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return false, nil
+		}
+		return false, err
 	}
-	return false, err
+	return true, nil
 }
 
-func (r *organizations) SignIn(email string, password string) (token string, err error) {
-	var model OrganizationModel
-	if err = r.db.Where("email = ?", email).First(&model).Error; err != nil {
-		return "", err
+func (r *organizations) SignIn(email string, password string) (org OrganizationModel, err error) {
+	if err = r.db.Where("email = ?", email).First(&org).Error; err != nil {
+		return OrganizationModel{}, err
 	}
-
-	if err = bcrypt.CompareHashAndPassword([]byte(model.Password), []byte(password)); err != nil {
-		return "", err
+	if err = bcrypt.CompareHashAndPassword([]byte(org.Password), []byte(password)); err != nil {
+		return OrganizationModel{}, err
 	}
-
-	claims := authjwt.OrganizationClaims{
-		OrganizationID: model.ID,
-	}
-
-	token, err = r.authjwt.SignInOrganization(&claims)
-	if err != nil {
-		return "", err
-	}
-
-	return token, err
+	return
 }

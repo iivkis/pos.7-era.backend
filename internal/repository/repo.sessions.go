@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -42,17 +43,23 @@ func newSessionsRepo(db *gorm.DB) *sessions {
 }
 
 func (r *sessions) Open(m *SessionModel) (err error) {
-	var n int64
-	err = r.db.Model(&SessionModel{}).Where("employee_id = ? AND date_close IS NULL", m.EmployeeID).Count(&n).Error
-	if err != nil {
-		return err
-	}
+	// var n int64
+	// err = r.db.Model(&SessionModel{}).Where("employee_id = ? AND date_close IS NULL", m.EmployeeID).Count(&n).Error
+	// if err != nil {
+	// 	return err
+	// }
 
-	if n != 0 {
-		return ErrSessionAlreadyOpen
-	}
+	// if n != 0 {
+	// 	return ErrSessionAlreadyOpen
+	// }
 
-	err = r.db.Create(m).Error
+	//если найдена запись с открытой сессией, то возвращаем ошибку о том, что одновременно можно открыть только одну сессию
+	if err = r.db.Where("employee_id = ? AND date_close IS NULL", m.EmployeeID).First(&SessionModel{}).Error; err == nil {
+		err = ErrSessionAlreadyOpen
+		return
+	} else if errors.Is(err, gorm.ErrRecordNotFound) {
+		err = r.db.Create(m).Error
+	}
 	return
 }
 

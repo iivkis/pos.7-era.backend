@@ -15,10 +15,10 @@ import (
 type HttpHandler struct {
 	engine  *gin.Engine
 	service myservice.MyService
-	authjwt authjwt.AuthJWT
+	authjwt *authjwt.AuthJWT
 }
 
-func NewHttpHandler(service myservice.MyService, authjwt authjwt.AuthJWT) HttpHandler {
+func NewHttpHandler(service myservice.MyService, authjwt *authjwt.AuthJWT) HttpHandler {
 	gin.SetMode(gin.ReleaseMode)
 
 	//create engine

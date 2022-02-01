@@ -15,26 +15,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type AuthorizationService interface {
-	SignUpOrg(c *gin.Context)
-	SignUpEmployee(c *gin.Context)
-
-	SignInOrg(c *gin.Context)
-	SignInEmployee(c *gin.Context)
-
-	SendCode(c *gin.Context)
-	ConfirmCode(c *gin.Context)
-}
-
-type authorization struct {
+type AuthorizationService struct {
 	repo      repository.Repository
 	strcode   *strcode.Strcode
 	mailagent *mailagent.MailAgent
-	authjwt   authjwt.AuthJWT
+	authjwt   *authjwt.AuthJWT
 }
 
-func newAuthorizationService(repo repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent, authjwt authjwt.AuthJWT) *authorization {
-	return &authorization{
+func newAuthorizationService(repo repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent, authjwt *authjwt.AuthJWT) *AuthorizationService {
+	return &AuthorizationService{
 		repo:      repo,
 		strcode:   strcode,
 		mailagent: mailagent,
@@ -56,7 +45,7 @@ type signUpOrgInput struct {
 //@Success 201 {object} object "Возвращаемый объект при регистрации огранизации"
 //@Failure 401 {object} serviceError
 //@Router /auth/signUp.Org [post]
-func (s *authorization) SignUpOrg(c *gin.Context) {
+func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 	//parse body
 	var input signUpOrgInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -159,7 +148,7 @@ type signUpEmployeeInput struct {
 //@Success 201 {object} object "Возвращаемый объект при регистрации сотрудника"
 //@Failure 400 {object} serviceError
 //@Router /auth/signUp.Employee [post]
-func (s *authorization) SignUpEmployee(c *gin.Context) {
+func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 	var orgID = c.MustGet("claims_org_id").(uint)
 
 	//parse JSON body
@@ -218,19 +207,15 @@ type signInOrgOutput struct {
 //@Success 200 {object} signInOrgOutput "Возвращает `jwt токен` при успешной авторизации"
 //@Failure 401 {object} serviceError
 //@Router /auth/signIn.Org [post]
-func (s *authorization) SignInOrg(c *gin.Context) {
+func (s *AuthorizationService) SignInOrg(c *gin.Context) {
 	var input signInOrgInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	token, err := s.repo.Organizations.SignIn(input.Email, input.Password)
+	org, err := s.repo.Organizations.SignIn(input.Email, input.Password)
 	if err != nil {
-		if dberr, ok := isDatabaseError(err); ok {
-			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
-			return
-		}
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusUnauthorized, errEmailNotFound())
 			return
@@ -239,8 +224,17 @@ func (s *authorization) SignInOrg(c *gin.Context) {
 			NewResponse(c, http.StatusUnauthorized, errIncorrectPassword())
 			return
 		}
+		NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(err.Error()))
+		return
+	}
 
-		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+	claims := authjwt.OrganizationClaims{
+		OrganizationID: org.ID,
+	}
+
+	token, err := s.authjwt.SignInOrganization(&claims)
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownServer(err.Error()))
 		return
 	}
 
@@ -265,7 +259,7 @@ type signInEmployeeOutput struct {
 //@Success 200 {object} signInEmployeeOutput "Возвращает `jwt токен` при успешной авторизации"
 //@Failure 401 {object} serviceError
 //@Router /auth/signIn.Employee [post]
-func (s *authorization) SignInEmployee(c *gin.Context) {
+func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 	var input signInEmployeeInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
@@ -317,7 +311,7 @@ type sendCodeInputQuery struct {
 //@param email query string false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
 //@Success 200 {object} object "возвращает пустой объект"
 //@Router /auth/sendCode [get]
-func (s *authorization) SendCode(c *gin.Context) {
+func (s *AuthorizationService) SendCode(c *gin.Context) {
 	var inputQ sendCodeInputQuery
 	if err := c.ShouldBindQuery(&inputQ); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -366,7 +360,7 @@ type confirmCodeInputQuery struct {
 //@param code query string false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
 //@Success 200 {object} object "возвращает пустой объект"
 //@Router /auth/confirmCode [get]
-func (s *authorization) ConfirmCode(c *gin.Context) {
+func (s *AuthorizationService) ConfirmCode(c *gin.Context) {
 	var inputQ confirmCodeInputQuery
 	if err := c.ShouldBindQuery(&inputQ); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))

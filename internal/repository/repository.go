@@ -1,6 +1,9 @@
 package repository
 
 import (
+	"fmt"
+
+	"github.com/iivkis/pos-ninja-backend/internal/config"
 	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -14,8 +17,8 @@ type Repository struct {
 	Category      CategoryRepository
 }
 
-func NewRepository(authjwt authjwt.AuthJWT) Repository {
-	url := "f0602327_posninja:AjKZwdoH@tcp(141.8.193.236)/f0602327_posninja?parseTime=True"
+func NewRepository(authjwt *authjwt.AuthJWT) Repository {
+	url := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=True", config.Env.DatabaseLogin, config.Env.DatabasePassword, config.Env.DatabaseIP, config.Env.DatabaseLogin)
 	db, err := gorm.Open(mysql.Open(url), &gorm.Config{})
 	if err != nil {
 		panic(err)

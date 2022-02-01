@@ -37,7 +37,7 @@ type employees struct {
 	// authjwt authjwt.AuthJWT
 }
 
-func newEmployeesRepo(db *gorm.DB, authjwt authjwt.AuthJWT) *employees {
+func newEmployeesRepo(db *gorm.DB, authjwt *authjwt.AuthJWT) *employees {
 	return &employees{
 		db: db,
 		// authjwt: authjwt,
@@ -60,33 +60,16 @@ func (r *employees) Create(m *EmployeeModel) error {
 }
 
 func (r *employees) SignIn(id uint, password string, orgID uint) (empl EmployeeModel, err error) {
-	if err = r.db.Where("id = ? AND org_id = ? AND password = ?", id, orgID, password).First(&empl).Error; err != nil {
-		return empl, err
-	}
-
-	// claims := authjwt.EmployeeClaims{
-	// 	OrganizationID: orgID,
-	// 	EmployeeID:     empl.ID,
-	// 	Role:           empl.Role,
-	// }
-
-	// token, err = r.authjwt.SignInEmployee(&claims)
-	// if err != nil {
-	// 	return "", err
-	// }
-
-	return empl, err
+	err = r.db.Where("id = ? AND org_id = ? AND password = ?", id, orgID, password).First(&empl).Error
+	return
 }
 
-func (r *employees) SetPassword(id uint, pwd string) error {
-	if err := r.checkPasswordCorret(pwd); err != nil {
-		return ErrOnlyNumInPassword
+func (r *employees) SetPassword(id uint, pwd string) (err error) {
+	if err = r.checkPasswordCorret(pwd); err != nil {
+		return
 	}
-
-	if err := r.db.Model(&EmployeeModel{}).Where("id = ?", id).Update("password", pwd).Error; err != nil {
-		return err
-	}
-	return nil
+	err = r.db.Model(&EmployeeModel{}).Where("id = ?", id).Update("password", pwd).Error
+	return
 }
 
 func (r *employees) GetAll(orgID uint) ([]EmployeeModel, error) {

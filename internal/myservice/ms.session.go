@@ -10,13 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type SessionService interface {
-	OpenOrClose(c *gin.Context)
-	GetAll(c *gin.Context)
-	GetLastForOutlet(с *gin.Context)
-}
-
-type sessions struct {
+type SessionsService struct {
 	repo repository.Repository
 }
 
@@ -32,8 +26,8 @@ type sessionOutputModel struct {
 	DateClose int64 `json:"date_close"`
 }
 
-func newSessionService(repo repository.Repository) *sessions {
-	return &sessions{
+func newSessionsService(repo repository.Repository) *SessionsService {
+	return &SessionsService{
 		repo: repo,
 	}
 }
@@ -50,7 +44,7 @@ type openOrCloseSessionInput struct {
 //@param type body openOrCloseSessionInput false "Принимаемый объект"
 //@Success 201 {object} object "возвращает пустой объект"
 //@Router /sessions [post]
-func (s *sessions) OpenOrClose(c *gin.Context) {
+func (s *SessionsService) OpenOrClose(c *gin.Context) {
 	var input openOrCloseSessionInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -68,6 +62,10 @@ func (s *sessions) OpenOrClose(c *gin.Context) {
 				OrgID:           c.MustGet("claims_org_id").(uint),
 			}
 			if err := s.repo.Sessions.Open(&sess); err != nil {
+				if errors.Is(err, repository.ErrSessionAlreadyOpen) {
+					NewResponse(c, http.StatusBadRequest, errRecordAlreadyExists(err.Error()))
+					return
+				}
 				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 				return
 			}
@@ -95,7 +93,7 @@ type getAllSessionsOutput []sessionOutputModel
 //@Success 200 {object} getAllSessionsOutput "Возвращает массив сессий"
 //@Failure 500 {object} serviceError
 //@Router /sessions [get]
-func (s *sessions) GetAll(c *gin.Context) {
+func (s *SessionsService) GetAll(c *gin.Context) {
 	sessions, err := s.repo.Sessions.GetAllUnscopedByOrgID(c.MustGet("claims_org_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
@@ -130,7 +128,7 @@ func (s *sessions) GetAll(c *gin.Context) {
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /sessions/last [get]
-func (s *sessions) GetLastForOutlet(c *gin.Context) {
+func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
 	sess, err := s.repo.Sessions.GetLastForOutlet(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

@@ -7,14 +7,7 @@ import (
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
 )
 
-type CategoryService interface {
-	Create(*gin.Context)
-	GetAll(*gin.Context)
-	Delete(*gin.Context)
-	Update(*gin.Context)
-}
-
-type category struct {
+type CategoriesService struct {
 	repo repository.Repository
 }
 
@@ -23,8 +16,8 @@ type categoryOutputModel struct {
 	Name string `json:"name"`
 }
 
-func newCategoryService(repo repository.Repository) *category {
-	return &category{
+func newCategoriesService(repo repository.Repository) *CategoriesService {
+	return &CategoriesService{
 		repo: repo,
 	}
 }
@@ -38,7 +31,7 @@ type createCategoryInput struct {
 //@Accept json
 //@Success 201 {object} object "возвращает пустой объект"
 //@Router /category [post]
-func (s *category) Create(c *gin.Context) {
+func (s *CategoriesService) Create(c *gin.Context) {
 	var input createCategoryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -65,7 +58,7 @@ type getAllCategoryOutput []categoryOutputModel
 //@Success 200 {object} getAllCategoryOutput "Возвращает массив категорий"
 //@Failure 500 {object} serviceError
 //@Router /category [get]
-func (s *category) GetAll(c *gin.Context) {
+func (s *CategoriesService) GetAll(c *gin.Context) {
 	cats, err := s.repo.Category.GetAllByOutletID(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
@@ -89,7 +82,7 @@ func (s *category) GetAll(c *gin.Context) {
 //@Success 200 {object} object "возвращает пустой объект"
 //@Failure 500 {object} serviceError
 //@Router /category/:id [delete]
-func (s *category) Delete(c *gin.Context) {
+func (s *CategoriesService) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if id == "" {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("empty param `id`"))
@@ -110,7 +103,7 @@ func (s *category) Delete(c *gin.Context) {
 //@Produce json
 //@Success 201 {object} object "возвращает пустой объект"
 //@Router /category/:id [put]
-func (s *category) Update(c *gin.Context) {
+func (s *CategoriesService) Update(c *gin.Context) {
 	var input createCategoryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))

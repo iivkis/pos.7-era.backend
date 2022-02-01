@@ -9,15 +9,7 @@ import (
 
 var errInvalidToken = errors.New("invalid token")
 
-type AuthJWT interface {
-	SignInOrganization(claims *OrganizationClaims) (token string, err error)
-	SignInEmployee(claims *EmployeeClaims) (token string, err error)
-
-	ParseOrganizationToken(token string) (*OrganizationClaims, error)
-	ParseEmployeeToken(token string) (*EmployeeClaims, error)
-}
-
-type authjwt struct {
+type AuthJWT struct {
 	secretOrg      []byte
 	secretEmployee []byte
 }
@@ -37,8 +29,8 @@ type EmployeeClaims struct {
 	jwt.StandardClaims
 }
 
-func NewAuthJWT(secret []byte) *authjwt {
-	return &authjwt{
+func NewAuthJWT(secret []byte) *AuthJWT {
+	return &AuthJWT{
 		secretOrg:      secret,
 		secretEmployee: reverse(secret),
 	}
@@ -52,20 +44,20 @@ func reverse(arr []byte) (rev []byte) {
 	return
 }
 
-func (j *authjwt) SignInOrganization(claims *OrganizationClaims) (token string, err error) {
+func (j *AuthJWT) SignInOrganization(claims *OrganizationClaims) (token string, err error) {
 	claims.Issuer = "pos-ninja.ru"
 	claims.CreatedAt = time.Now().UTC().Unix()
 	return jwt.NewWithClaims(jwt.SigningMethodHS512, claims).SignedString(j.secretOrg)
 }
 
-func (j *authjwt) SignInEmployee(claims *EmployeeClaims) (token string, err error) {
+func (j *AuthJWT) SignInEmployee(claims *EmployeeClaims) (token string, err error) {
 	claims.Issuer = "pos-ninja.ru"
 	claims.CreatedAt = time.Now().UTC().Unix()
 	claims.ExpiresAt = time.Now().Unix() + 60*60*24 //токен живет 24 часа
 	return jwt.NewWithClaims(jwt.SigningMethodHS512, claims).SignedString(j.secretEmployee)
 }
 
-func (j *authjwt) ParseOrganizationToken(token string) (*OrganizationClaims, error) {
+func (j *AuthJWT) ParseOrganizationToken(token string) (*OrganizationClaims, error) {
 	t, err := jwt.ParseWithClaims(token, &OrganizationClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return j.secretOrg, nil
 	})
@@ -80,7 +72,7 @@ func (j *authjwt) ParseOrganizationToken(token string) (*OrganizationClaims, err
 	return nil, errInvalidToken
 }
 
-func (j *authjwt) ParseEmployeeToken(token string) (*EmployeeClaims, error) {
+func (j *AuthJWT) ParseEmployeeToken(token string) (*EmployeeClaims, error) {
 	t, err := jwt.ParseWithClaims(token, &EmployeeClaims{}, func(t *jwt.Token) (interface{}, error) {
 		return j.secretEmployee, nil
 	})

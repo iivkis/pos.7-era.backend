@@ -7,12 +7,7 @@ import (
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
 )
 
-type OutletsService interface {
-	Create(c *gin.Context)
-	GetAll(c *gin.Context)
-}
-
-type outlets struct {
+type OutletsService struct {
 	repo repository.Repository
 }
 
@@ -21,8 +16,8 @@ type outletOutputModel struct {
 	Name string `json:"name"`
 }
 
-func newOutletsService(repo repository.Repository) *outlets {
-	return &outlets{
+func newOutletsService(repo repository.Repository) *OutletsService {
+	return &OutletsService{
 		repo: repo,
 	}
 }
@@ -39,7 +34,7 @@ type createOutletInput struct {
 //@Success 200 {object} object "Возвращает пустой объект"
 //@Failure 500 {object} serviceError
 //@Router /outlets [post]
-func (s *outlets) Create(c *gin.Context) {
+func (s *OutletsService) Create(c *gin.Context) {
 	var input createOutletInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -67,7 +62,7 @@ type getAllOutletsOutput []outletOutputModel
 //@Success 200 {object} getAllOutletsOutput "Возвращает массив торговых точек"
 //@Failure 500 {object} serviceError
 //@Router /outlets [get]
-func (s *outlets) GetAll(c *gin.Context) {
+func (s *OutletsService) GetAll(c *gin.Context) {
 	orgID := c.MustGet("claims_org_id").(uint)
 
 	outlets, err := s.repo.Outlets.GetAll(orgID)

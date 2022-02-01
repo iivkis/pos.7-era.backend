@@ -45,17 +45,17 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 	sessionsApi := r.Group("/sessions")
 	{
-		sessionsApi.POST("/", h.authEmployee("owner", "admin", "cashier"), h.service.Session.OpenOrClose)
-		sessionsApi.GET("/", h.authEmployee("owner", "admin"), h.service.Session.GetAll)
-		sessionsApi.GET("/last", h.authEmployee("owner", "admin", "cashier"), h.service.Session.GetLastForOutlet)
+		sessionsApi.POST("/", h.authEmployee("owner", "admin", "cashier"), h.service.Sessions.OpenOrClose)
+		sessionsApi.GET("/", h.authEmployee("owner", "admin"), h.service.Sessions.GetAll)
+		sessionsApi.GET("/last", h.authEmployee("owner", "admin", "cashier"), h.service.Sessions.GetLastForOutlet)
 	}
 
 	categoryApi := r.Group("/category")
 	{
-		categoryApi.GET("/", h.authEmployee("owner", "admin", "cashier"), h.service.Category.GetAll)
-		categoryApi.POST("/", h.authEmployee("owner", "admin"), h.service.Category.Create)
-		categoryApi.PUT("/:id", h.authEmployee("owner", "admin"), h.service.Category.Update)
-		categoryApi.DELETE("/:id", h.authEmployee("owner", "admin"), h.service.Category.Delete)
+		categoryApi.GET("/", h.authEmployee("owner", "admin", "cashier"), h.service.Categories.GetAll)
+		categoryApi.POST("/", h.authEmployee("owner", "admin"), h.service.Categories.Create)
+		categoryApi.PUT("/:id", h.authEmployee("owner", "admin"), h.service.Categories.Update)
+		categoryApi.DELETE("/:id", h.authEmployee("owner", "admin"), h.service.Categories.Delete)
 	}
 }
 
