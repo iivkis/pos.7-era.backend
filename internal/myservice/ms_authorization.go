@@ -99,17 +99,13 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 	employeeModelOwner := repository.EmployeeModel{
 		Name:     "Управление организацией",
 		Password: "000000",
-		Role:     "owner",
+		Role:     repository.R_OWNER,
 		OrgID:    orgModel.ID,
 		OutletID: outletModel.ID,
 	}
 
 	if err := s.repo.Employees.Create(&employeeModelOwner); err != nil {
-		if dberr, ok := isDatabaseError(err); ok {
-			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
-			return
-		}
-		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(err.Error()))
 		return
 	}
 
@@ -117,16 +113,12 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 	employeeModelCashier := repository.EmployeeModel{
 		Name:     "Кассир (продажа товара)",
 		Password: "000000",
-		Role:     "cashier",
+		Role:     repository.R_CASHIER,
 		OrgID:    orgModel.ID,
 		OutletID: outletModel.ID,
 	}
 
 	if err := s.repo.Employees.Create(&employeeModelCashier); err != nil {
-		if dberr, ok := isDatabaseError(err); ok {
-			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
-			return
-		}
 		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
 		return
 	}
@@ -138,6 +130,7 @@ type signUpEmployeeInput struct {
 	Name     string `json:"name" binding:"required,min=2,max=200"`
 	Password string `json:"password" binding:"required,min=6,max=6"`
 	Role     string `json:"role" binding:"required,max=20"`
+	OutletID uint   `json:"outlet_id" binding:"min=1"`
 }
 
 //@Summary Регистрация сотрудника
@@ -158,7 +151,7 @@ func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 		return
 	}
 
-	if input.Role == "owner" {
+	if input.Role == repository.R_OWNER {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("you cannot create a user with the owner role"))
 		return
 	}
@@ -168,19 +161,12 @@ func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 		Name:     input.Name,
 		Password: input.Password,
 		Role:     input.Role,
+		OutletID: input.OutletID,
 		OrgID:    orgID,
 	}
 
 	if err := s.repo.Employees.Create(&model); err != nil {
-		if dberr, ok := isDatabaseError(err); ok {
-			switch dberr.Number {
-			case 1062:
-				NewResponse(c, http.StatusBadRequest, errEmailExists())
-			default:
-				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(dberr.Error()))
-			}
-			return
-		} else if errors.Is(err, repository.ErrOnlyNumInPassword) || errors.Is(err, repository.ErrUndefinedRole) {
+		if errors.Is(err, repository.ErrOnlyNumInPassword) || errors.Is(err, repository.ErrUndefinedRole) {
 			NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 			return
 		}
@@ -271,10 +257,6 @@ func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 	//return employee model if find
 	empl, err := s.repo.Employees.SignIn(input.ID, input.Password, orgID)
 	if err != nil {
-		if dberr, ok := isDatabaseError(err); ok {
-			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
-			return
-		}
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusUnauthorized, errRecordNotFound())
 			return
@@ -321,28 +303,27 @@ func (s *AuthorizationService) SendCode(c *gin.Context) {
 	switch inputQ.Type {
 	case "org":
 		{
+			//проверка на сущ. email в БД
 			if ok, err := s.repo.Organizations.EmailExists(inputQ.Email); err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+				return
 			} else if !ok {
 				NewResponse(c, http.StatusBadRequest, errEmailNotFound())
-			} else {
-				s.mailagent.SendTemplate(inputQ.Email, "confirm_code.html", mailagent.Value{
-					"code":     s.strcode.Encode(inputQ.Email),
-					"host":     config.Env.Host,
-					"port":     config.Env.Port,
-					"protocol": config.Env.Protocol,
-					"type":     "org",
-				})
-				if err != nil {
-					NewResponse(c, http.StatusInternalServerError, errUnknownServer("error on send email"))
-					return
-				}
-				NewResponse(c, http.StatusOK, nil)
+				return
 			}
-		}
-	case "employee":
-		{
 
+			//отправка письма с ссылкой для подтверждения
+			if err := s.mailagent.SendTemplate(inputQ.Email, "confirm_code.html", mailagent.Value{
+				"code":     s.strcode.Encode(inputQ.Email),
+				"host":     config.Env.Host,
+				"port":     config.Env.Port,
+				"protocol": config.Env.Protocol,
+				"type":     "org",
+			}); err != nil {
+				NewResponse(c, http.StatusInternalServerError, errUnknownServer("error on send email"))
+				return
+			}
+			NewResponse(c, http.StatusOK, nil)
 		}
 	default:
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData())

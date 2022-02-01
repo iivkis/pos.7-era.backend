@@ -2,11 +2,6 @@ package repository
 
 import "gorm.io/gorm"
 
-type OutletsRepository interface {
-	Create(m *OutletModel) error
-	GetAll(orgID uint) ([]OutletModel, error)
-}
-
 type OutletModel struct {
 	gorm.Model
 	OrgID uint
@@ -16,24 +11,24 @@ type OutletModel struct {
 	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`
 }
 
-type outlets struct {
+type OutletsRepo struct {
 	db *gorm.DB
 }
 
-func newOutletsRepo(db *gorm.DB) *outlets {
-	return &outlets{
+func newOutletsRepo(db *gorm.DB) *OutletsRepo {
+	return &OutletsRepo{
 		db: db,
 	}
 }
 
-func (r *outlets) Create(m *OutletModel) error {
+func (r *OutletsRepo) Create(m *OutletModel) error {
 	if err := r.db.Create(m).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *outlets) GetAll(orgID uint) ([]OutletModel, error) {
+func (r *OutletsRepo) GetAll(orgID uint) ([]OutletModel, error) {
 	var models []OutletModel
 	if err := r.db.Where("org_id = ?", orgID).Find(&models).Error; err != nil {
 		return models, err

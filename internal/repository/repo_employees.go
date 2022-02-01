@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
 	"gorm.io/gorm"
 )
 
@@ -25,26 +24,17 @@ type EmployeeModel struct {
 	OutletModel       OutletModel       `gorm:"foreignKey:OutletID"`
 }
 
-type EmployeesRepository interface {
-	Create(m *EmployeeModel) error
-	SignIn(id uint, password string, orgID uint) (empl EmployeeModel, err error)
-	SetPassword(id uint, pwd string) error
-	GetAll(orgID uint) ([]EmployeeModel, error)
-}
-
-type employees struct {
+type EmployeesRepo struct {
 	db *gorm.DB
-	// authjwt authjwt.AuthJWT
 }
 
-func newEmployeesRepo(db *gorm.DB, authjwt *authjwt.AuthJWT) *employees {
-	return &employees{
+func newEmployeesRepo(db *gorm.DB) *EmployeesRepo {
+	return &EmployeesRepo{
 		db: db,
-		// authjwt: authjwt,
 	}
 }
 
-func (r *employees) Create(m *EmployeeModel) error {
+func (r *EmployeesRepo) Create(m *EmployeeModel) error {
 	if !roleIsExists(m.Role) {
 		return ErrUndefinedRole
 	}
@@ -59,12 +49,12 @@ func (r *employees) Create(m *EmployeeModel) error {
 	return nil
 }
 
-func (r *employees) SignIn(id uint, password string, orgID uint) (empl EmployeeModel, err error) {
+func (r *EmployeesRepo) SignIn(id uint, password string, orgID uint) (empl EmployeeModel, err error) {
 	err = r.db.Where("id = ? AND org_id = ? AND password = ?", id, orgID, password).First(&empl).Error
 	return
 }
 
-func (r *employees) SetPassword(id uint, pwd string) (err error) {
+func (r *EmployeesRepo) SetPassword(id uint, pwd string) (err error) {
 	if err = r.checkPasswordCorret(pwd); err != nil {
 		return
 	}
@@ -72,7 +62,7 @@ func (r *employees) SetPassword(id uint, pwd string) (err error) {
 	return
 }
 
-func (r *employees) GetAll(orgID uint) ([]EmployeeModel, error) {
+func (r *EmployeesRepo) GetAll(orgID uint) ([]EmployeeModel, error) {
 	var models []EmployeeModel
 	if err := r.db.Where("org_id = ?", orgID).Find(&models).Error; err != nil {
 		return models, err
@@ -80,7 +70,7 @@ func (r *employees) GetAll(orgID uint) ([]EmployeeModel, error) {
 	return models, nil
 }
 
-func (r *employees) checkPasswordCorret(pwd string) error {
+func (r *EmployeesRepo) checkPasswordCorret(pwd string) error {
 	n, err := strconv.Atoi(pwd)
 	if err != nil || n < 0 {
 		return ErrOnlyNumInPassword

@@ -4,22 +4,12 @@ import (
 	"errors"
 	"time"
 
-	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
-type OrganizationsRepository interface {
-	Create(m *OrganizationModel) error
-	SignIn(email string, password string) (org OrganizationModel, err error)
-	ConfirmEmailTrue(email string) error
-	EmailExists(email string) (ok bool, err error)
-	SetPassword(id uint, pwd string) error
-}
-
-type organizations struct {
-	db      *gorm.DB
-	authjwt *authjwt.AuthJWT
+type OrganizationsRepo struct {
+	db *gorm.DB
 }
 
 type OrganizationModel struct {
@@ -33,14 +23,13 @@ type OrganizationModel struct {
 	EmailConfirmed bool
 }
 
-func newOrganizationsRepo(db *gorm.DB, authjwt *authjwt.AuthJWT) *organizations {
-	return &organizations{
-		db:      db,
-		authjwt: authjwt,
+func newOrganizationsRepo(db *gorm.DB) *OrganizationsRepo {
+	return &OrganizationsRepo{
+		db: db,
 	}
 }
 
-func (r *organizations) Create(m *OrganizationModel) error {
+func (r *OrganizationsRepo) Create(m *OrganizationModel) error {
 	if err := r.db.Create(m).Error; err != nil {
 		return err
 	}
@@ -52,7 +41,7 @@ func (r *organizations) Create(m *OrganizationModel) error {
 	return nil
 }
 
-func (r *organizations) SetPassword(id uint, pwd string) error {
+func (r *OrganizationsRepo) SetPassword(id uint, pwd string) error {
 	cpwd, err := bcrypt.GenerateFromPassword([]byte(pwd), 7)
 	if err != nil {
 		return err
@@ -64,11 +53,11 @@ func (r *organizations) SetPassword(id uint, pwd string) error {
 	return nil
 }
 
-func (r *organizations) ConfirmEmailTrue(email string) error {
+func (r *OrganizationsRepo) ConfirmEmailTrue(email string) error {
 	return r.db.Model(&OrganizationModel{}).Where("email = ?", email).Update("email_confirmed", true).Error
 }
 
-func (r *organizations) EmailExists(email string) (bool, error) {
+func (r *OrganizationsRepo) EmailExists(email string) (bool, error) {
 	err := r.db.Where("email = ?", email).First(&OrganizationModel{}).Error
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -79,7 +68,7 @@ func (r *organizations) EmailExists(email string) (bool, error) {
 	return true, nil
 }
 
-func (r *organizations) SignIn(email string, password string) (org OrganizationModel, err error) {
+func (r *OrganizationsRepo) SignIn(email string, password string) (org OrganizationModel, err error) {
 	if err = r.db.Where("email = ?", email).First(&org).Error; err != nil {
 		return OrganizationModel{}, err
 	}

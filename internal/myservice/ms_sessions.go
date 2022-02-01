@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
-	"gorm.io/gorm"
 )
 
 type SessionsService struct {
@@ -104,7 +103,7 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 	for i, sess := range sessions {
 		var dateClose int64
 		if !sess.DateClose.Time.IsZero() {
-			dateClose = sess.DateClose.Time.Unix()
+			dateClose = sess.DateClose.Time.UnixMilli()
 		}
 
 		output[i] = sessionOutputModel{
@@ -113,7 +112,7 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 			OutletID:   sess.OutletID,
 			CashOpen:   sess.CashSessionOpen,
 			CashClose:  sess.CashSessionClose,
-			DateOpen:   sess.DateOpen.Unix(),
+			DateOpen:   sess.DateOpen.UnixMilli(),
 			DateClose:  dateClose,
 		}
 	}
@@ -131,10 +130,6 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
 	sess, err := s.repo.Sessions.GetLastForOutlet(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			NewResponse(c, http.StatusBadRequest, errRecordNotFound())
-			return
-		}
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -145,8 +140,9 @@ func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
 		OutletID:   sess.OutletID,
 		CashOpen:   sess.CashSessionOpen,
 		CashClose:  sess.CashSessionClose,
-		DateOpen:   sess.DateOpen.Unix(),
-		DateClose:  sess.DateClose.Time.Unix(),
+		DateOpen:   sess.DateOpen.UnixMilli(),
+		DateClose:  sess.DateClose.Time.UnixMilli(),
 	}
+
 	NewResponse(c, http.StatusOK, output)
 }

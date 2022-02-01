@@ -10,11 +10,11 @@ import (
 )
 
 type Repository struct {
-	Organizations OrganizationsRepository
-	Employees     EmployeesRepository
-	Outlets       OutletsRepository
-	Sessions      SessionsRepository
-	Category      CategoryRepository
+	Organizations *OrganizationsRepo
+	Employees     *EmployeesRepo
+	Outlets       *OutletsRepo
+	Sessions      *SessionsRepo
+	Category      *CategoriesRepo
 }
 
 func NewRepository(authjwt *authjwt.AuthJWT) Repository {
@@ -36,10 +36,10 @@ func NewRepository(authjwt *authjwt.AuthJWT) Repository {
 	)
 
 	return Repository{
-		Organizations: newOrganizationsRepo(db, authjwt),
-		Employees:     newEmployeesRepo(db, authjwt),
+		Organizations: newOrganizationsRepo(db),
+		Employees:     newEmployeesRepo(db),
 		Outlets:       newOutletsRepo(db),
 		Sessions:      newSessionsRepo(db),
-		Category:      newCategoryRepo(db),
+		Category:      newCategoriesRepo(db),
 	}
 }

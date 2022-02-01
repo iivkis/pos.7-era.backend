@@ -1,12 +1,19 @@
 package repository
 
-var rolesList = []string{"owner", "admin", "cashier"}
+//roles
+const (
+	R_OWNER   = "owner"
+	R_ADMIN   = "admin"
+	R_CASHIER = "cashier"
+)
 
-func roleIsExists(role string) bool {
-	for _, r := range rolesList {
-		if r == role {
-			return true
-		}
-	}
-	return false
+var rolesList = map[string]int{
+	R_OWNER:   1,
+	R_ADMIN:   2,
+	R_CASHIER: 3,
+}
+
+func roleIsExists(role string) (ok bool) {
+	_, ok = rolesList[role]
+	return
 }
