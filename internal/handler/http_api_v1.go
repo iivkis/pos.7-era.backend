@@ -51,12 +51,12 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	}
 
 	//api для категорий
-	categoryApi := r.Group("/categories")
+	categoriesApi := r.Group("/categories")
 	{
-		categoryApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Categories.GetAll)
-		categoryApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Create)
-		categoryApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Update)
-		categoryApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Delete)
+		categoriesApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Categories.GetAll)
+		categoriesApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Create)
+		categoriesApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Update)
+		categoriesApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Delete)
 	}
 }
 
@@ -81,6 +81,17 @@ func (h *HttpHandler) withAuthOrg() gin.HandlerFunc {
 }
 
 func (h *HttpHandler) withAuthEmployee(allowedRoles ...string) gin.HandlerFunc {
+	//создаем карту с ролями для быстрого поиска
+	var allowed = map[string]uint8{}
+	for i, roles := range allowedRoles {
+		allowed[roles] = uint8(i)
+	}
+
+	var isAllowed = func(role string) bool {
+		_, ok := allowed[role]
+		return ok
+	}
+
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 		if token == "" {
@@ -98,20 +109,10 @@ func (h *HttpHandler) withAuthEmployee(allowedRoles ...string) gin.HandlerFunc {
 		}
 
 		//проверка прав доступа
-		{
-			var allowed bool
-			for _, role := range allowedRoles {
-				if role == claims.Role {
-					allowed = true
-					break
-				}
-			}
-
-			if !allowed {
-				myservice.NewResponse(c, http.StatusUnauthorized, myservice.ErrNoAccessRights())
-				c.Abort()
-				return
-			}
+		if !isAllowed(claims.Role) {
+			myservice.NewResponse(c, http.StatusUnauthorized, myservice.ErrNoAccessRights())
+			c.Abort()
+			return
 		}
 
 		c.Set("claims_org_id", claims.OrganizationID)

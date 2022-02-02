@@ -8,9 +8,9 @@ const (
 )
 
 var rolesList = map[string]int{
-	R_OWNER:   1,
-	R_ADMIN:   2,
-	R_CASHIER: 3,
+	R_OWNER:   0,
+	R_ADMIN:   1,
+	R_CASHIER: 2,
 }
 
 func roleIsExists(role string) (ok bool) {
