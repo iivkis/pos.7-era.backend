@@ -24,7 +24,7 @@ func newCategoriesService(repo *repository.Repository) *CategoriesService {
 }
 
 type CategoryCreateInput struct {
-	Name string `json:"name" binding:"max=150"`
+	Name string `json:"name" binding:"required,max=150"`
 }
 
 //@Summary Добавить новую категорию к точке

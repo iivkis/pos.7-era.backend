@@ -54,6 +54,10 @@ func (s *ProductsService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.Products.Create(&newProduct); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
+			return
+		}
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

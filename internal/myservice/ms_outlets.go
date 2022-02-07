@@ -23,7 +23,7 @@ func newOutletsService(repo *repository.Repository) *OutletsService {
 }
 
 type createOutletInput struct {
-	Name string `json:"name" binding:"min=3,max=100"`
+	Name string `json:"name" binding:"required,max=100"`
 }
 
 //@Summary Добавить торговую точку

@@ -9,7 +9,6 @@ type Response struct {
 
 func NewResponse(c *gin.Context, code int, data interface{}) {
 	var obj Response
-
 	if data == nil {
 		data = struct{}{}
 	}
