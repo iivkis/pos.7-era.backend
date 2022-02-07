@@ -30,10 +30,11 @@ func newProductsService(repo *repository.Repository) *ProductsService {
 }
 
 type ProductCreateInput struct {
-	Name   string  `json:"name" binding:"min=1"`
-	Amount int     `json:"amount"`
-	Price  float64 `json:"price"`
-	Photo  string  `json:"photo"`
+	Name       string  `json:"name" binding:"min=1"`
+	Amount     int     `json:"amount"`
+	Price      float64 `json:"price"`
+	Photo      string  `json:"photo"`
+	CategoryID uint    `json:"category_id" binding:"min=1"`
 }
 
 func (s *ProductsService) Create(c *gin.Context) {
@@ -43,10 +44,11 @@ func (s *ProductsService) Create(c *gin.Context) {
 	}
 
 	newProduct := repository.ProductModel{
-		Name:   input.Name,
-		Amount: input.Amount,
-		Price:  input.Price,
-		Photo:  input.Photo,
+		Name:       input.Name,
+		Amount:     input.Amount,
+		Price:      input.Price,
+		Photo:      input.Photo,
+		CategoryID: input.CategoryID,
 	}
 
 	if err := s.repo.Products.Create(&newProduct); err != nil {
