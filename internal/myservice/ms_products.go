@@ -49,6 +49,8 @@ func (s *ProductsService) Create(c *gin.Context) {
 		Price:      input.Price,
 		Photo:      input.Photo,
 		CategoryID: input.CategoryID,
+		OutletID:   c.MustGet("claims_outlet_id").(uint),
+		OrgID:      c.MustGet("claims_org_id").(uint),
 	}
 
 	if err := s.repo.Products.Create(&newProduct); err != nil {
@@ -60,8 +62,8 @@ func (s *ProductsService) Create(c *gin.Context) {
 
 type ProductGetAllForOutletOutput []ProductOutputModel
 
-func (s *ProductsService) GetAllForOutlet(c *gin.Context) {
-	products, err := s.repo.Products.GetAllForOutlet(c.MustGet("claims_outlet_id"))
+func (s *ProductsService) GetAll(c *gin.Context) {
+	products, err := s.repo.Products.GetAllForOrg(c.MustGet("claims_org_id"))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
@@ -82,7 +84,7 @@ func (s *ProductsService) GetAllForOutlet(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-func (s *ProductsService) GetOne(c *gin.Context) {
+func (s *ProductsService) GetOneForOutlet(c *gin.Context) {
 	product, err := s.repo.Products.GetOneForOutlet(c.Param("id"), c.MustGet("claims_outlet_id"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

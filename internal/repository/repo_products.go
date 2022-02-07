@@ -12,9 +12,11 @@ type ProductModel struct {
 
 	CategoryID uint
 	OutletID   uint
+	OrgID      uint
 
-	CategoryModel CategoryModel `gorm:"foreignKey:CategoryID"`
-	OutletModel   OutletModel   `gorm:"foreignKey:OutletID"`
+	CategoryModel     CategoryModel     `gorm:"foreignKey:CategoryID"`
+	OutletModel       OutletModel       `gorm:"foreignKey:OutletID"`
+	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`
 }
 
 type ProductsRepo struct {
@@ -30,6 +32,11 @@ func newProductsRepo(db *gorm.DB) *ProductsRepo {
 //Возвращает все продукты текущей точки
 func (r *ProductsRepo) GetAllForOutlet(outletID interface{}) (products []ProductModel, err error) {
 	err = r.db.Where("outlet_id = ?", outletID).Find(&products).Error
+	return
+}
+
+func (r *ProductsRepo) GetAllForOrg(orgID interface{}) (products []ProductModel, err error) {
+	err = r.db.Where("org_id = ?", orgID).Find(&products).Error
 	return
 }
 
