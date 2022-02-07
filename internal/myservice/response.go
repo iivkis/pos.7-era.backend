@@ -2,13 +2,13 @@ package myservice
 
 import "github.com/gin-gonic/gin"
 
-type response struct {
+type Response struct {
 	Status bool        `json:"status"`
 	Data   interface{} `json:"data"`
 }
 
 func NewResponse(c *gin.Context, code int, data interface{}) {
-	var obj response
+	var obj Response
 
 	if data == nil {
 		data = struct{}{}

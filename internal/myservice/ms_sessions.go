@@ -10,7 +10,7 @@ import (
 )
 
 type SessionsService struct {
-	repo repository.Repository
+	repo *repository.Repository
 }
 
 type sessionOutputModel struct {
@@ -25,7 +25,7 @@ type sessionOutputModel struct {
 	DateClose int64 `json:"date_close"`
 }
 
-func newSessionsService(repo repository.Repository) *SessionsService {
+func newSessionsService(repo *repository.Repository) *SessionsService {
 	return &SessionsService{
 		repo: repo,
 	}
@@ -128,7 +128,7 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 //@Failure 500 {object} serviceError
 //@Router /sessions/last [get]
 func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
-	sess, err := s.repo.Sessions.GetLastForOutlet(c.MustGet("claims_outlet_id").(uint))
+	sess, err := s.repo.Sessions.GetLastClosedForOutlet(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

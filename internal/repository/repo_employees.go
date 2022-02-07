@@ -17,6 +17,7 @@ type EmployeeModel struct {
 	OrgID    uint
 	OutletID uint
 	Role     string
+	Online   bool
 
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 
@@ -54,20 +55,19 @@ func (r *EmployeesRepo) SignIn(id uint, password string, orgID uint) (empl Emplo
 	return
 }
 
-func (r *EmployeesRepo) SetPassword(id uint, pwd string) (err error) {
+func (r *EmployeesRepo) SetPassword(employeeID interface{}, orgID interface{}, pwd string) (err error) {
 	if err = r.checkPasswordCorret(pwd); err != nil {
 		return
 	}
-	err = r.db.Model(&EmployeeModel{}).Where("id = ?", id).Update("password", pwd).Error
+	err = r.db.Model(&EmployeeModel{}).Where("id = ? AND org_id = ?", employeeID, orgID).Update("password", pwd).Error
 	return
 }
 
-func (r *EmployeesRepo) GetAll(orgID uint) ([]EmployeeModel, error) {
-	var models []EmployeeModel
-	if err := r.db.Where("org_id = ?", orgID).Find(&models).Error; err != nil {
-		return models, err
+func (r *EmployeesRepo) GetAll(orgID uint) (employees []EmployeeModel, err error) {
+	if err = r.db.Where("org_id = ?", orgID).Find(&employees).Error; err != nil {
+		return employees, err
 	}
-	return models, nil
+	return employees, nil
 }
 
 func (r *EmployeesRepo) checkPasswordCorret(pwd string) error {

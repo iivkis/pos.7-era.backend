@@ -2,7 +2,9 @@ package handler
 
 import (
 	"net/http"
+	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos-ninja-backend/docs"
 	"github.com/iivkis/pos-ninja-backend/internal/myservice"
@@ -23,7 +25,18 @@ func NewHttpHandler(service myservice.MyService, authjwt *authjwt.AuthJWT) HttpH
 
 	//create engine
 	engine := gin.Default()
+
+	//set up recovery and logger
 	engine.Use(gin.Recovery(), gin.Logger())
+
+	//use CORS
+	engine.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowCredentials: true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		MaxAge:           12 * time.Hour,
+	}))
 
 	return HttpHandler{
 		engine:  engine,

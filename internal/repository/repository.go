@@ -14,17 +14,19 @@ type Repository struct {
 	Employees     *EmployeesRepo
 	Outlets       *OutletsRepo
 	Sessions      *SessionsRepo
-	Category      *CategoriesRepo
+	Categories    *CategoriesRepo
+	Products      *ProductsRepo
 }
 
-func NewRepository(authjwt *authjwt.AuthJWT) Repository {
+func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 	url := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=True", config.Env.DatabaseLogin, config.Env.DatabasePassword, config.Env.DatabaseIP, config.Env.DatabaseLogin)
+
 	db, err := gorm.Open(mysql.Open(url), &gorm.Config{})
 	if err != nil {
 		panic(err)
 	}
 
-	db.AutoMigrate(
+	if err := db.AutoMigrate(
 		&OrganizationModel{},
 		&EmployeeModel{},
 		&OutletModel{},
@@ -33,13 +35,16 @@ func NewRepository(authjwt *authjwt.AuthJWT) Repository {
 		&OrderInfoModel{},
 		&OrderListModel{},
 		&CategoryModel{},
-	)
+	); err != nil {
+		panic(err)
+	}
 
-	return Repository{
+	return &Repository{
 		Organizations: newOrganizationsRepo(db),
 		Employees:     newEmployeesRepo(db),
 		Outlets:       newOutletsRepo(db),
 		Sessions:      newSessionsRepo(db),
-		Category:      newCategoriesRepo(db),
+		Categories:    newCategoriesRepo(db),
+		Products:      newProductsRepo(db),
 	}
 }

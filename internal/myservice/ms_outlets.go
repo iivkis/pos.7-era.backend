@@ -8,7 +8,7 @@ import (
 )
 
 type OutletsService struct {
-	repo repository.Repository
+	repo *repository.Repository
 }
 
 type outletOutputModel struct {
@@ -16,7 +16,7 @@ type outletOutputModel struct {
 	Name string `json:"name"`
 }
 
-func newOutletsService(repo repository.Repository) *OutletsService {
+func newOutletsService(repo *repository.Repository) *OutletsService {
 	return &OutletsService{
 		repo: repo,
 	}

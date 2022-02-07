@@ -6,8 +6,11 @@ type CategoryModel struct {
 	gorm.Model
 	Name string
 
-	OutletID    uint
-	OutletModel OutletModel `gorm:"foreignKey:OutletID"`
+	OutletID uint
+	OrgID    uint
+
+	OutletModel       OutletModel       `gorm:"foreignKey:OutletID"`
+	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`
 }
 
 type CategoriesRepo struct {
@@ -30,13 +33,18 @@ func (r *CategoriesRepo) GetAllByOutletID(outletID uint) (cats []CategoryModel, 
 	return
 }
 
+func (r *CategoriesRepo) GetAllByOrgID(orgID uint) (cats []CategoryModel, err error) {
+	err = r.db.Where("org_id = ?", orgID).Find(&cats).Error
+	return
+}
+
 func (r *CategoriesRepo) DeleteByID(outletID uint, paramCategoryID string) (err error) {
 	err = r.db.Where("id = ? AND outlet_id = ?", paramCategoryID, outletID).
 		Delete(&CategoryModel{}).Error
 	return
 }
 
-func (r *CategoriesRepo) Update(paramCategoryID string, m *CategoryModel) (err error) {
-	err = r.db.Where("id = ?", paramCategoryID).Updates(m).Error
+func (r *CategoriesRepo) Update(categoryID interface{}, outletID interface{}, m *CategoryModel) (err error) {
+	err = r.db.Where("id = ? AND outlet_id = ?", categoryID, outletID).Updates(m).Error
 	return err
 }

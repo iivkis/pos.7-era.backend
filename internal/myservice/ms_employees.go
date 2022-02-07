@@ -8,16 +8,18 @@ import (
 )
 
 type EmployeesService struct {
-	repo repository.Repository
+	repo *repository.Repository
 }
 
 type employeeOutputModel struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
-	Role string `json:"role"`
+	ID       uint   `json:"id"`
+	Name     string `json:"name"`
+	Role     string `json:"role"`
+	Online   bool   `json:"online"`
+	OutletID uint   `json:"outlet_id"`
 }
 
-func newEmployeesService(repo repository.Repository) *EmployeesService {
+func newEmployeesService(repo *repository.Repository) *EmployeesService {
 	return &EmployeesService{
 		repo: repo,
 	}
@@ -44,10 +46,16 @@ func (s *EmployeesService) GetAll(c *gin.Context) {
 
 	output := make(getAllEmployeesOutput, len(employees))
 	for i, employee := range employees {
+		if err != nil {
+			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			return
+		}
 		output[i] = employeeOutputModel{
-			ID:   employee.ID,
-			Name: employee.Name,
-			Role: employee.Role,
+			ID:       employee.ID,
+			Name:     employee.Name,
+			Role:     employee.Role,
+			Online:   employee.Online,
+			OutletID: employee.OutletID,
 		}
 	}
 

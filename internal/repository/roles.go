@@ -7,13 +7,19 @@ const (
 	R_CASHIER = "cashier"
 )
 
-var rolesList = map[string]int{
-	R_OWNER:   0,
-	R_ADMIN:   1,
-	R_CASHIER: 2,
+var (
+	rolesList = []string{R_OWNER, R_ADMIN, R_CASHIER}
+	rolesMap  map[string]int
+)
+
+func init() {
+	rolesMap = make(map[string]int)
+	for i, role := range rolesList {
+		rolesMap[role] = i
+	}
 }
 
 func roleIsExists(role string) (ok bool) {
-	_, ok = rolesList[role]
+	_, ok = rolesMap[role]
 	return
 }

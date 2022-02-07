@@ -58,6 +58,16 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		categoriesApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Update)
 		categoriesApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Delete)
 	}
+
+	//api для продуктов
+	productsApi := r.Group("/products")
+	{
+		productsApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Products.GetAllForOutlet)
+		productsApi.GET("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Products.GetOne)
+		productsApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Create)
+		productsApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Update)
+		productsApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Delete)
+	}
 }
 
 func (h *HttpHandler) withAuthOrg() gin.HandlerFunc {

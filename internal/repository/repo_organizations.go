@@ -41,13 +41,13 @@ func (r *OrganizationsRepo) Create(m *OrganizationModel) error {
 	return nil
 }
 
-func (r *OrganizationsRepo) SetPassword(id uint, pwd string) error {
+func (r *OrganizationsRepo) SetPassword(orgID interface{}, pwd string) error {
 	cpwd, err := bcrypt.GenerateFromPassword([]byte(pwd), 7)
 	if err != nil {
 		return err
 	}
 
-	if err := r.db.Model(&OrganizationModel{}).Where("id = ?", id).Update("password", string(cpwd)).Error; err != nil {
+	if err := r.db.Model(&OrganizationModel{}).Where("id = ?", orgID).Update("password", string(cpwd)).Error; err != nil {
 		return err
 	}
 	return nil
