@@ -68,6 +68,14 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		productsApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Update)
 		productsApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Delete)
 	}
+
+	ingredientsApi := r.Group("/ingredients")
+	{
+		ingredientsApi.POST("/")
+		ingredientsApi.GET("/")
+		ingredientsApi.PUT("/")
+		ingredientsApi.DELETE("/")
+	}
 }
 
 func (h *HttpHandler) withAuthOrg() gin.HandlerFunc {
