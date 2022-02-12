@@ -71,10 +71,10 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 	ingredientsApi := r.Group("/ingredients")
 	{
-		ingredientsApi.POST("/")
-		ingredientsApi.GET("/")
-		ingredientsApi.PUT("/")
-		ingredientsApi.DELETE("/")
+		ingredientsApi.POST("/", h.service.Ingredients.Create)
+		ingredientsApi.GET("/", h.service.Ingredients.GetAllForOrg)
+		ingredientsApi.PUT("/:id", h.service.Ingredients.UpdateModel)
+		ingredientsApi.DELETE("/:id", h.service.Ingredients.Delete)
 	}
 }
 
