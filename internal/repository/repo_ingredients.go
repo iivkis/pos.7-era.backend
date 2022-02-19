@@ -36,10 +36,15 @@ func (r *IngredientsRepo) GetAllByOrgID(orgID interface{}) (ingredients []Ingred
 	return
 }
 
-func (r *IngredientsRepo) Update(ingredient *IngredientModel, ingredientID interface{}, outletID interface{}) error {
+func (r *IngredientsRepo) Updates(ingredient *IngredientModel, ingredientID interface{}, outletID interface{}) error {
 	return r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).Updates(ingredient).Error
 }
 
 func (r *IngredientsRepo) Delete(ingredientID interface{}, outletID interface{}) error {
 	return r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).Delete(&IngredientModel{}).Error
+}
+
+func (r *IngredientsRepo) ExistsInOutlet(ingredientID interface{}, outletID interface{}) bool {
+	err := r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).First(&ProductModel{}).Error
+	return err == nil
 }

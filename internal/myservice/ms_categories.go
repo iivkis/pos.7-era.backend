@@ -31,7 +31,7 @@ type CategoryCreateInput struct {
 //@param type body CategoryCreateInput false "Принимаемый объект"
 //@Accept json
 //@Success 201 {object} object "возвращает пустой объект"
-//@Router /category [post]
+//@Router /categories [post]
 func (s *CategoriesService) Create(c *gin.Context) {
 	var input CategoryCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -59,7 +59,7 @@ type CategoryGetAllOutput []CategoryOutputModel
 //@Produce json
 //@Success 200 {object} CategoryGetAllOutput "Возвращает массив категорий"
 //@Failure 500 {object} serviceError
-//@Router /category [get]
+//@Router /categories [get]
 func (s *CategoriesService) GetAll(c *gin.Context) {
 	cats, err := s.repo.Categories.GetAllByOrgID(c.MustGet("claims_org_id").(uint))
 	if err != nil {
@@ -84,7 +84,7 @@ func (s *CategoriesService) GetAll(c *gin.Context) {
 //@Produce json
 //@Success 200 {object} object "возвращает пустой объект"
 //@Failure 500 {object} serviceError
-//@Router /category/:id [delete]
+//@Router /categories/:id [delete]
 func (s *CategoriesService) Delete(c *gin.Context) {
 	id := c.Param("id")
 	if err := s.repo.Categories.DeleteByID(c.MustGet("claims_outlet_id").(uint), id); err != nil {
@@ -100,11 +100,11 @@ type UpdateCategoryInput struct {
 }
 
 //@Summary Обновить поля категории
-//@param type body createCategoryInput false "Принимаемый объект"
+//@param type body UpdateCategoryInput false "Принимаемый объект"
 //@Accept json
 //@Produce json
 //@Success 201 {object} object "возвращает пустой объект"
-//@Router /category/:id [put]
+//@Router /categories/:id [put]
 func (s *CategoriesService) Update(c *gin.Context) {
 	var input UpdateCategoryInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -116,7 +116,7 @@ func (s *CategoriesService) Update(c *gin.Context) {
 		Name: input.Name,
 	}
 
-	if err := s.repo.Categories.Update(c.Param("id"), c.MustGet("claims_outlet_id"), &cat); err != nil {
+	if err := s.repo.Categories.Updates(c.Param("id"), c.MustGet("claims_outlet_id"), &cat); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

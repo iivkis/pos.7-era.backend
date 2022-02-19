@@ -1,13 +1,262 @@
 basePath: /api/v1
 definitions:
-  myservice.categoryOutputModel:
+  myservice.CategoryCreateInput:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
+  myservice.CategoryOutputModel:
     properties:
       id:
         type: integer
       name:
         type: string
+      outlet_id:
+        type: integer
     type: object
-  myservice.createCategoryInput:
+  myservice.IngredientCreateInput:
+    properties:
+      count:
+        type: number
+      measure_unit:
+        type: integer
+      name:
+        type: string
+      purchase_price:
+        type: number
+    required:
+    - name
+    type: object
+  myservice.IngredientOutputModel:
+    properties:
+      count:
+        type: number
+      id:
+        type: integer
+      measure_unit:
+        type: integer
+      name:
+        type: string
+      outlet_id:
+        type: integer
+    type: object
+  myservice.IngredientUpdateInput:
+    properties:
+      count:
+        type: number
+      measure_unit:
+        type: integer
+      name:
+        type: string
+      purchase_price:
+        type: number
+    type: object
+  myservice.OrderInfoOutputModel:
+    properties:
+      date:
+        type: integer
+      employee_name:
+        type: string
+      id:
+        type: integer
+      outlet_id:
+        type: integer
+      pay_type:
+        type: integer
+      session_id:
+        type: integer
+    type: object
+  myservice.OrderListCreateInput:
+    properties:
+      count:
+        type: integer
+      order_info_id:
+        type: integer
+      product_id:
+        type: integer
+      product_name:
+        type: string
+      product_price:
+        type: number
+    type: object
+  myservice.OrderListOutputModel:
+    properties:
+      count:
+        type: integer
+      id:
+        type: integer
+      order_info_id:
+        type: integer
+      outlet_id:
+        type: integer
+      product_id:
+        type: integer
+      product_name:
+        type: string
+      product_price:
+        type: number
+    type: object
+  myservice.OrdersInfoCreateInput:
+    properties:
+      date:
+        type: integer
+      employee_name:
+        type: string
+      pay_type:
+        type: integer
+    required:
+    - employee_name
+    type: object
+  myservice.OrdersInfoCreateOutput:
+    properties:
+      id:
+        type: integer
+    type: object
+  myservice.PWICreateInput:
+    properties:
+      count_take_for_sell:
+        type: number
+      ingredient_id:
+        type: integer
+      product_id:
+        type: integer
+    type: object
+  myservice.PWIOutputModel:
+    properties:
+      count_take_for_sell:
+        type: number
+      id:
+        type: integer
+      ingredient_id:
+        type: integer
+      outlet_id:
+        type: integer
+      product_id:
+        type: integer
+    type: object
+  myservice.PWIUpdateFields:
+    properties:
+      count_take_for_sell:
+        type: number
+    type: object
+  myservice.ProductCreateInput:
+    properties:
+      amount:
+        type: integer
+      category_id:
+        type: integer
+      name:
+        type: string
+      photo:
+        type: string
+      price:
+        type: number
+    type: object
+  myservice.ProductOutputModel:
+    properties:
+      amount:
+        type: integer
+      category_id:
+        type: integer
+      id:
+        type: integer
+      name:
+        type: string
+      outlet_id:
+        type: integer
+      photo:
+        type: string
+      price:
+        type: number
+    type: object
+  myservice.ProductUpdateInput:
+    properties:
+      amount:
+        type: integer
+      name:
+        type: string
+      photo:
+        type: string
+      price:
+        type: number
+    type: object
+  myservice.SessionOutputModel:
+    properties:
+      cash_close:
+        type: number
+      cash_open:
+        type: number
+      date_close:
+        type: integer
+      date_open:
+        type: integer
+      employee_id:
+        type: integer
+      id:
+        type: integer
+      outlet_id:
+        type: integer
+    type: object
+  myservice.SignInEmployeeInput:
+    properties:
+      id:
+        type: integer
+      password:
+        type: string
+    required:
+    - password
+    type: object
+  myservice.SignInEmployeeOutput:
+    properties:
+      token:
+        type: string
+    type: object
+  myservice.SignInOrgInput:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  myservice.SignInOrgOutput:
+    properties:
+      token:
+        type: string
+    type: object
+  myservice.SignUpEmployeeInput:
+    properties:
+      name:
+        type: string
+      outlet_id:
+        type: integer
+      password:
+        type: string
+      role:
+        type: string
+    required:
+    - name
+    - password
+    - role
+    type: object
+  myservice.SignUpOrgInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  myservice.UpdateCategoryInput:
     properties:
       name:
         type: string
@@ -16,6 +265,8 @@ definitions:
     properties:
       name:
         type: string
+    required:
+    - name
     type: object
   myservice.employeeOutputModel:
     properties:
@@ -23,6 +274,10 @@ definitions:
         type: integer
       name:
         type: string
+      online:
+        type: boolean
+      outlet_id:
+        type: integer
       role:
         type: string
     type: object
@@ -51,78 +306,6 @@ definitions:
         type: integer
       error:
         type: string
-    type: object
-  myservice.sessionOutputModel:
-    properties:
-      cash_close:
-        type: number
-      cash_open:
-        type: number
-      date_close:
-        type: integer
-      date_open:
-        type: integer
-      employee_id:
-        type: integer
-      id:
-        type: integer
-      outlet_id:
-        type: integer
-    type: object
-  myservice.signInEmployeeInput:
-    properties:
-      id:
-        type: integer
-      password:
-        type: string
-    required:
-    - password
-    type: object
-  myservice.signInEmployeeOutput:
-    properties:
-      token:
-        type: string
-    type: object
-  myservice.signInOrgInput:
-    properties:
-      email:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - password
-    type: object
-  myservice.signInOrgOutput:
-    properties:
-      token:
-        type: string
-    type: object
-  myservice.signUpEmployeeInput:
-    properties:
-      name:
-        type: string
-      password:
-        type: string
-      role:
-        type: string
-    required:
-    - name
-    - password
-    - role
-    type: object
-  myservice.signUpOrgInput:
-    properties:
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-    required:
-    - email
-    - name
-    - password
     type: object
 info:
   contact:
@@ -176,14 +359,14 @@ paths:
         name: json
         required: true
         schema:
-          $ref: '#/definitions/myservice.signInEmployeeInput'
+          $ref: '#/definitions/myservice.SignInEmployeeInput'
       produces:
       - application/json
       responses:
         "200":
           description: Возвращает `jwt токен` при успешной авторизации
           schema:
-            $ref: '#/definitions/myservice.signInEmployeeOutput'
+            $ref: '#/definitions/myservice.SignInEmployeeOutput'
         "401":
           description: Unauthorized
           schema:
@@ -200,14 +383,14 @@ paths:
         name: json
         required: true
         schema:
-          $ref: '#/definitions/myservice.signInOrgInput'
+          $ref: '#/definitions/myservice.SignInOrgInput'
       produces:
       - application/json
       responses:
         "200":
           description: Возвращает `jwt токен` при успешной авторизации
           schema:
-            $ref: '#/definitions/myservice.signInOrgOutput'
+            $ref: '#/definitions/myservice.SignInOrgOutput'
         "401":
           description: Unauthorized
           schema:
@@ -225,7 +408,7 @@ paths:
         name: json
         required: true
         schema:
-          $ref: '#/definitions/myservice.signUpEmployeeInput'
+          $ref: '#/definitions/myservice.SignUpEmployeeInput'
       produces:
       - application/json
       responses:
@@ -249,7 +432,7 @@ paths:
         name: json
         required: true
         schema:
-          $ref: '#/definitions/myservice.signUpOrgInput'
+          $ref: '#/definitions/myservice.SignUpOrgInput'
       produces:
       - application/json
       responses:
@@ -262,7 +445,7 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Регистрация организации
-  /category:
+  /categories:
     get:
       description: Метод позволяет получить список категорий точки
       produces:
@@ -272,7 +455,7 @@ paths:
           description: Возвращает массив категорий
           schema:
             items:
-              $ref: '#/definitions/myservice.categoryOutputModel'
+              $ref: '#/definitions/myservice.CategoryOutputModel'
             type: array
         "500":
           description: Internal Server Error
@@ -287,14 +470,14 @@ paths:
         in: body
         name: type
         schema:
-          $ref: '#/definitions/myservice.createCategoryInput'
+          $ref: '#/definitions/myservice.CategoryCreateInput'
       responses:
         "201":
           description: возвращает пустой объект
           schema:
             type: object
       summary: Добавить новую категорию к точке
-  /category/:id:
+  /categories/:id:
     delete:
       description: Метод позволяет удалить категоирю из точки
       produces:
@@ -317,7 +500,7 @@ paths:
         in: body
         name: type
         schema:
-          $ref: '#/definitions/myservice.createCategoryInput'
+          $ref: '#/definitions/myservice.UpdateCategoryInput'
       produces:
       - application/json
       responses:
@@ -343,6 +526,96 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Список всех сотрудников
+  /ingredients:
+    get:
+      responses:
+        "200":
+          description: возвращает все ингредиенты текущей организации
+          schema:
+            items:
+              $ref: '#/definitions/myservice.IngredientOutputModel'
+            type: array
+      summary: Получить все ингредиенты огранизации
+    post:
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.IngredientCreateInput'
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+      summary: Добавить новый ингредиент в точку
+    put:
+      parameters:
+      - description: Обновляемые поля
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.IngredientUpdateInput'
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+      summary: Обновить ингредиент
+  /orderInfo:
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: список order info
+          schema:
+            items:
+              $ref: '#/definitions/myservice.OrderInfoOutputModel'
+            type: array
+      summary: Получить список order info организации
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.OrdersInfoCreateInput'
+      responses:
+        "201":
+          description: возвращает id созданного order info
+          schema:
+            $ref: '#/definitions/myservice.OrdersInfoCreateOutput'
+      summary: Добавить order info
+  /orderList:
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: список order list
+          schema:
+            items:
+              $ref: '#/definitions/myservice.OrderListOutputModel'
+            type: array
+      summary: Получить список order list организации
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.OrderListCreateInput'
+      responses:
+        "201":
+          description: возвращает пустой объект
+          schema:
+            type: object
+      summary: Добавить order list
   /outlets:
     get:
       description: Метод позволяет получить список всех торговых точек
@@ -383,6 +656,121 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Добавить торговую точку
+  /products:
+    get:
+      consumes:
+      - application/json
+      responses:
+        "201":
+          description: возвращает список пордуктов организации
+          schema:
+            items:
+              $ref: '#/definitions/myservice.ProductOutputModel'
+            type: array
+      summary: Список продуктов организации
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.ProductCreateInput'
+      responses:
+        "201":
+          description: возвращает пустой объект
+          schema:
+            type: object
+      summary: Добавить новый продукт в точку
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Обновляемые поля
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.ProductUpdateInput'
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+      summary: Обновить продукт
+  /products/:id:
+    delete:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+      summary: Удалить продукт
+    get:
+      consumes:
+      - application/json
+      responses:
+        "201":
+          description: возвращает список пордуктов организации
+          schema:
+            items:
+              $ref: '#/definitions/myservice.ProductOutputModel'
+            type: array
+      summary: Продукт организации
+  /pwis:
+    get:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: Список связей продуктов и ингредиентов
+          schema:
+            items:
+              $ref: '#/definitions/myservice.PWIOutputModel'
+            type: array
+      summary: Получить список связей продуктов и ингредиентов
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.PWICreateInput'
+      responses:
+        "201":
+          description: возвращает пустой объект
+          schema:
+            type: object
+      summary: Добавить связь продукта и ингридиента в точку
+  /pwis/:id:
+    delete:
+      consumes:
+      - application/json
+      responses:
+        "200":
+          description: пустой объект
+          schema:
+            type: object
+      summary: Удалить связь
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Обновляемые поля
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.PWIUpdateFields'
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+      summary: Обновить связь
   /sessions:
     get:
       description: Метод позволяет получить список всех сессий
@@ -393,7 +781,7 @@ paths:
           description: Возвращает массив сессий
           schema:
             items:
-              $ref: '#/definitions/myservice.sessionOutputModel'
+              $ref: '#/definitions/myservice.SessionOutputModel'
             type: array
         "500":
           description: Internal Server Error
@@ -426,7 +814,7 @@ paths:
         "200":
           description: Возвращает последнюю закрытую сессию точки продаж
           schema:
-            $ref: '#/definitions/myservice.sessionOutputModel'
+            $ref: '#/definitions/myservice.SessionOutputModel'
         "400":
           description: Bad Request
           schema:

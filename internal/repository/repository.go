@@ -10,13 +10,16 @@ import (
 )
 
 type Repository struct {
-	Organizations *OrganizationsRepo
-	Employees     *EmployeesRepo
-	Outlets       *OutletsRepo
-	Sessions      *SessionsRepo
-	Categories    *CategoriesRepo
-	Products      *ProductsRepo
-	Ingredients   *IngredientsRepo
+	Organizations           *OrganizationsRepo
+	Employees               *EmployeesRepo
+	Outlets                 *OutletsRepo
+	Sessions                *SessionsRepo
+	Categories              *CategoriesRepo
+	Products                *ProductsRepo
+	Ingredients             *IngredientsRepo
+	OrdersList              *OrderListRepo
+	OrdersInfo              *OrderInfoRepo
+	ProductsWithIngredients *ProductsWithIngredientsRepo
 }
 
 func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
@@ -37,17 +40,21 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 		&OrderListModel{},
 		&CategoryModel{},
 		&IngredientModel{},
+		&ProductWithIngredientModel{},
 	); err != nil {
 		panic(err)
 	}
 
 	return &Repository{
-		Organizations: newOrganizationsRepo(db),
-		Employees:     newEmployeesRepo(db),
-		Outlets:       newOutletsRepo(db),
-		Sessions:      newSessionsRepo(db),
-		Categories:    newCategoriesRepo(db),
-		Products:      newProductsRepo(db),
-		Ingredients:   newIngredientsRepo(db),
+		Organizations:           newOrganizationsRepo(db),
+		Employees:               newEmployeesRepo(db),
+		Outlets:                 newOutletsRepo(db),
+		Sessions:                newSessionsRepo(db),
+		Categories:              newCategoriesRepo(db),
+		Products:                newProductsRepo(db),
+		Ingredients:             newIngredientsRepo(db),
+		OrdersList:              newOrderListRepo(db),
+		OrdersInfo:              newOrderInfoRepo(db),
+		ProductsWithIngredients: newProductsWithIngredientsRepo(db),
 	}
 }

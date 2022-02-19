@@ -32,6 +32,10 @@ type IngredientCreateInput struct {
 	MeasureUnit   int     `json:"measure_unit" binding:"min=1,max=3"`
 }
 
+//@Summary Добавить новый ингредиент в точку
+//@param type body IngredientCreateInput false "Принимаемый объект"
+//@Success 200 {object} object "возвращает пустой объект"
+//@Router /ingredients [post]
 func (s *IngredientsService) Create(c *gin.Context) {
 	var input IngredientCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -57,6 +61,9 @@ func (s *IngredientsService) Create(c *gin.Context) {
 
 type IngredientGetAllOutput []IngredientOutputModel
 
+//@Summary Получить все ингредиенты огранизации
+//@Success 200 {object} IngredientGetAllOutput "возвращает все ингредиенты текущей организации"
+//@Router /ingredients [get]
 func (s *IngredientsService) GetAllForOrg(c *gin.Context) {
 	ingredients, err := s.repo.Ingredients.GetAllByOrgID(c.MustGet("claims_org_id").(uint))
 	if err != nil {
@@ -84,7 +91,11 @@ type IngredientUpdateInput struct {
 	MeasureUnit   int     `json:"measure_unit"`
 }
 
-func (s *IngredientsService) UpdateModel(c *gin.Context) {
+//@Summary Обновить ингредиент
+//@param type body IngredientUpdateInput false "Обновляемые поля"
+//@Success 200 {object} object "возвращает пустой объект"
+//@Router /ingredients [put]
+func (s *IngredientsService) UpdateFields(c *gin.Context) {
 	var input IngredientUpdateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -98,7 +109,7 @@ func (s *IngredientsService) UpdateModel(c *gin.Context) {
 		MeasureUnit:   input.MeasureUnit,
 	}
 
-	if err := s.repo.Ingredients.Update(&ingredient, c.Param("id"), c.MustGet("claims_outlet_id").(uint)); err != nil {
+	if err := s.repo.Ingredients.Updates(&ingredient, c.Param("id"), c.MustGet("claims_outlet_id").(uint)); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

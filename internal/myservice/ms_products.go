@@ -37,6 +37,11 @@ type ProductCreateInput struct {
 	CategoryID uint    `json:"category_id" binding:"min=1"`
 }
 
+//@Summary Добавить новый продукт в точку
+//@param type body ProductCreateInput false "Принимаемый объект"
+//@Accept json
+//@Success 201 {object} object "возвращает пустой объект"
+//@Router /products [post]
 func (s *ProductsService) Create(c *gin.Context) {
 	var input ProductCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -66,8 +71,12 @@ func (s *ProductsService) Create(c *gin.Context) {
 
 type ProductGetAllForOutletOutput []ProductOutputModel
 
-func (s *ProductsService) GetAll(c *gin.Context) {
-	products, err := s.repo.Products.GetAllForOrg(c.MustGet("claims_org_id"))
+//@Summary Список продуктов организации
+//@Accept json
+//@Success 201 {object} ProductGetAllForOutletOutput "возвращает список пордуктов организации"
+//@Router /products [get]
+func (s *ProductsService) GetAllForOrg(c *gin.Context) {
+	products, err := s.repo.Products.FindAllByOrgID(c.MustGet("claims_org_id"))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
@@ -88,8 +97,12 @@ func (s *ProductsService) GetAll(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
+//@Summary Продукт организации
+//@Accept json
+//@Success 201 {object} ProductGetAllForOutletOutput "возвращает список пордуктов организации"
+//@Router /products/:id [get]
 func (s *ProductsService) GetOneForOutlet(c *gin.Context) {
-	product, err := s.repo.Products.GetOneForOutlet(c.Param("id"), c.MustGet("claims_outlet_id"))
+	product, err := s.repo.Products.FindOneByOutletID(c.Param("id"), c.MustGet("claims_outlet_id"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusBadRequest, errRecordNotFound())
@@ -118,7 +131,12 @@ type ProductUpdateInput struct {
 	Photo  string  `json:"photo"`
 }
 
-func (s *ProductsService) Update(c *gin.Context) {
+//@Summary Обновить продукт
+//@param type body ProductUpdateInput false "Обновляемые поля"
+//@Accept json
+//@Success 200 {object} object "возвращает пустой объект"
+//@Router /products [put]
+func (s *ProductsService) UpdateFields(c *gin.Context) {
 	var input ProductUpdateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -132,7 +150,7 @@ func (s *ProductsService) Update(c *gin.Context) {
 		Photo:  input.Photo,
 	}
 
-	if err := s.repo.Products.Update(c.Param("id"), c.MustGet("claims_outlet_id"), &product); err != nil {
+	if err := s.repo.Products.Updates(c.Param("id"), c.MustGet("claims_outlet_id"), &product); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -140,6 +158,10 @@ func (s *ProductsService) Update(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
+//@Summary Удалить продукт
+//@Accept json
+//@Success 200 {object} object "возвращает пустой объект"
+//@Router /products/:id [delete]
 func (s *ProductsService) Delete(c *gin.Context) {
 	if err := s.repo.Products.Delete(c.Param("id"), c.MustGet("claims_outlet_id")); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))

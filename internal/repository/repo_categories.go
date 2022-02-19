@@ -44,7 +44,7 @@ func (r *CategoriesRepo) DeleteByID(outletID uint, paramCategoryID string) (err 
 	return
 }
 
-func (r *CategoriesRepo) Update(categoryID interface{}, outletID interface{}, m *CategoryModel) (err error) {
+func (r *CategoriesRepo) Updates(categoryID interface{}, outletID interface{}, m *CategoryModel) (err error) {
 	err = r.db.Where("id = ? AND outlet_id = ?", categoryID, outletID).Updates(m).Error
 	return err
 }

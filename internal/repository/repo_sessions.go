@@ -39,12 +39,6 @@ func newSessionsRepo(db *gorm.DB) *SessionsRepo {
 //если найдена запись с открытой сессией, то возвращаем ошибку о том, что одновременно можно открыть только одну сессию
 //иначе создаем новую сессию
 func (r *SessionsRepo) Open(m *SessionModel) error {
-	// if err = r.db.Where("employee_id = ? AND date_close IS NULL", m.EmployeeID).First(&SessionModel{}).Error; err == nil {
-	// 	err = ErrSessionAlreadyOpen
-	// 	return
-	// } else if errors.Is(err, gorm.ErrRecordNotFound) {
-	// 	err = r.db.Create(m).Error
-	// }
 	ok, err := r.HasOpenSession(m.EmployeeID)
 	if err != nil {
 		return err

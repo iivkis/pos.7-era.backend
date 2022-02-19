@@ -80,7 +80,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/myservice.signInEmployeeInput"
+                            "$ref": "#/definitions/myservice.SignInEmployeeInput"
                         }
                     }
                 ],
@@ -88,7 +88,7 @@
                     "200": {
                         "description": "Возвращает `jwt токен` при успешной авторизации",
                         "schema": {
-                            "$ref": "#/definitions/myservice.signInEmployeeOutput"
+                            "$ref": "#/definitions/myservice.SignInEmployeeOutput"
                         }
                     },
                     "401": {
@@ -117,7 +117,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/myservice.signInOrgInput"
+                            "$ref": "#/definitions/myservice.SignInOrgInput"
                         }
                     }
                 ],
@@ -125,7 +125,7 @@
                     "200": {
                         "description": "Возвращает `jwt токен` при успешной авторизации",
                         "schema": {
-                            "$ref": "#/definitions/myservice.signInOrgOutput"
+                            "$ref": "#/definitions/myservice.SignInOrgOutput"
                         }
                     },
                     "401": {
@@ -154,7 +154,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/myservice.signUpEmployeeInput"
+                            "$ref": "#/definitions/myservice.SignUpEmployeeInput"
                         }
                     }
                 ],
@@ -191,7 +191,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/myservice.signUpOrgInput"
+                            "$ref": "#/definitions/myservice.SignUpOrgInput"
                         }
                     }
                 ],
@@ -211,7 +211,7 @@
                 }
             }
         },
-        "/category": {
+        "/categories": {
             "get": {
                 "description": "Метод позволяет получить список категорий точки",
                 "produces": [
@@ -224,7 +224,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/myservice.categoryOutputModel"
+                                "$ref": "#/definitions/myservice.CategoryOutputModel"
                             }
                         }
                     },
@@ -247,7 +247,7 @@
                         "name": "type",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/myservice.createCategoryInput"
+                            "$ref": "#/definitions/myservice.CategoryCreateInput"
                         }
                     }
                 ],
@@ -261,7 +261,7 @@
                 }
             }
         },
-        "/category/:id": {
+        "/categories/:id": {
             "put": {
                 "consumes": [
                     "application/json"
@@ -276,7 +276,7 @@
                         "name": "type",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/myservice.createCategoryInput"
+                            "$ref": "#/definitions/myservice.UpdateCategoryInput"
                         }
                     }
                 ],
@@ -332,6 +332,150 @@
                         "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/ingredients": {
+            "get": {
+                "summary": "Получить все ингредиенты огранизации",
+                "responses": {
+                    "200": {
+                        "description": "возвращает все ингредиенты текущей организации",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.IngredientOutputModel"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "summary": "Обновить ингредиент",
+                "parameters": [
+                    {
+                        "description": "Обновляемые поля",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.IngredientUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "summary": "Добавить новый ингредиент в точку",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.IngredientCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/orderInfo": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Получить список order info организации",
+                "responses": {
+                    "200": {
+                        "description": "список order info",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.OrderInfoOutputModel"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Добавить order info",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.OrdersInfoCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает id созданного order info",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.OrdersInfoCreateOutput"
+                        }
+                    }
+                }
+            }
+        },
+        "/orderList": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Получить список order list организации",
+                "responses": {
+                    "200": {
+                        "description": "список order list",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.OrderListOutputModel"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Добавить order list",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.OrderListCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
                         }
                     }
                 }
@@ -398,6 +542,189 @@
                 }
             }
         },
+        "/products": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Список продуктов организации",
+                "responses": {
+                    "201": {
+                        "description": "возвращает список пордуктов организации",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.ProductOutputModel"
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Обновить продукт",
+                "parameters": [
+                    {
+                        "description": "Обновляемые поля",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.ProductUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Добавить новый продукт в точку",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.ProductCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/products/:id": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Продукт организации",
+                "responses": {
+                    "201": {
+                        "description": "возвращает список пордуктов организации",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.ProductOutputModel"
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Удалить продукт",
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/pwis": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Получить список связей продуктов и ингредиентов",
+                "responses": {
+                    "200": {
+                        "description": "Список связей продуктов и ингредиентов",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.PWIOutputModel"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Добавить связь продукта и ингридиента в точку",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.PWICreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
+        "/pwis/:id": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Обновить связь",
+                "parameters": [
+                    {
+                        "description": "Обновляемые поля",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.PWIUpdateFields"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Удалить связь",
+                "responses": {
+                    "200": {
+                        "description": "пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    }
+                }
+            }
+        },
         "/sessions": {
             "get": {
                 "description": "Метод позволяет получить список всех сессий",
@@ -411,7 +738,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/myservice.sessionOutputModel"
+                                "$ref": "#/definitions/myservice.SessionOutputModel"
                             }
                         }
                     },
@@ -457,7 +784,7 @@
                     "200": {
                         "description": "Возвращает последнюю закрытую сессию точки продаж",
                         "schema": {
-                            "$ref": "#/definitions/myservice.sessionOutputModel"
+                            "$ref": "#/definitions/myservice.SessionOutputModel"
                         }
                     },
                     "400": {
@@ -477,7 +804,18 @@
         }
     },
     "definitions": {
-        "myservice.categoryOutputModel": {
+        "myservice.CategoryCreateInput": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.CategoryOutputModel": {
             "type": "object",
             "properties": {
                 "id": {
@@ -485,10 +823,381 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "outlet_id": {
+                    "type": "integer"
                 }
             }
         },
-        "myservice.createCategoryInput": {
+        "myservice.IngredientCreateInput": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "measure_unit": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "purchase_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.IngredientOutputModel": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "measure_unit": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "outlet_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.IngredientUpdateInput": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "measure_unit": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "purchase_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.OrderInfoOutputModel": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "type": "integer"
+                },
+                "employee_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "outlet_id": {
+                    "type": "integer"
+                },
+                "pay_type": {
+                    "type": "integer"
+                },
+                "session_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.OrderListCreateInput": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "order_info_id": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "product_name": {
+                    "type": "string"
+                },
+                "product_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.OrderListOutputModel": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "order_info_id": {
+                    "type": "integer"
+                },
+                "outlet_id": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "integer"
+                },
+                "product_name": {
+                    "type": "string"
+                },
+                "product_price": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.OrdersInfoCreateInput": {
+            "type": "object",
+            "required": [
+                "employee_name"
+            ],
+            "properties": {
+                "date": {
+                    "type": "integer"
+                },
+                "employee_name": {
+                    "type": "string"
+                },
+                "pay_type": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.OrdersInfoCreateOutput": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.PWICreateInput": {
+            "type": "object",
+            "properties": {
+                "count_take_for_sell": {
+                    "type": "number"
+                },
+                "ingredient_id": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.PWIOutputModel": {
+            "type": "object",
+            "properties": {
+                "count_take_for_sell": {
+                    "type": "number"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "ingredient_id": {
+                    "type": "integer"
+                },
+                "outlet_id": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.PWIUpdateFields": {
+            "type": "object",
+            "properties": {
+                "count_take_for_sell": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.ProductCreateInput": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.ProductOutputModel": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "category_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "outlet_id": {
+                    "type": "integer"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.ProductUpdateInput": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "photo": {
+                    "type": "string"
+                },
+                "price": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.SessionOutputModel": {
+            "type": "object",
+            "properties": {
+                "cash_close": {
+                    "type": "number"
+                },
+                "cash_open": {
+                    "type": "number"
+                },
+                "date_close": {
+                    "type": "integer"
+                },
+                "date_open": {
+                    "type": "integer"
+                },
+                "employee_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "outlet_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.SignInEmployeeInput": {
+            "type": "object",
+            "required": [
+                "password"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.SignInEmployeeOutput": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.SignInOrgInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.SignInOrgOutput": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.SignUpEmployeeInput": {
+            "type": "object",
+            "required": [
+                "name",
+                "password",
+                "role"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "outlet_id": {
+                    "type": "integer"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.SignUpOrgInput": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.UpdateCategoryInput": {
             "type": "object",
             "properties": {
                 "name": {
@@ -498,6 +1207,9 @@
         },
         "myservice.createOutletInput": {
             "type": "object",
+            "required": [
+                "name"
+            ],
             "properties": {
                 "name": {
                     "type": "string"
@@ -512,6 +1224,12 @@
                 },
                 "name": {
                     "type": "string"
+                },
+                "online": {
+                    "type": "boolean"
+                },
+                "outlet_id": {
+                    "type": "integer"
                 },
                 "role": {
                     "type": "string"
@@ -554,115 +1272,6 @@
                     "type": "integer"
                 },
                 "error": {
-                    "type": "string"
-                }
-            }
-        },
-        "myservice.sessionOutputModel": {
-            "type": "object",
-            "properties": {
-                "cash_close": {
-                    "type": "number"
-                },
-                "cash_open": {
-                    "type": "number"
-                },
-                "date_close": {
-                    "type": "integer"
-                },
-                "date_open": {
-                    "type": "integer"
-                },
-                "employee_id": {
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "outlet_id": {
-                    "type": "integer"
-                }
-            }
-        },
-        "myservice.signInEmployeeInput": {
-            "type": "object",
-            "required": [
-                "password"
-            ],
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "myservice.signInEmployeeOutput": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "myservice.signInOrgInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "myservice.signInOrgOutput": {
-            "type": "object",
-            "properties": {
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "myservice.signUpEmployeeInput": {
-            "type": "object",
-            "required": [
-                "name",
-                "password",
-                "role"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                },
-                "role": {
-                    "type": "string"
-                }
-            }
-        },
-        "myservice.signUpOrgInput": {
-            "type": "object",
-            "required": [
-                "email",
-                "name",
-                "password"
-            ],
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
                     "type": "string"
                 }
             }

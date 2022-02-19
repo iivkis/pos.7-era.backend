@@ -62,20 +62,44 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	//api для продуктов
 	productsApi := r.Group("/products")
 	{
-		productsApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Products.GetAll)
+		productsApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Products.GetAllForOrg)
 		productsApi.GET("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Products.GetOneForOutlet)
 		productsApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Create)
-		productsApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Update)
+		productsApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.UpdateFields)
 		productsApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Delete)
 	}
 
 	ingredientsApi := r.Group("/ingredients")
 	{
-		ingredientsApi.POST("/", h.service.Ingredients.Create)
-		ingredientsApi.GET("/", h.service.Ingredients.GetAllForOrg)
-		ingredientsApi.PUT("/:id", h.service.Ingredients.UpdateModel)
-		ingredientsApi.DELETE("/:id", h.service.Ingredients.Delete)
+		ingredientsApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Ingredients.Create)
+		ingredientsApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Ingredients.GetAllForOrg)
+		ingredientsApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Ingredients.UpdateFields)
+		ingredientsApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Ingredients.Delete)
 	}
+
+	//products with ingredients
+	pwisApi := r.Group("/pwis")
+	{
+		pwisApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.ProductsWithIngredients.GetAllForOrg)
+		pwisApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.ProductsWithIngredients.Create)
+		pwisApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.ProductsWithIngredients.UpdateFields)
+		pwisApi.POST("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.ProductsWithIngredients.Delete)
+	}
+
+	//order info
+	orderInfoApi := r.Group("/orderInfo")
+	{
+		orderInfoApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersInfo.GetAllForOrg)
+		orderInfoApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersInfo.Create)
+	}
+
+	//order list
+	orderListApi := r.Group("/orderList")
+	{
+		orderListApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersList.GetAllForOrg)
+		orderListApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersList.Create)
+	}
+
 }
 
 func (h *HttpHandler) withAuthOrg() gin.HandlerFunc {

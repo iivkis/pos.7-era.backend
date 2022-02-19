@@ -188,7 +188,7 @@ type SignInOrgOutput struct {
 
 //@Summary Вход для организации
 //@Description Метод позволяет войти в аккаунт организации.
-//@Param json body signInOrgInput true "Объект для входа в огранизацию."
+//@Param json body SignInOrgInput true "Объект для входа в огранизацию."
 //@Accept json
 //@Produce json
 //@Success 200 {object} SignInOrgOutput "Возвращает `jwt токен` при успешной авторизации"

@@ -13,7 +13,7 @@ type SessionsService struct {
 	repo *repository.Repository
 }
 
-type sessionOutputModel struct {
+type SessionOutputModel struct {
 	ID         uint `json:"id"`
 	EmployeeID uint `json:"employee_id"`
 	OutletID   uint `json:"outlet_id"`
@@ -84,7 +84,7 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 	}
 }
 
-type getAllSessionsOutput []sessionOutputModel
+type getAllSessionsOutput []SessionOutputModel
 
 //@Summary Список всех сессий
 //@Description Метод позволяет получить список всех сессий
@@ -106,7 +106,7 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 			dateClose = sess.DateClose.Time.UnixMilli()
 		}
 
-		output[i] = sessionOutputModel{
+		output[i] = SessionOutputModel{
 			ID:         sess.ID,
 			EmployeeID: sess.EmployeeID,
 			OutletID:   sess.OutletID,
@@ -123,7 +123,7 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 //@Summary Последняя закрытая сессия торговой точки (к которой привязан jwt токен)
 //@Description Метод позволяет получить последнюю сессию торговой точки, к которой привязан jwt токен
 //@Produce json
-//@Success 200 {object} sessionOutputModel "Возвращает последнюю закрытую сессию точки продаж"
+//@Success 200 {object} SessionOutputModel "Возвращает последнюю закрытую сессию точки продаж"
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /sessions/last [get]
@@ -134,7 +134,7 @@ func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
 		return
 	}
 
-	output := sessionOutputModel{
+	output := SessionOutputModel{
 		ID:         sess.ID,
 		EmployeeID: sess.EmployeeID,
 		OutletID:   sess.OutletID,
