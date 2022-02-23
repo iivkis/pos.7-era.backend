@@ -79,15 +79,17 @@ func (r *SessionsRepo) GetLastClosedForOutlet(outletID uint) (model SessionModel
 }
 
 //закрывает сессию сотрудника
-func (r *SessionsRepo) CloseByEmployeeID(employeeID uint, dateClose time.Time, cashClose float64) (err error) {
+func (r *SessionsRepo) CloseByEmployeeID(employeeID uint, dateClose time.Time, cashClose float64) (id uint, err error) {
+	var sess SessionModel
 	if err = r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).
+		First(&sess).
 		Update("cash_session_close", cashClose).
 		Update("date_close", dateClose.String()).Error; err != nil {
-		return
+		return sess.ID, err
 	}
 
 	err = r.db.Model(&EmployeeModel{}).Where("id = ?", employeeID).Update("online", false).Error
-	return
+	return sess.ID, err
 }
 
 func (r *SessionsRepo) HasOpenSession(employeeID interface{}) (ok bool, err error) {

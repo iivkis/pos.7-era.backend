@@ -31,20 +31,24 @@ func newSessionsService(repo *repository.Repository) *SessionsService {
 	}
 }
 
-type openOrCloseSessionInput struct {
+type SessionsOpenOrCloseInput struct {
 	Action string  `json:"action" binding:"required"` // "open" or "close"
 	Date   int64   `json:"date"`
 	Cash   float64 `json:"cash"`
 }
 
+type SessionOpenOrCloseOutput struct {
+	ID uint `json:"id"`
+}
+
 //@Summary Открыть или закрыть сессию
 //@Description Открывает сессию с id указанным в jwt токен.
 //@Description - Поле `action` принимает два параметра `open` (для открытия сессии) и `close` (для закрытия сессии)
-//@param type body openOrCloseSessionInput false "Принимаемый объект"
+//@param type body SessionsOpenOrCloseInput false "Принимаемый объект"
 //@Success 201 {object} object "возвращает пустой объект"
 //@Router /sessions [post]
 func (s *SessionsService) OpenOrClose(c *gin.Context) {
-	var input openOrCloseSessionInput
+	var input SessionsOpenOrCloseInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
@@ -68,15 +72,16 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 				return
 			}
-			NewResponse(c, http.StatusOK, nil)
+			NewResponse(c, http.StatusOK, SessionOpenOrCloseOutput{ID: sess.ID})
 		}
 	case "close":
 		{
-			if err := s.repo.Sessions.CloseByEmployeeID(c.MustGet("claims_employee_id").(uint), time.UnixMilli(input.Date), input.Cash); err != nil {
+			id, err := s.repo.Sessions.CloseByEmployeeID(c.MustGet("claims_employee_id").(uint), time.UnixMilli(input.Date), input.Cash)
+			if err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 				return
 			}
-			NewResponse(c, http.StatusOK, nil)
+			NewResponse(c, http.StatusOK, SessionOpenOrCloseOutput{ID: id})
 		}
 	default:
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("action can be only `open` or `close` value"))
