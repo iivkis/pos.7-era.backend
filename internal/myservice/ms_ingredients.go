@@ -8,11 +8,12 @@ import (
 )
 
 type IngredientOutputModel struct {
-	ID          uint    `json:"id"`
-	Name        string  `json:"name"`
-	Count       float64 `json:"count"`
-	MeasureUnit int     `json:"measure_unit"`
-	OutletID    uint    `json:"outlet_id"`
+	ID            uint    `json:"id"`
+	Name          string  `json:"name"`
+	Count         float64 `json:"count"`
+	MeasureUnit   int     `json:"measure_unit"`
+	PurchasePrice float64 `json:"purchase_price"`
+	OutletID      uint    `json:"outlet_id"`
 }
 
 type IngredientsService struct {
@@ -74,11 +75,12 @@ func (s *IngredientsService) GetAllForOrg(c *gin.Context) {
 	var output IngredientGetAllOutput = make(IngredientGetAllOutput, len(ingredients))
 	for i, ingredient := range ingredients {
 		output[i] = IngredientOutputModel{
-			ID:          ingredient.ID,
-			Name:        ingredient.Name,
-			Count:       ingredient.Count,
-			MeasureUnit: ingredient.MeasureUnit,
-			OutletID:    ingredient.OutletID,
+			ID:            ingredient.ID,
+			Name:          ingredient.Name,
+			Count:         ingredient.Count,
+			MeasureUnit:   ingredient.MeasureUnit,
+			PurchasePrice: ingredient.PurchasePrice,
+			OutletID:      ingredient.OutletID,
 		}
 	}
 	NewResponse(c, http.StatusOK, output)

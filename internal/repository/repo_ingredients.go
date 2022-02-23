@@ -32,7 +32,7 @@ func (r *IngredientsRepo) Create(ingredient *IngredientModel) error {
 }
 
 func (r *IngredientsRepo) GetAllByOrgID(orgID interface{}) (ingredients []IngredientModel, err error) {
-	err = r.db.Where("org_id").Find(&ingredients).Error
+	err = r.db.Where("org_id = ?", orgID).Find(&ingredients).Error
 	return
 }
 
