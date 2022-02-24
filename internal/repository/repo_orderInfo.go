@@ -37,7 +37,7 @@ func (r *OrderInfoRepo) Updates(m *OrderInfoModel, orderInfoID interface{}, outl
 }
 
 func (r *OrderInfoRepo) FindAllForOrg(orgID interface{}) (m []OrderInfoModel, err error) {
-	err = r.db.Where("org_id = ?", orgID).Find(&m).Error
+	err = r.db.Unscoped().Where("org_id = ?", orgID).Find(&m).Error
 	return
 }
 

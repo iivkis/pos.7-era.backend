@@ -69,14 +69,42 @@ func (s *ProductsService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, nil)
 }
 
-type ProductGetAllForOutletOutput []ProductOutputModel
+type ProductGetAllForOrgOutput []ProductOutputModel
 
 //@Summary Список продуктов организации
 //@Accept json
-//@Success 201 {object} ProductGetAllForOutletOutput "возвращает список пордуктов организации"
+//@Success 201 {object} ProductGetAllForOrgOutput "возвращает список пордуктов организации"
 //@Router /products [get]
 func (s *ProductsService) GetAllForOrg(c *gin.Context) {
 	products, err := s.repo.Products.FindAllByOrgID(c.MustGet("claims_org_id"))
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	output := make(ProductGetAllForOrgOutput, len(products))
+	for i, product := range products {
+		output[i] = ProductOutputModel{
+			ID:         product.ID,
+			Name:       product.Name,
+			Amount:     product.Amount,
+			Price:      product.Price,
+			Photo:      product.Photo,
+			CategoryID: product.CategoryID,
+			OutletID:   product.OutletID,
+		}
+	}
+	NewResponse(c, http.StatusOK, output)
+}
+
+type ProductGetAllForOutletOutput []ProductOutputModel
+
+//@Summary Список продуктов точки
+//@Accept json
+//@Success 201 {object} ProductGetAllForOutletOutput "возвращает список пордуктов точки"
+//@Router /products.Outlet [get]
+func (s *ProductsService) GetAllForOutlet(c *gin.Context) {
+	products, err := s.repo.Products.FindAllByOutletID(c.MustGet("claims_outlet_id"))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

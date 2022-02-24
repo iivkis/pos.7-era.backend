@@ -15,6 +15,7 @@ type OrderInfoOutputModel struct {
 	Date         int64  `json:"date"`
 	EmployeeName string `json:"employee_name"`
 	SessionID    uint   `json:"session_id"`
+	IsDelete     bool   `json:"is_delete"`
 	OutletID     uint   `json:"outlet_id"`
 }
 
@@ -29,7 +30,7 @@ func newOrdersInfoService(repo *repository.Repository) *OrdersInfoService {
 }
 
 type OrdersInfoCreateInput struct {
-	PayType      int    `json:"pay_type" binding:"min=1,max=3"`
+	PayType      int    `json:"pay_type" binding:"min=0,max=2"`
 	EmployeeName string `json:"employee_name" binding:"required"`
 	Date         int64  `json:"date" binding:"min=1"`
 }
@@ -97,9 +98,23 @@ func (s *OrdersInfoService) GetAllForOrg(c *gin.Context) {
 			PayType:      item.PayType,
 			Date:         item.Date,
 			EmployeeName: item.EmployeeName,
+			IsDelete:     !item.DeletedAt.Time.IsZero(),
 			SessionID:    item.SessionID,
 			OutletID:     item.OutletID,
 		}
 	}
 	NewResponse(c, http.StatusOK, output)
+}
+
+//@Summary Удалить order info
+//@Accept json
+//@Success 200 {object} OrdersInfoGetAllForOrgOutput "список order info"
+//@Router /orderInfo/:id [delete]
+func (s *OrdersInfoService) Delete(c *gin.Context) {
+	err := s.repo.OrdersInfo.Delete(c.Param("id"), c.MustGet("claims_outlet_id"))
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+	NewResponse(c, http.StatusOK, nil)
 }

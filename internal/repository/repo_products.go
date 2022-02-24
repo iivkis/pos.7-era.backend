@@ -30,7 +30,7 @@ func newProductsRepo(db *gorm.DB) *ProductsRepo {
 }
 
 //Возвращает все продукты текущей точки
-func (r *ProductsRepo) GetAllForOutlet(outletID interface{}) (products []ProductModel, err error) {
+func (r *ProductsRepo) FindAllByOutletID(outletID interface{}) (products []ProductModel, err error) {
 	err = r.db.Where("outlet_id = ?", outletID).Find(&products).Error
 	return
 }

@@ -69,6 +69,11 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		productsApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Delete)
 	}
 
+	productsOutletApi := r.Group("/products.Outlet")
+	{
+		productsOutletApi.GET("/", h.withAuthEmployee(repository.R_CASHIER), h.service.Products.GetAllForOutlet)
+	}
+
 	ingredientsApi := r.Group("/ingredients")
 	{
 		ingredientsApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Ingredients.Create)
