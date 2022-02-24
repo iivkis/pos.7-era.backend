@@ -37,6 +37,10 @@ type OrderListCreateInput struct {
 	OrderInfoID uint `json:"order_info_id"`
 }
 
+type OrderListCreateOutput struct {
+	ID uint `json:"id"`
+}
+
 //@Summary Добавить order list
 //@param type body OrderListCreateInput false "Принимаемый объект"
 //@Accept json
@@ -69,7 +73,8 @@ func (s *OrdersListService) Create(c *gin.Context) {
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, nil)
+	output := OrderListCreateOutput{ID: newModel.ID}
+	NewResponse(c, http.StatusCreated, output)
 }
 
 type OrderListGetAllForOrgOutput []OrderListOutputModel

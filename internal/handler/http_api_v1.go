@@ -42,6 +42,11 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		outletsApi.GET("/", h.withAuthOrg(), h.service.Outlets.GetAll)
 	}
 
+	{
+		r.POST("/outlets", h.withAuthOrg(), h.service.Outlets.Create)
+		r.GET("/outlets", h.withAuthOrg(), h.service.Outlets.GetAll)
+	}
+
 	//api для сессий
 	sessionsApi := r.Group("/sessions")
 	{
