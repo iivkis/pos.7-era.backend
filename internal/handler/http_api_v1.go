@@ -101,6 +101,7 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	{
 		orderInfoApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersInfo.GetAllForOrg)
 		orderInfoApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersInfo.Create)
+		orderInfoApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersInfo.Delete)
 	}
 
 	//order list
