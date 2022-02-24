@@ -92,6 +92,19 @@ func (r *SessionsRepo) CloseByEmployeeID(employeeID uint, dateClose time.Time, c
 	return sess.ID, err
 }
 
+func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
+	err := r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).
+		First(sess).
+		Update("cash_session_close", sess.CashSessionClose).
+		Update("date_close", sess.DateClose.Time.String()).Error
+	if err != nil {
+		return err
+	}
+
+	err = r.db.Model(&EmployeeModel{}).Where("id = ?", employeeID).Update("online", false).Error
+	return err
+}
+
 func (r *SessionsRepo) HasOpenSession(employeeID interface{}) (ok bool, err error) {
 	err = r.db.Where("employee_id = ? AND date_close IS NULL", employeeID).First(&SessionModel{}).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {

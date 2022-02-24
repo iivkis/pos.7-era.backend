@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 type SessionsService struct {
@@ -38,7 +39,8 @@ type SessionsOpenOrCloseInput struct {
 }
 
 type SessionOpenOrCloseOutput struct {
-	ID uint `json:"id"`
+	ID         uint `json:"id"`
+	EmployeeID uint `json:"employee_id"`
 }
 
 //@Summary Открыть или закрыть сессию
@@ -72,16 +74,20 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 				return
 			}
-			NewResponse(c, http.StatusOK, SessionOpenOrCloseOutput{ID: sess.ID})
+			NewResponse(c, http.StatusOK, SessionOpenOrCloseOutput{ID: sess.ID, EmployeeID: sess.EmployeeID})
 		}
 	case "close":
 		{
-			id, err := s.repo.Sessions.CloseByEmployeeID(c.MustGet("claims_employee_id").(uint), time.UnixMilli(input.Date), input.Cash)
+			sess := repository.SessionModel{
+				DateClose:        gorm.DeletedAt{Time: time.UnixMilli(input.Date)},
+				CashSessionClose: input.Cash,
+			}
+			err := s.repo.Sessions.Close(c.MustGet("claims_employee_id"), &sess)
 			if err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 				return
 			}
-			NewResponse(c, http.StatusOK, SessionOpenOrCloseOutput{ID: id})
+			NewResponse(c, http.StatusOK, SessionOpenOrCloseOutput{ID: sess.ID, EmployeeID: sess.EmployeeID})
 		}
 	default:
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("action can be only `open` or `close` value"))
