@@ -14,101 +14,84 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	})
 
 	//authorization
-	authApi := r.Group("/auth")
 	{
 		//регистрация организации и сотрудника
-		authApi.POST("/signUp.Org", h.service.Authorization.SignUpOrg)
-		authApi.POST("/signUp.Employee", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Authorization.SignUpEmployee)
+		r.POST("/auth/signUp.Org", h.service.Authorization.SignUpOrg)
+		r.POST("/auth/signUp.Employee", h.withAuthEmployee(r_owner, r_admin), h.service.Authorization.SignUpEmployee)
 
 		//вход в аккаунт организации и сотрудника
-		authApi.POST("/signIn.Org", h.service.Authorization.SignInOrg)
-		authApi.POST("/signIn.Employee", h.withAuthOrg(), h.service.Authorization.SignInEmployee)
+		r.POST("/auth/signIn.Org", h.service.Authorization.SignInOrg)
+		r.POST("/auth/signIn.Employee", h.withAuthOrg(), h.service.Authorization.SignInEmployee)
 
 		//отправка код подтверждения на email и проверка
-		authApi.GET("/sendCode", h.withAuthOrg(), h.service.Authorization.SendCode)
-		authApi.GET("/confirmCode", h.service.Authorization.ConfirmCode)
+		r.GET("/auth/sendCode", h.withAuthOrg(), h.service.Authorization.SendCode)
+		r.GET("/auth/confirmCode", h.service.Authorization.ConfirmCode)
 	}
 
 	//api для сотрудников
-	employeesApi := r.Group("/employees")
 	{
-		employeesApi.GET("/", h.withAuthOrg(), h.service.Employees.GetAll)
+		r.GET("/employees", h.withAuthOrg(), h.service.Employees.GetAll)
 	}
 
 	//api для торговых точек
-	outletsApi := r.Group("/outlets")
-	{
-		outletsApi.POST("/", h.withAuthOrg(), h.service.Outlets.Create)
-		outletsApi.GET("/", h.withAuthOrg(), h.service.Outlets.GetAll)
-	}
-
 	{
 		r.POST("/outlets", h.withAuthOrg(), h.service.Outlets.Create)
 		r.GET("/outlets", h.withAuthOrg(), h.service.Outlets.GetAll)
 	}
 
 	//api для сессий
-	sessionsApi := r.Group("/sessions")
 	{
-		sessionsApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Sessions.OpenOrClose)
-		sessionsApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Sessions.GetAll)
-		sessionsApi.GET("/last", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Sessions.GetLastForOutlet)
+		r.POST("/sessions", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Sessions.OpenOrClose)
+		r.GET("/sessions", h.withAuthEmployee(r_owner, r_admin), h.service.Sessions.GetAll)
+		r.GET("/sessions/last", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Sessions.GetLastForOutlet)
 	}
 
 	//api для категорий
-	categoriesApi := r.Group("/categories")
 	{
-		categoriesApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Categories.GetAll)
-		categoriesApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Create)
-		categoriesApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Update)
-		categoriesApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Categories.Delete)
+		r.GET("/categories", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Categories.GetAll)
+		r.POST("/categories", h.withAuthEmployee(r_owner, r_admin), h.service.Categories.Create)
+		r.PUT("/categories/:id", h.withAuthEmployee(r_owner, r_admin), h.service.Categories.Update)
+		r.DELETE("/categories/:id", h.withAuthEmployee(r_owner, r_admin), h.service.Categories.Delete)
 	}
 
 	//api для продуктов
-	productsApi := r.Group("/products")
 	{
-		productsApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Products.GetAllForOrg)
-		productsApi.GET("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Products.GetOneForOutlet)
-		productsApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Create)
-		productsApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.UpdateFields)
-		productsApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Products.Delete)
+		r.GET("/products", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Products.GetAllForOrg)
+		r.GET("/products/:id", h.withAuthEmployee(r_owner, r_admin, repository.R_CASHIER), h.service.Products.GetOneForOutlet)
+		r.POST("/products", h.withAuthEmployee(r_owner, r_admin), h.service.Products.Create)
+		r.PUT("/products/:id", h.withAuthEmployee(r_owner, r_admin), h.service.Products.UpdateFields)
+		r.DELETE("/products/:id", h.withAuthEmployee(r_owner, r_admin), h.service.Products.Delete)
+
+		r.GET("/products.Outlet", h.withAuthEmployee(r_cashier), h.service.Products.GetAllForOutlet)
 	}
 
-	productsOutletApi := r.Group("/products.Outlet")
+	//ingredients api
 	{
-		productsOutletApi.GET("/", h.withAuthEmployee(repository.R_CASHIER), h.service.Products.GetAllForOutlet)
-	}
-
-	ingredientsApi := r.Group("/ingredients")
-	{
-		ingredientsApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Ingredients.Create)
-		ingredientsApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.Ingredients.GetAllForOrg)
-		ingredientsApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Ingredients.UpdateFields)
-		ingredientsApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.Ingredients.Delete)
+		r.POST("/ingredients", h.withAuthEmployee(r_owner, r_admin), h.service.Ingredients.Create)
+		r.GET("/ingredients", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Ingredients.GetAllForOrg)
+		r.PUT("/ingredients/:id", h.withAuthEmployee(r_owner, r_admin), h.service.Ingredients.UpdateFields)
+		r.DELETE("/ingredients/:id", h.withAuthEmployee(r_owner, r_admin), h.service.Ingredients.Delete)
 	}
 
 	//products with ingredients
-	pwisApi := r.Group("/pwis")
 	{
-		pwisApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.ProductsWithIngredients.GetAllForOrg)
-		pwisApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.ProductsWithIngredients.Create)
-		pwisApi.PUT("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.ProductsWithIngredients.UpdateFields)
-		pwisApi.POST("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN), h.service.ProductsWithIngredients.Delete)
+		r.GET("/pwis", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.ProductsWithIngredients.GetAllForOrg)
+		r.POST("/pwis", h.withAuthEmployee(r_owner, r_admin), h.service.ProductsWithIngredients.Create)
+		r.PUT("/pwis/:id", h.withAuthEmployee(r_owner, r_admin), h.service.ProductsWithIngredients.UpdateFields)
+		r.POST("/pwis/:id", h.withAuthEmployee(r_owner, r_admin), h.service.ProductsWithIngredients.Delete)
 	}
 
 	//order info
-	orderInfoApi := r.Group("/orderInfo")
 	{
-		orderInfoApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersInfo.GetAllForOrg)
-		orderInfoApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersInfo.Create)
-		orderInfoApi.DELETE("/:id", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersInfo.Delete)
+		r.GET("/orderInfo", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.OrdersInfo.GetAllForOrg)
+		r.POST("/orderInfo", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.OrdersInfo.Create)
+		r.DELETE("/orderInfo/:id", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.OrdersInfo.Delete)
 	}
 
 	//order list
-	orderListApi := r.Group("/orderList")
 	{
-		orderListApi.GET("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersList.GetAllForOrg)
-		orderListApi.POST("/", h.withAuthEmployee(repository.R_OWNER, repository.R_ADMIN, repository.R_CASHIER), h.service.OrdersList.Create)
+		r.GET("/orderList", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.OrdersList.GetAllForOrg)
+		r.POST("/orderList", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.OrdersList.Create)
 	}
 
 }
