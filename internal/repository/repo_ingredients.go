@@ -45,6 +45,6 @@ func (r *IngredientsRepo) Delete(ingredientID interface{}, outletID interface{})
 }
 
 func (r *IngredientsRepo) ExistsInOutlet(ingredientID interface{}, outletID interface{}) bool {
-	err := r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).First(&ProductModel{}).Error
+	err := r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).First(&IngredientModel{}).Error
 	return err == nil
 }
