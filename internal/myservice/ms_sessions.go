@@ -3,11 +3,9 @@ package myservice
 import (
 	"errors"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos-ninja-backend/internal/repository"
-	"gorm.io/gorm"
 )
 
 type SessionsService struct {
@@ -61,7 +59,7 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 		{
 			sess := repository.SessionModel{
 				CashSessionOpen: input.Cash,
-				DateOpen:        time.UnixMilli(input.Date),
+				DateOpen:        input.Date,
 				EmployeeID:      c.MustGet("claims_employee_id").(uint),
 				OutletID:        c.MustGet("claims_outlet_id").(uint),
 				OrgID:           c.MustGet("claims_org_id").(uint),
@@ -79,7 +77,7 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 	case "close":
 		{
 			sess := repository.SessionModel{
-				DateClose:        gorm.DeletedAt{Time: time.UnixMilli(input.Date)},
+				DateClose:        input.Date,
 				CashSessionClose: input.Cash,
 			}
 			err := s.repo.Sessions.Close(c.MustGet("claims_employee_id"), &sess)
@@ -104,7 +102,7 @@ type getAllSessionsOutput []SessionOutputModel
 //@Failure 500 {object} serviceError
 //@Router /sessions [get]
 func (s *SessionsService) GetAll(c *gin.Context) {
-	sessions, err := s.repo.Sessions.GetAllUnscopedByOrgID(c.MustGet("claims_org_id").(uint))
+	sessions, err := s.repo.Sessions.GetAllByOrgID(c.MustGet("claims_org_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
@@ -112,19 +110,14 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 
 	var output getAllSessionsOutput = make(getAllSessionsOutput, len(sessions))
 	for i, sess := range sessions {
-		var dateClose int64
-		if !sess.DateClose.Time.IsZero() {
-			dateClose = sess.DateClose.Time.UnixMilli()
-		}
-
 		output[i] = SessionOutputModel{
 			ID:         sess.ID,
 			EmployeeID: sess.EmployeeID,
 			OutletID:   sess.OutletID,
 			CashOpen:   sess.CashSessionOpen,
 			CashClose:  sess.CashSessionClose,
-			DateOpen:   sess.DateOpen.UnixMilli(),
-			DateClose:  dateClose,
+			DateOpen:   sess.DateOpen,
+			DateClose:  sess.DateClose,
 		}
 	}
 
@@ -137,8 +130,8 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 //@Success 200 {object} SessionOutputModel "Возвращает последнюю закрытую сессию точки продаж"
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
-//@Router /sessions/last [get]
-func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
+//@Router /sessions.Last.Closed [get]
+func (s *SessionsService) GetLastClosedForOutlet(c *gin.Context) {
 	sess, err := s.repo.Sessions.GetLastClosedForOutlet(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
@@ -151,8 +144,35 @@ func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
 		OutletID:   sess.OutletID,
 		CashOpen:   sess.CashSessionOpen,
 		CashClose:  sess.CashSessionClose,
-		DateOpen:   sess.DateOpen.UnixMilli(),
-		DateClose:  sess.DateClose.Time.UnixMilli(),
+		DateOpen:   sess.DateOpen,
+		DateClose:  sess.DateClose,
+	}
+
+	NewResponse(c, http.StatusOK, output)
+}
+
+//@Summary Последняя закрытая сессия торговой точки (к которой привязан jwt токен)
+//@Description Метод позволяет получить последнюю сессию торговой точки, к которой привязан jwt токен
+//@Produce json
+//@Success 200 {object} SessionOutputModel "Возвращает последнюю закрытую сессию точки продаж"
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
+//@Router /sessions.Last [get]
+func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
+	sess, err := s.repo.Sessions.GetLastForOutlet(c.MustGet("claims_outlet_id").(uint))
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	output := SessionOutputModel{
+		ID:         sess.ID,
+		EmployeeID: sess.EmployeeID,
+		OutletID:   sess.OutletID,
+		CashOpen:   sess.CashSessionOpen,
+		CashClose:  sess.CashSessionClose,
+		DateOpen:   sess.DateOpen,
+		DateClose:  sess.DateClose,
 	}
 
 	NewResponse(c, http.StatusOK, output)

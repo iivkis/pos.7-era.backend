@@ -43,7 +43,11 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	{
 		r.POST("/sessions", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Sessions.OpenOrClose)
 		r.GET("/sessions", h.withAuthEmployee(r_owner, r_admin), h.service.Sessions.GetAll)
-		r.GET("/sessions/last", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Sessions.GetLastForOutlet)
+
+		r.GET("/sessions/last", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Sessions.GetLastClosedForOutlet)
+		r.GET("/sessions.Last", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Sessions.GetLastForOutlet)
+		r.GET("/sessions.Last.Closed", h.withAuthEmployee(r_owner, r_admin, r_cashier), h.service.Sessions.GetLastClosedForOutlet)
+
 	}
 
 	//api для категорий

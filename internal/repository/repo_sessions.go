@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"time"
 
 	"gorm.io/gorm"
 )
@@ -10,8 +9,8 @@ import (
 type SessionModel struct {
 	ID uint
 
-	DateOpen  time.Time
-	DateClose gorm.DeletedAt
+	DateOpen  int64
+	DateClose int64
 
 	CashSessionOpen  float64
 	CashSessionClose float64
@@ -58,7 +57,7 @@ func (r *SessionsRepo) Open(m *SessionModel) error {
 }
 
 //Возвращает все сессии организации (в том числе удаленные)
-func (r *SessionsRepo) GetAllUnscopedByOrgID(orgID uint) (models []SessionModel, err error) {
+func (r *SessionsRepo) GetAllByOrgID(orgID uint) (models []SessionModel, err error) {
 	err = r.db.Unscoped().Where("org_id = ?", orgID).Order("id desc").Find(&models).Error
 	return
 }
@@ -71,32 +70,26 @@ func (r *SessionsRepo) GetByEmployeeID(employeeID uint) (model SessionModel, err
 
 //Возвращает последнюю закрытую сессию для точки продаж
 func (r *SessionsRepo) GetLastClosedForOutlet(outletID uint) (model SessionModel, err error) {
-	err = r.db.Unscoped().Where("outlet_id = ? AND date_close IS NOT NULL", outletID).Last(&model).Error
+	err = r.db.Where("outlet_id = ? AND date_close <> 0", outletID).Last(&model).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
 		err = nil
 	}
 	return
 }
 
-//закрывает сессию сотрудника
-func (r *SessionsRepo) CloseByEmployeeID(employeeID uint, dateClose time.Time, cashClose float64) (id uint, err error) {
-	var sess SessionModel
-	if err = r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).
-		First(&sess).
-		Update("cash_session_close", cashClose).
-		Update("date_close", dateClose.String()).Error; err != nil {
-		return sess.ID, err
+//Возвращает последнюю сессию для точки продаж
+func (r *SessionsRepo) GetLastForOutlet(outletID uint) (model SessionModel, err error) {
+	err = r.db.Where("outlet_id = ?", outletID).Last(&model).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		err = nil
 	}
-
-	err = r.db.Model(&EmployeeModel{}).Where("id = ?", employeeID).Update("online", false).Error
-	return sess.ID, err
+	return
 }
 
 func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
 	err := r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).
-		First(sess).
-		Update("cash_session_close", sess.CashSessionClose).
-		Update("date_close", sess.DateClose.Time.String()).Error
+		Updates(sess).
+		First(sess).Error
 	if err != nil {
 		return err
 	}
@@ -106,7 +99,7 @@ func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
 }
 
 func (r *SessionsRepo) HasOpenSession(employeeID interface{}) (ok bool, err error) {
-	err = r.db.Where("employee_id = ? AND date_close IS NULL", employeeID).First(&SessionModel{}).Error
+	err = r.db.Where("employee_id = ? AND date_close = 0", employeeID).First(&SessionModel{}).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return false, nil
 	} else if err != nil {

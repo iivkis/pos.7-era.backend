@@ -51,7 +51,7 @@ func (r *ProductsWithIngredientsRepo) FindAllByProductID(productID interface{}) 
 	return
 }
 
-func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID interface{}, outletID interface{}) (err error) {
+func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID interface{}, count int, outletID interface{}) (err error) {
 	var list []ProductWithIngredientModel
 	if err = r.db.Where("product_id = ? AND outlet_id = ?", productID, outletID).Find(&list).Error; err != nil {
 		return err
@@ -64,7 +64,7 @@ func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID interface{},
 		}
 
 		//write off
-		m.Count -= item.CountTakeForSell
+		m.Count -= item.CountTakeForSell * float64(count)
 
 		if err = r.db.Updates(&m).Error; err != nil {
 			return err

@@ -53,7 +53,7 @@ func (s *OrdersListService) Create(c *gin.Context) {
 		return
 	}
 
-	if err := s.repo.ProductsWithIngredients.WriteOffIngredients(input.ProductID, c.MustGet("claims_outlet_id").(uint)); err != nil {
+	if err := s.repo.ProductsWithIngredients.WriteOffIngredients(input.ProductID, input.Count, c.MustGet("claims_outlet_id").(uint)); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
