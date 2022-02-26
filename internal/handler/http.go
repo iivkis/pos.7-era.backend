@@ -16,7 +16,7 @@ import (
 
 type HttpHandler struct {
 	engine  *gin.Engine
-	service myservice.MyService
+	srv     myservice.MyService
 	authjwt *authjwt.AuthJWT
 }
 
@@ -40,7 +40,7 @@ func NewHttpHandler(service myservice.MyService, authjwt *authjwt.AuthJWT) HttpH
 
 	return HttpHandler{
 		engine:  engine,
-		service: service,
+		srv:     service,
 		authjwt: authjwt,
 	}
 }

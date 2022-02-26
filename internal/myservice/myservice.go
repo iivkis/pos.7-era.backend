@@ -8,6 +8,7 @@ import (
 )
 
 type MyService struct {
+	Mware                   *MiddlewareService
 	Authorization           *AuthorizationService
 	Employees               *EmployeesService
 	Outlets                 *OutletsService
@@ -22,6 +23,7 @@ type MyService struct {
 
 func NewMyService(repo *repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent, authjwt *authjwt.AuthJWT) MyService {
 	return MyService{
+		Mware:                   newMiddlewareService(repo, authjwt),
 		Authorization:           newAuthorizationService(repo, strcode, mailagent, authjwt),
 		Employees:               newEmployeesService(repo),
 		Outlets:                 newOutletsService(repo),

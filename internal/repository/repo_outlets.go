@@ -35,3 +35,8 @@ func (r *OutletsRepo) GetAll(orgID uint) ([]OutletModel, error) {
 	}
 	return models, nil
 }
+
+func (r *OutletsRepo) ExistsInOrg(outletID interface{}, orgID interface{}) bool {
+	err := r.db.Where("id = ? AND org_id = ?", outletID, orgID).First(&OutletModel{}).Error
+	return err == nil
+}
