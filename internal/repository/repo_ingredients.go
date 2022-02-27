@@ -36,6 +36,11 @@ func (r *IngredientsRepo) GetAllByOrgID(orgID interface{}) (ingredients []Ingred
 	return
 }
 
+func (r *IngredientsRepo) GetAllByOutletID(outletID interface{}) (ingredients []IngredientModel, err error) {
+	err = r.db.Where("outlet_id = ?", outletID).Find(&ingredients).Error
+	return
+}
+
 func (r *IngredientsRepo) Updates(ingredient *IngredientModel, ingredientID interface{}, outletID interface{}) error {
 	return r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).Updates(ingredient).Error
 }

@@ -62,6 +62,12 @@ func (r *SessionsRepo) GetAllByOrgID(orgID uint) (models []SessionModel, err err
 	return
 }
 
+//Возвращает все сессии организации (в том числе удаленные)
+func (r *SessionsRepo) GetAllByOutletID(outletID uint) (models []SessionModel, err error) {
+	err = r.db.Unscoped().Where("outlet_id = ?", outletID).Order("id desc").Find(&models).Error
+	return
+}
+
 //Возвращает сессию сотрудника
 func (r *SessionsRepo) GetByEmployeeID(employeeID uint) (model SessionModel, err error) {
 	err = r.db.Where("employee_id = ?", employeeID).First(&model).Error

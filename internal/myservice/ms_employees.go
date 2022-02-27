@@ -33,8 +33,8 @@ type getAllEmployeesOutput []employeeOutputModel
 //@Success 200 {object} getAllEmployeesOutput "Возвращает массив сотрудников"
 //@Failure 500 {object} serviceError
 //@Router /employees [get]
-func (s *EmployeesService) GetAll(c *gin.Context) {
-	employees, err := s.repo.Employees.GetAll(c.MustGet("claims_org_id").(uint))
+func (s *EmployeesService) GetAllForOrg(c *gin.Context) {
+	employees, err := s.repo.Employees.FindAllForOrg(c.MustGet("claims_org_id").(uint))
 	if err != nil {
 		if dberr, ok := isDatabaseError(err); ok {
 			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(dberr.Error()))

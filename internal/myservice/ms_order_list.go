@@ -83,8 +83,8 @@ type OrderListGetAllForOrgOutput []OrderListOutputModel
 //@Accept json
 //@Success 200 {object} OrderListGetAllForOrgOutput "список order list"
 //@Router /orderList [get]
-func (s *OrdersListService) GetAllForOrg(c *gin.Context) {
-	models, err := s.repo.OrdersList.FindAllForOrg(c.MustGet("claims_org_id").(uint))
+func (s *OrdersListService) GetAllForOutlet(c *gin.Context) {
+	models, err := s.repo.OrdersList.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 	}

@@ -80,12 +80,12 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 
 type OrdersInfoGetAllForOrgOutput []OrderInfoOutputModel
 
-//@Summary Получить список order info организации
+//@Summary Получить список order info точки
 //@Accept json
 //@Success 200 {object} OrdersInfoGetAllForOrgOutput "список order info"
 //@Router /orderInfo [get]
-func (s *OrdersInfoService) GetAllForOrg(c *gin.Context) {
-	list, err := s.repo.OrdersInfo.FindAllForOrg(c.MustGet("claims_org_id").(uint))
+func (s *OrdersInfoService) GetAllForOutlet(c *gin.Context) {
+	list, err := s.repo.OrdersInfo.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

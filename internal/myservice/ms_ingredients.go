@@ -65,8 +65,8 @@ type IngredientGetAllOutput []IngredientOutputModel
 //@Summary Получить все ингредиенты огранизации
 //@Success 200 {object} IngredientGetAllOutput "возвращает все ингредиенты текущей организации"
 //@Router /ingredients [get]
-func (s *IngredientsService) GetAllForOrg(c *gin.Context) {
-	ingredients, err := s.repo.Ingredients.GetAllByOrgID(c.MustGet("claims_org_id").(uint))
+func (s *IngredientsService) GetAllForOutlet(c *gin.Context) {
+	ingredients, err := s.repo.Ingredients.GetAllByOutletID(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

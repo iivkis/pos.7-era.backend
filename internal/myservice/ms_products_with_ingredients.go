@@ -71,8 +71,8 @@ type PWIGetAllForOrgOutput []PWIOutputModel
 //@Accept json
 //@Success 200 {object} PWIGetAllForOrgOutput "Список связей продуктов и ингредиентов"
 //@Router /pwis [get]
-func (s *ProductsWithIngredientsService) GetAllForOrg(c *gin.Context) {
-	pwis, err := s.repo.ProductsWithIngredients.GetAllForOrg(c.MustGet("claims_org_id").(uint))
+func (s *ProductsWithIngredientsService) GetAllForOutlet(c *gin.Context) {
+	pwis, err := s.repo.ProductsWithIngredients.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

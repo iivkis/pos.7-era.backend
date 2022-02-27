@@ -101,8 +101,8 @@ type getAllSessionsOutput []SessionOutputModel
 //@Success 200 {object} getAllSessionsOutput "Возвращает массив сессий"
 //@Failure 500 {object} serviceError
 //@Router /sessions [get]
-func (s *SessionsService) GetAll(c *gin.Context) {
-	sessions, err := s.repo.Sessions.GetAllByOrgID(c.MustGet("claims_org_id").(uint))
+func (s *SessionsService) GetAllForOutlet(c *gin.Context) {
+	sessions, err := s.repo.Sessions.GetAllByOutletID(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

@@ -36,8 +36,13 @@ func (r *OrderListRepo) Create(m *OrderListModel) error {
 	return r.db.Create(m).Error
 }
 
-func (r *OrderListRepo) FindAllForOrg(orgID interface{}) (orders []OrderListModel, err error) {
+func (r *OrderListRepo) FindAllByOrgID(orgID interface{}) (orders []OrderListModel, err error) {
 	err = r.db.Where("org_id = ?", orgID).Find(&orders).Error
+	return
+}
+
+func (r *OrderListRepo) FindAllByOutletID(outletID interface{}) (orders []OrderListModel, err error) {
+	err = r.db.Where("outlet_id = ?", outletID).Find(&orders).Error
 	return
 }
 

@@ -60,8 +60,8 @@ type CategoryGetAllOutput []CategoryOutputModel
 //@Success 200 {object} CategoryGetAllOutput "Возвращает массив категорий"
 //@Failure 500 {object} serviceError
 //@Router /categories [get]
-func (s *CategoriesService) GetAll(c *gin.Context) {
-	cats, err := s.repo.Categories.GetAllByOrgID(c.MustGet("claims_org_id").(uint))
+func (s *CategoriesService) GetAllForOutlet(c *gin.Context) {
+	cats, err := s.repo.Categories.GetAllByOutletID(c.MustGet("claims_outlet_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
