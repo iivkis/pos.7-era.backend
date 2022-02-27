@@ -27,8 +27,8 @@ func newEmployeesService(repo *repository.Repository) *EmployeesService {
 
 type getAllEmployeesOutput []employeeOutputModel
 
-//@Summary Список всех сотрудников
-//@Description Метод позволяет получить список всех сотрудников
+//@Summary Список всех сотрудников организации
+//@Description Метод позволяет получить список всех сотрудников организации
 //@Produce json
 //@Success 200 {object} getAllEmployeesOutput "Возвращает массив сотрудников"
 //@Failure 500 {object} serviceError
@@ -36,11 +36,7 @@ type getAllEmployeesOutput []employeeOutputModel
 func (s *EmployeesService) GetAllForOrg(c *gin.Context) {
 	employees, err := s.repo.Employees.FindAllForOrg(c.MustGet("claims_org_id").(uint))
 	if err != nil {
-		if dberr, ok := isDatabaseError(err); ok {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(dberr.Error()))
-			return
-		}
-		NewResponse(c, http.StatusInternalServerError, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 

@@ -39,8 +39,11 @@ type ProductCreateInput struct {
 
 //@Summary Добавить новый продукт в точку
 //@param type body ProductCreateInput false "Принимаемый объект"
-//@Accept json
 //@Success 201 {object} object "возвращает пустой объект"
+//@Accept json
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /products [post]
 func (s *ProductsService) Create(c *gin.Context) {
 	var input ProductCreateInput
@@ -72,8 +75,11 @@ func (s *ProductsService) Create(c *gin.Context) {
 type ProductGetAllForOutletOutput []ProductOutputModel
 
 //@Summary Список продуктов точки
+//@Success 200 {object} ProductGetAllForOutletOutput "возвращает список пордуктов точки"
 //@Accept json
-//@Success 201 {object} ProductGetAllForOutletOutput "возвращает список пордуктов точки"
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /products [get]
 func (s *ProductsService) GetAllForOutlet(c *gin.Context) {
 	products, err := s.repo.Products.FindAllByOutletID(c.MustGet("claims_outlet_id"))
@@ -97,9 +103,12 @@ func (s *ProductsService) GetAllForOutlet(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-//@Summary Продукт организации
+//@Summary Продукт точки
+//@Success 200 {object} ProductOutputModel "возвращает один продукт из точки"
 //@Accept json
-//@Success 201 {object} ProductGetAllForOutletOutput "возвращает список пордуктов организации"
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /products/:id [get]
 func (s *ProductsService) GetOneForOutlet(c *gin.Context) {
 	product, err := s.repo.Products.FindOneByOutletID(c.Param("id"), c.MustGet("claims_outlet_id"))
@@ -131,11 +140,14 @@ type ProductUpdateInput struct {
 	Photo  string  `json:"photo"`
 }
 
-//@Summary Обновить продукт
+//@Summary Обновить продукт в точке
 //@param type body ProductUpdateInput false "Обновляемые поля"
-//@Accept json
 //@Success 200 {object} object "возвращает пустой объект"
-//@Router /products [put]
+//@Accept json
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
+//@Router /products/:id [put]
 func (s *ProductsService) UpdateFields(c *gin.Context) {
 	var input ProductUpdateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -158,9 +170,12 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
-//@Summary Удалить продукт
-//@Accept json
+//@Summary Удалить продукт в точке
 //@Success 200 {object} object "возвращает пустой объект"
+//@Accept json
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /products/:id [delete]
 func (s *ProductsService) Delete(c *gin.Context) {
 	if err := s.repo.Products.Delete(c.Param("id"), c.MustGet("claims_outlet_id")); err != nil {

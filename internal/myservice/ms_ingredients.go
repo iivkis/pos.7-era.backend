@@ -35,7 +35,11 @@ type IngredientCreateInput struct {
 
 //@Summary Добавить новый ингредиент в точку
 //@param type body IngredientCreateInput false "Принимаемый объект"
-//@Success 200 {object} object "возвращает пустой объект"
+//@Accept json
+//@Produce json
+//@Success 201 {object} object "возвращает пустой объект"
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /ingredients [post]
 func (s *IngredientsService) Create(c *gin.Context) {
 	var input IngredientCreateInput
@@ -57,13 +61,17 @@ func (s *IngredientsService) Create(c *gin.Context) {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
-	NewResponse(c, http.StatusOK, nil)
+	NewResponse(c, http.StatusCreated, nil)
 }
 
-type IngredientGetAllOutput []IngredientOutputModel
+type IngredientGetAllForOutletOutput []IngredientOutputModel
 
-//@Summary Получить все ингредиенты огранизации
-//@Success 200 {object} IngredientGetAllOutput "возвращает все ингредиенты текущей организации"
+//@Summary Получить все ингредиенты точки
+//@Accept json
+//@Produce json
+//@Success 200 {object} IngredientGetAllForOutletOutput "возвращает все ингредиенты текущей точки"
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /ingredients [get]
 func (s *IngredientsService) GetAllForOutlet(c *gin.Context) {
 	ingredients, err := s.repo.Ingredients.GetAllByOutletID(c.MustGet("claims_outlet_id").(uint))
@@ -72,7 +80,7 @@ func (s *IngredientsService) GetAllForOutlet(c *gin.Context) {
 		return
 	}
 
-	var output IngredientGetAllOutput = make(IngredientGetAllOutput, len(ingredients))
+	var output IngredientGetAllForOutletOutput = make(IngredientGetAllForOutletOutput, len(ingredients))
 	for i, ingredient := range ingredients {
 		output[i] = IngredientOutputModel{
 			ID:            ingredient.ID,
@@ -96,6 +104,10 @@ type IngredientUpdateInput struct {
 //@Summary Обновить ингредиент
 //@param type body IngredientUpdateInput false "Обновляемые поля"
 //@Success 200 {object} object "возвращает пустой объект"
+//@Accept json
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /ingredients [put]
 func (s *IngredientsService) UpdateFields(c *gin.Context) {
 	var input IngredientUpdateInput

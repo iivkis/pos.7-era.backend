@@ -103,7 +103,7 @@ type UpdateCategoryInput struct {
 //@param type body UpdateCategoryInput false "Принимаемый объект"
 //@Accept json
 //@Produce json
-//@Success 201 {object} object "возвращает пустой объект"
+//@Success 200 {object} object "возвращает пустой объект"
 //@Router /categories/:id [put]
 func (s *CategoriesService) Update(c *gin.Context) {
 	var input UpdateCategoryInput

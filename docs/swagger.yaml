@@ -41,6 +41,8 @@ definitions:
         type: string
       outlet_id:
         type: integer
+      purchase_price:
+        type: number
     type: object
   myservice.IngredientUpdateInput:
     properties:
@@ -61,6 +63,8 @@ definitions:
         type: string
       id:
         type: integer
+      is_delete:
+        type: boolean
       outlet_id:
         type: integer
       pay_type:
@@ -199,6 +203,18 @@ definitions:
       outlet_id:
         type: integer
     type: object
+  myservice.SessionsOpenOrCloseInput:
+    properties:
+      action:
+        description: '"open" or "close"'
+        type: string
+      cash:
+        type: number
+      date:
+        type: integer
+    required:
+    - action
+    type: object
   myservice.SignInEmployeeInput:
     properties:
       id:
@@ -280,18 +296,6 @@ definitions:
         type: integer
       role:
         type: string
-    type: object
-  myservice.openOrCloseSessionInput:
-    properties:
-      action:
-        description: '"open" or "close"'
-        type: string
-      cash:
-        type: number
-      date:
-        type: integer
-    required:
-    - action
     type: object
   myservice.outletOutputModel:
     properties:
@@ -504,14 +508,14 @@ paths:
       produces:
       - application/json
       responses:
-        "201":
+        "200":
           description: возвращает пустой объект
           schema:
             type: object
       summary: Обновить поля категории
   /employees:
     get:
-      description: Метод позволяет получить список всех сотрудников
+      description: Метод позволяет получить список всех сотрудников организации
       produces:
       - application/json
       responses:
@@ -525,55 +529,101 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/myservice.serviceError'
-      summary: Список всех сотрудников
+      summary: Список всех сотрудников организации
   /ingredients:
     get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
       responses:
         "200":
-          description: возвращает все ингредиенты текущей организации
+          description: возвращает все ингредиенты текущей точки
           schema:
             items:
               $ref: '#/definitions/myservice.IngredientOutputModel'
             type: array
-      summary: Получить все ингредиенты огранизации
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить все ингредиенты точки
     post:
+      consumes:
+      - application/json
       parameters:
       - description: Принимаемый объект
         in: body
         name: type
         schema:
           $ref: '#/definitions/myservice.IngredientCreateInput'
+      produces:
+      - application/json
       responses:
-        "200":
+        "201":
           description: возвращает пустой объект
           schema:
             type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
       summary: Добавить новый ингредиент в точку
     put:
+      consumes:
+      - application/json
       parameters:
       - description: Обновляемые поля
         in: body
         name: type
         schema:
           $ref: '#/definitions/myservice.IngredientUpdateInput'
+      produces:
+      - application/json
       responses:
         "200":
           description: возвращает пустой объект
           schema:
             type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
       summary: Обновить ингредиент
   /orderInfo:
     get:
       consumes:
       - application/json
+      produces:
+      - application/json
       responses:
         "200":
-          description: список order info
+          description: список завершенных заказов точки
           schema:
             items:
               $ref: '#/definitions/myservice.OrderInfoOutputModel'
             type: array
-      summary: Получить список order info организации
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить список завершенных заказов точки (orderInfo)
     post:
       consumes:
       - application/json
@@ -588,19 +638,50 @@ paths:
           description: возвращает id созданного order info
           schema:
             $ref: '#/definitions/myservice.OrdersInfoCreateOutput'
-      summary: Добавить order info
+      summary: Добавить orderInfo
+  /orderInfo/:id:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Удалить orderInfo в точке по его id
   /orderList:
     get:
       consumes:
       - application/json
+      produces:
+      - application/json
       responses:
         "200":
-          description: список order list
+          description: список orderList точки
           schema:
             items:
               $ref: '#/definitions/myservice.OrderListOutputModel'
             type: array
-      summary: Получить список order list организации
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить список orderList точки (список продутктов из которых состоит
+        заказ)
     post:
       consumes:
       - application/json
@@ -610,12 +691,22 @@ paths:
         name: type
         schema:
           $ref: '#/definitions/myservice.OrderListCreateInput'
+      produces:
+      - application/json
       responses:
         "201":
           description: возвращает пустой объект
           schema:
             type: object
-      summary: Добавить order list
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Добавить orderList (список продутктов из которых состоит заказ)
   /outlets:
     get:
       description: Метод позволяет получить список всех торговых точек
@@ -660,14 +751,24 @@ paths:
     get:
       consumes:
       - application/json
+      produces:
+      - application/json
       responses:
-        "201":
-          description: возвращает список пордуктов организации
+        "200":
+          description: возвращает список пордуктов точки
           schema:
             items:
               $ref: '#/definitions/myservice.ProductOutputModel'
             type: array
-      summary: Список продуктов организации
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Список продуктов точки
     post:
       consumes:
       - application/json
@@ -677,12 +778,61 @@ paths:
         name: type
         schema:
           $ref: '#/definitions/myservice.ProductCreateInput'
+      produces:
+      - application/json
       responses:
         "201":
           description: возвращает пустой объект
           schema:
             type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
       summary: Добавить новый продукт в точку
+  /products/:id:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Удалить продукт в точке
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращает один продукт из точки
+          schema:
+            $ref: '#/definitions/myservice.ProductOutputModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Продукт точки
     put:
       consumes:
       - application/json
@@ -692,45 +842,44 @@ paths:
         name: type
         schema:
           $ref: '#/definitions/myservice.ProductUpdateInput'
-      responses:
-        "200":
-          description: возвращает пустой объект
-          schema:
-            type: object
-      summary: Обновить продукт
-  /products/:id:
-    delete:
-      consumes:
+      produces:
       - application/json
       responses:
         "200":
           description: возвращает пустой объект
           schema:
             type: object
-      summary: Удалить продукт
-    get:
-      consumes:
-      - application/json
-      responses:
-        "201":
-          description: возвращает список пордуктов организации
+        "400":
+          description: Bad Request
           schema:
-            items:
-              $ref: '#/definitions/myservice.ProductOutputModel'
-            type: array
-      summary: Продукт организации
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Обновить продукт в точке
   /pwis:
     get:
       consumes:
       - application/json
+      produces:
+      - application/json
       responses:
         "200":
-          description: Список связей продуктов и ингредиентов
+          description: Список связей продуктов и ингредиентов точки
           schema:
             items:
               $ref: '#/definitions/myservice.PWIOutputModel'
             type: array
-      summary: Получить список связей продуктов и ингредиентов
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить список связей продуктов и ингредиентов в точке
     post:
       consumes:
       - application/json
@@ -750,12 +899,22 @@ paths:
     delete:
       consumes:
       - application/json
+      produces:
+      - application/json
       responses:
         "200":
           description: пустой объект
           schema:
             type: object
-      summary: Удалить связь
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Удалить связь из точки
     put:
       consumes:
       - application/json
@@ -773,21 +932,27 @@ paths:
       summary: Обновить связь
   /sessions:
     get:
-      description: Метод позволяет получить список всех сессий
+      consumes:
+      - application/json
+      description: Метод позволяет получить список всех сессий точки
       produces:
       - application/json
       responses:
         "200":
-          description: Возвращает массив сессий
+          description: Возвращает массив сессий точки
           schema:
             items:
               $ref: '#/definitions/myservice.SessionOutputModel'
             type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/myservice.serviceError'
-      summary: Список всех сессий
+      summary: Список всех сессий точки
     post:
       description: |-
         Открывает сессию с id указанным в jwt токен.
@@ -797,15 +962,39 @@ paths:
         in: body
         name: type
         schema:
-          $ref: '#/definitions/myservice.openOrCloseSessionInput'
+          $ref: '#/definitions/myservice.SessionsOpenOrCloseInput'
       responses:
         "201":
           description: возвращает пустой объект
           schema:
             type: object
-      summary: Открыть или закрыть сессию
-  /sessions/last:
+      summary: Открыть или закрыть сессию в точке
+  /sessions.Last:
     get:
+      consumes:
+      - application/json
+      description: Метод позволяет получить последнюю сессию торговой точки (не важно,
+        открытая или закрытая), к которой привязан jwt токен
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Возвращает последнюю закрытую сессию точки продаж
+          schema:
+            $ref: '#/definitions/myservice.SessionOutputModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Последняя сессия торговой точки (к которой привязан jwt токен)
+  /sessions.Last.Closed:
+    get:
+      consumes:
+      - application/json
       description: Метод позволяет получить последнюю сессию торговой точки, к которой
         привязан jwt токен
       produces:

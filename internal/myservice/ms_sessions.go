@@ -41,7 +41,7 @@ type SessionOpenOrCloseOutput struct {
 	EmployeeID uint `json:"employee_id"`
 }
 
-//@Summary Открыть или закрыть сессию
+//@Summary Открыть или закрыть сессию в точке
 //@Description Открывает сессию с id указанным в jwt токен.
 //@Description - Поле `action` принимает два параметра `open` (для открытия сессии) и `close` (для закрытия сессии)
 //@param type body SessionsOpenOrCloseInput false "Принимаемый объект"
@@ -93,12 +93,14 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 	}
 }
 
-type getAllSessionsOutput []SessionOutputModel
+type SessionsGetAllForOutletOutput []SessionOutputModel
 
-//@Summary Список всех сессий
-//@Description Метод позволяет получить список всех сессий
+//@Summary Список всех сессий точки
+//@Description Метод позволяет получить список всех сессий точки
+//@Success 200 {object} SessionsGetAllForOutletOutput "Возвращает массив сессий точки"
+//@Accept json
 //@Produce json
-//@Success 200 {object} getAllSessionsOutput "Возвращает массив сессий"
+//@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /sessions [get]
 func (s *SessionsService) GetAllForOutlet(c *gin.Context) {
@@ -108,7 +110,7 @@ func (s *SessionsService) GetAllForOutlet(c *gin.Context) {
 		return
 	}
 
-	var output getAllSessionsOutput = make(getAllSessionsOutput, len(sessions))
+	var output SessionsGetAllForOutletOutput = make(SessionsGetAllForOutletOutput, len(sessions))
 	for i, sess := range sessions {
 		output[i] = SessionOutputModel{
 			ID:         sess.ID,
@@ -126,6 +128,7 @@ func (s *SessionsService) GetAllForOutlet(c *gin.Context) {
 
 //@Summary Последняя закрытая сессия торговой точки (к которой привязан jwt токен)
 //@Description Метод позволяет получить последнюю сессию торговой точки, к которой привязан jwt токен
+//@Accept json
 //@Produce json
 //@Success 200 {object} SessionOutputModel "Возвращает последнюю закрытую сессию точки продаж"
 //@Failure 400 {object} serviceError
@@ -151,10 +154,11 @@ func (s *SessionsService) GetLastClosedForOutlet(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-//@Summary Последняя закрытая сессия торговой точки (к которой привязан jwt токен)
-//@Description Метод позволяет получить последнюю сессию торговой точки, к которой привязан jwt токен
-//@Produce json
+//@Summary Последняя сессия торговой точки (к которой привязан jwt токен)
+//@Description Метод позволяет получить последнюю сессию торговой точки (не важно, открытая или закрытая), к которой привязан jwt токен
 //@Success 200 {object} SessionOutputModel "Возвращает последнюю закрытую сессию точки продаж"
+//@Accept json
+//@Produce json
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /sessions.Last [get]

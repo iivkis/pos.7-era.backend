@@ -65,11 +65,14 @@ func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, nil)
 }
 
-type PWIGetAllForOrgOutput []PWIOutputModel
+type PWIGetAllForOutletOutput []PWIOutputModel
 
-//@Summary Получить список связей продуктов и ингредиентов
+//@Summary Получить список связей продуктов и ингредиентов в точке
+//@Success 200 {object} PWIGetAllForOutletOutput "Список связей продуктов и ингредиентов точки"
 //@Accept json
-//@Success 200 {object} PWIGetAllForOrgOutput "Список связей продуктов и ингредиентов"
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /pwis [get]
 func (s *ProductsWithIngredientsService) GetAllForOutlet(c *gin.Context) {
 	pwis, err := s.repo.ProductsWithIngredients.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint))
@@ -78,7 +81,7 @@ func (s *ProductsWithIngredientsService) GetAllForOutlet(c *gin.Context) {
 		return
 	}
 
-	output := make(PWIGetAllForOrgOutput, len(pwis))
+	output := make(PWIGetAllForOutletOutput, len(pwis))
 	for i, pwi := range pwis {
 		output[i] = PWIOutputModel{
 			ID:               pwi.ID,
@@ -91,9 +94,12 @@ func (s *ProductsWithIngredientsService) GetAllForOutlet(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-//@Summary Удалить связь
-//@Accept json
+//@Summary Удалить связь из точки
 //@Success 200 {object} object "пустой объект"
+//@Accept json
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /pwis/:id [delete]
 func (s *ProductsWithIngredientsService) Delete(c *gin.Context) {
 	err := s.repo.ProductsWithIngredients.Delete(c.Param("id"), c.MustGet("claims_outlet_id"))

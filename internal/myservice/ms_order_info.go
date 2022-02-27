@@ -39,7 +39,7 @@ type OrdersInfoCreateOutput struct {
 	ID uint `json:"id"`
 }
 
-//@Summary Добавить order info
+//@Summary Добавить orderInfo
 //@param type body OrdersInfoCreateInput false "Принимаемый объект"
 //@Accept json
 //@Success 201 {object} OrdersInfoCreateOutput "возвращает id созданного order info"
@@ -78,11 +78,14 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, output)
 }
 
-type OrdersInfoGetAllForOrgOutput []OrderInfoOutputModel
+type OrdersInfoGetAllForOutletOutput []OrderInfoOutputModel
 
-//@Summary Получить список order info точки
+//@Summary Получить список завершенных заказов точки (orderInfo)
 //@Accept json
-//@Success 200 {object} OrdersInfoGetAllForOrgOutput "список order info"
+//@Produce json
+//@Success 200 {object} OrdersInfoGetAllForOutletOutput "список завершенных заказов точки"
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /orderInfo [get]
 func (s *OrdersInfoService) GetAllForOutlet(c *gin.Context) {
 	list, err := s.repo.OrdersInfo.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint))
@@ -91,7 +94,7 @@ func (s *OrdersInfoService) GetAllForOutlet(c *gin.Context) {
 		return
 	}
 
-	output := make(OrdersInfoGetAllForOrgOutput, len(list))
+	output := make(OrdersInfoGetAllForOutletOutput, len(list))
 	for i, item := range list {
 		output[i] = OrderInfoOutputModel{
 			ID:           item.ID,
@@ -106,9 +109,12 @@ func (s *OrdersInfoService) GetAllForOutlet(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-//@Summary Удалить order info
+//@Summary Удалить orderInfo в точке по его id
+//@Success 200 {object} object "возвращает пустой объект"
+//@Produce json
 //@Accept json
-//@Success 200 {object} OrdersInfoGetAllForOrgOutput "список order info"
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /orderInfo/:id [delete]
 func (s *OrdersInfoService) Delete(c *gin.Context) {
 	err := s.repo.OrdersInfo.Delete(c.Param("id"), c.MustGet("claims_outlet_id"))

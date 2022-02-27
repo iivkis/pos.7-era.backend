@@ -297,7 +297,7 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "description": "возвращает пустой объект",
                         "schema": {
                             "type": "object"
@@ -329,11 +329,11 @@ var doc = `{
         },
         "/employees": {
             "get": {
-                "description": "Метод позволяет получить список всех сотрудников",
+                "description": "Метод позволяет получить список всех сотрудников организации",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Список всех сотрудников",
+                "summary": "Список всех сотрудников организации",
                 "responses": {
                     "200": {
                         "description": "Возвращает массив сотрудников",
@@ -355,20 +355,44 @@ var doc = `{
         },
         "/ingredients": {
             "get": {
-                "summary": "Получить все ингредиенты огранизации",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить все ингредиенты точки",
                 "responses": {
                     "200": {
-                        "description": "возвращает все ингредиенты текущей организации",
+                        "description": "возвращает все ингредиенты текущей точки",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/myservice.IngredientOutputModel"
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
                     }
                 }
             },
             "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "summary": "Обновить ингредиент",
                 "parameters": [
                     {
@@ -386,10 +410,28 @@ var doc = `{
                         "schema": {
                             "type": "object"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
                     }
                 }
             },
             "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
                 "summary": "Добавить новый ингредиент в точку",
                 "parameters": [
                     {
@@ -402,10 +444,22 @@ var doc = `{
                     }
                 ],
                 "responses": {
-                    "200": {
+                    "201": {
                         "description": "возвращает пустой объект",
                         "schema": {
                             "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -416,15 +470,30 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Получить список order info организации",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить список завершенных заказов точки (orderInfo)",
                 "responses": {
                     "200": {
-                        "description": "список order info",
+                        "description": "список завершенных заказов точки",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/myservice.OrderInfoOutputModel"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -433,7 +502,7 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Добавить order info",
+                "summary": "Добавить orderInfo",
                 "parameters": [
                     {
                         "description": "Принимаемый объект",
@@ -454,20 +523,66 @@ var doc = `{
                 }
             }
         },
+        "/orderInfo/:id": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Удалить orderInfo в точке по его id",
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/orderList": {
             "get": {
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Получить список order list организации",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить список orderList точки (список продутктов из которых состоит заказ)",
                 "responses": {
                     "200": {
-                        "description": "список order list",
+                        "description": "список orderList точки",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/myservice.OrderListOutputModel"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -476,7 +591,10 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Добавить order list",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Добавить orderList (список продутктов из которых состоит заказ)",
                 "parameters": [
                     {
                         "description": "Принимаемый объект",
@@ -492,6 +610,18 @@ var doc = `{
                         "description": "возвращает пустой объект",
                         "schema": {
                             "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -563,45 +693,39 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Список продуктов организации",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Список продуктов точки",
                 "responses": {
-                    "201": {
-                        "description": "возвращает список пордуктов организации",
+                    "200": {
+                        "description": "возвращает список пордуктов точки",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/myservice.ProductOutputModel"
                             }
                         }
-                    }
-                }
-            },
-            "put": {
-                "consumes": [
-                    "application/json"
-                ],
-                "summary": "Обновить продукт",
-                "parameters": [
-                    {
-                        "description": "Обновляемые поля",
-                        "name": "type",
-                        "in": "body",
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/myservice.ProductUpdateInput"
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "возвращает пустой объект",
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
             },
             "post": {
                 "consumes": [
+                    "application/json"
+                ],
+                "produces": [
                     "application/json"
                 ],
                 "summary": "Добавить новый продукт в точку",
@@ -621,6 +745,18 @@ var doc = `{
                         "schema": {
                             "type": "object"
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
                     }
                 }
             }
@@ -630,15 +766,66 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Продукт организации",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Продукт точки",
                 "responses": {
-                    "201": {
-                        "description": "возвращает список пордуктов организации",
+                    "200": {
+                        "description": "возвращает один продукт из точки",
                         "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/myservice.ProductOutputModel"
-                            }
+                            "$ref": "#/definitions/myservice.ProductOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Обновить продукт в точке",
+                "parameters": [
+                    {
+                        "description": "Обновляемые поля",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.ProductUpdateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -647,12 +834,27 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Удалить продукт",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Удалить продукт в точке",
                 "responses": {
                     "200": {
                         "description": "возвращает пустой объект",
                         "schema": {
                             "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -663,15 +865,30 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Получить список связей продуктов и ингредиентов",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить список связей продуктов и ингредиентов в точке",
                 "responses": {
                     "200": {
-                        "description": "Список связей продуктов и ингредиентов",
+                        "description": "Список связей продуктов и ингредиентов точки",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/myservice.PWIOutputModel"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -730,12 +947,27 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Удалить связь",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Удалить связь из точки",
                 "responses": {
                     "200": {
                         "description": "пустой объект",
                         "schema": {
                             "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -743,19 +975,28 @@ var doc = `{
         },
         "/sessions": {
             "get": {
-                "description": "Метод позволяет получить список всех сессий",
+                "description": "Метод позволяет получить список всех сессий точки",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Список всех сессий",
+                "summary": "Список всех сессий точки",
                 "responses": {
                     "200": {
-                        "description": "Возвращает массив сессий",
+                        "description": "Возвращает массив сессий точки",
                         "schema": {
                             "type": "array",
                             "items": {
                                 "$ref": "#/definitions/myservice.SessionOutputModel"
                             }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     },
                     "500": {
@@ -768,14 +1009,14 @@ var doc = `{
             },
             "post": {
                 "description": "Открывает сессию с id указанным в jwt токен.\n- Поле ` + "`" + `action` + "`" + ` принимает два параметра ` + "`" + `open` + "`" + ` (для открытия сессии) и ` + "`" + `close` + "`" + ` (для закрытия сессии)",
-                "summary": "Открыть или закрыть сессию",
+                "summary": "Открыть или закрыть сессию в точке",
                 "parameters": [
                     {
                         "description": "Принимаемый объект",
                         "name": "type",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/myservice.openOrCloseSessionInput"
+                            "$ref": "#/definitions/myservice.SessionsOpenOrCloseInput"
                         }
                     }
                 ],
@@ -789,9 +1030,44 @@ var doc = `{
                 }
             }
         },
-        "/sessions/last": {
+        "/sessions.Last": {
+            "get": {
+                "description": "Метод позволяет получить последнюю сессию торговой точки (не важно, открытая или закрытая), к которой привязан jwt токен",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Последняя сессия торговой точки (к которой привязан jwt токен)",
+                "responses": {
+                    "200": {
+                        "description": "Возвращает последнюю закрытую сессию точки продаж",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.SessionOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/sessions.Last.Closed": {
             "get": {
                 "description": "Метод позволяет получить последнюю сессию торговой точки, к которой привязан jwt токен",
+                "consumes": [
+                    "application/json"
+                ],
                 "produces": [
                     "application/json"
                 ],
@@ -882,6 +1158,9 @@ var doc = `{
                 },
                 "outlet_id": {
                     "type": "integer"
+                },
+                "purchase_price": {
+                    "type": "number"
                 }
             }
         },
@@ -913,6 +1192,9 @@ var doc = `{
                 },
                 "id": {
                     "type": "integer"
+                },
+                "is_delete": {
+                    "type": "boolean"
                 },
                 "outlet_id": {
                     "type": "integer"
@@ -1127,6 +1409,24 @@ var doc = `{
                 }
             }
         },
+        "myservice.SessionsOpenOrCloseInput": {
+            "type": "object",
+            "required": [
+                "action"
+            ],
+            "properties": {
+                "action": {
+                    "description": "\"open\" or \"close\"",
+                    "type": "string"
+                },
+                "cash": {
+                    "type": "number"
+                },
+                "date": {
+                    "type": "integer"
+                }
+            }
+        },
         "myservice.SignInEmployeeInput": {
             "type": "object",
             "required": [
@@ -1249,24 +1549,6 @@ var doc = `{
                 },
                 "role": {
                     "type": "string"
-                }
-            }
-        },
-        "myservice.openOrCloseSessionInput": {
-            "type": "object",
-            "required": [
-                "action"
-            ],
-            "properties": {
-                "action": {
-                    "description": "\"open\" or \"close\"",
-                    "type": "string"
-                },
-                "cash": {
-                    "type": "number"
-                },
-                "date": {
-                    "type": "integer"
                 }
             }
         },

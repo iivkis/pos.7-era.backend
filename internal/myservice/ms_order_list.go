@@ -41,10 +41,13 @@ type OrderListCreateOutput struct {
 	ID uint `json:"id"`
 }
 
-//@Summary Добавить order list
+//@Summary Добавить orderList (список продутктов из которых состоит заказ)
 //@param type body OrderListCreateInput false "Принимаемый объект"
-//@Accept json
 //@Success 201 {object} object "возвращает пустой объект"
+//@Accept json
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /orderList [post]
 func (s *OrdersListService) Create(c *gin.Context) {
 	var input OrderListCreateInput
@@ -77,11 +80,14 @@ func (s *OrdersListService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, output)
 }
 
-type OrderListGetAllForOrgOutput []OrderListOutputModel
+type OrderListGetAllForOutletOutput []OrderListOutputModel
 
-//@Summary Получить список order list организации
+//@Summary Получить список orderList точки (список продутктов из которых состоит заказ)
+//@Success 200 {object} OrderListGetAllForOutletOutput "список orderList точки"
 //@Accept json
-//@Success 200 {object} OrderListGetAllForOrgOutput "список order list"
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /orderList [get]
 func (s *OrdersListService) GetAllForOutlet(c *gin.Context) {
 	models, err := s.repo.OrdersList.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint))
@@ -89,7 +95,7 @@ func (s *OrdersListService) GetAllForOutlet(c *gin.Context) {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 	}
 
-	var output OrderListGetAllForOrgOutput = make(OrderListGetAllForOrgOutput, len(models))
+	var output OrderListGetAllForOutletOutput = make(OrderListGetAllForOutletOutput, len(models))
 	for i, item := range models {
 		output[i] = OrderListOutputModel{
 			ID:           item.ID,
