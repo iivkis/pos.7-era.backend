@@ -269,9 +269,9 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "возвращает пустой объект",
+                        "description": "возвращает id созданной записи",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
                         }
                     }
                 }
@@ -445,9 +445,9 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "возвращает пустой объект",
+                        "description": "возвращает id созданной записи",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
                         }
                     },
                     "400": {
@@ -517,7 +517,7 @@ var doc = `{
                     "201": {
                         "description": "возвращает id созданного order info",
                         "schema": {
-                            "$ref": "#/definitions/myservice.OrdersInfoCreateOutput"
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
                         }
                     }
                 }
@@ -607,9 +607,9 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "возвращает пустой объект",
+                        "description": "возвращает id созданной записи",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
                         }
                     },
                     "400": {
@@ -674,9 +674,9 @@ var doc = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "Возвращает пустой объект",
+                        "description": "возвращает id созданной записи",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
                         }
                     },
                     "500": {
@@ -741,9 +741,9 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "возвращает пустой объект",
+                        "description": "возвращает id созданной записи",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
                         }
                     },
                     "400": {
@@ -897,6 +897,9 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
+                "produces": [
+                    "application/json"
+                ],
                 "summary": "Добавить связь продукта и ингридиента в точку",
                 "parameters": [
                     {
@@ -910,9 +913,21 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "возвращает пустой объект",
+                        "description": "возвращает id созданной записи",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
                         }
                     }
                 }
@@ -1022,9 +1037,9 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "возвращает пустой объект",
+                        "description": "возвращает id созданной записи",
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/myservice.SessionOpenOrCloseOutput"
                         }
                     }
                 }
@@ -1096,6 +1111,27 @@ var doc = `{
         }
     },
     "definitions": {
+        "myservice.CashChangesCreateInput": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "date": {
+                    "description": "unixmilli",
+                    "type": "integer"
+                },
+                "reason": {
+                    "type": "integer"
+                },
+                "session_id": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
         "myservice.CategoryCreateInput": {
             "type": "object",
             "required": [
@@ -1117,6 +1153,14 @@ var doc = `{
                     "type": "string"
                 },
                 "outlet_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.DefaultOutputModel": {
+            "type": "object",
+            "properties": {
+                "id": {
                     "type": "integer"
                 }
             }
@@ -1270,14 +1314,6 @@ var doc = `{
                 }
             }
         },
-        "myservice.OrdersInfoCreateOutput": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                }
-            }
-        },
         "myservice.PWICreateInput": {
             "type": "object",
             "properties": {
@@ -1383,6 +1419,17 @@ var doc = `{
                 }
             }
         },
+        "myservice.SessionOpenOrCloseOutput": {
+            "type": "object",
+            "properties": {
+                "employee_id": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
         "myservice.SessionOutputModel": {
             "type": "object",
             "properties": {
@@ -1393,9 +1440,11 @@ var doc = `{
                     "type": "number"
                 },
                 "date_close": {
+                    "description": "unixmilli",
                     "type": "integer"
                 },
                 "date_open": {
+                    "description": "unixmilli",
                     "type": "integer"
                 },
                 "employee_id": {

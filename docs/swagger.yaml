@@ -1,5 +1,19 @@
 basePath: /api/v1
 definitions:
+  myservice.CashChangesCreateInput:
+    properties:
+      comment:
+        type: string
+      date:
+        description: unixmilli
+        type: integer
+      reason:
+        type: integer
+      session_id:
+        type: integer
+      total:
+        type: number
+    type: object
   myservice.CategoryCreateInput:
     properties:
       name:
@@ -14,6 +28,11 @@ definitions:
       name:
         type: string
       outlet_id:
+        type: integer
+    type: object
+  myservice.DefaultOutputModel:
+    properties:
+      id:
         type: integer
     type: object
   myservice.IngredientCreateInput:
@@ -113,11 +132,6 @@ definitions:
     required:
     - employee_name
     type: object
-  myservice.OrdersInfoCreateOutput:
-    properties:
-      id:
-        type: integer
-    type: object
   myservice.PWICreateInput:
     properties:
       count_take_for_sell:
@@ -186,6 +200,13 @@ definitions:
       price:
         type: number
     type: object
+  myservice.SessionOpenOrCloseOutput:
+    properties:
+      employee_id:
+        type: integer
+      id:
+        type: integer
+    type: object
   myservice.SessionOutputModel:
     properties:
       cash_close:
@@ -193,8 +214,10 @@ definitions:
       cash_open:
         type: number
       date_close:
+        description: unixmilli
         type: integer
       date_open:
+        description: unixmilli
         type: integer
       employee_id:
         type: integer
@@ -477,9 +500,9 @@ paths:
           $ref: '#/definitions/myservice.CategoryCreateInput'
       responses:
         "201":
-          description: возвращает пустой объект
+          description: возвращает id созданной записи
           schema:
-            type: object
+            $ref: '#/definitions/myservice.DefaultOutputModel'
       summary: Добавить новую категорию к точке
   /categories/:id:
     delete:
@@ -565,9 +588,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: возвращает пустой объект
+          description: возвращает id созданной записи
           schema:
-            type: object
+            $ref: '#/definitions/myservice.DefaultOutputModel'
         "400":
           description: Bad Request
           schema:
@@ -637,7 +660,7 @@ paths:
         "201":
           description: возвращает id созданного order info
           schema:
-            $ref: '#/definitions/myservice.OrdersInfoCreateOutput'
+            $ref: '#/definitions/myservice.DefaultOutputModel'
       summary: Добавить orderInfo
   /orderInfo/:id:
     delete:
@@ -695,9 +718,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: возвращает пустой объект
+          description: возвращает id созданной записи
           schema:
-            type: object
+            $ref: '#/definitions/myservice.DefaultOutputModel'
         "400":
           description: Bad Request
           schema:
@@ -739,9 +762,9 @@ paths:
       - application/json
       responses:
         "200":
-          description: Возвращает пустой объект
+          description: возвращает id созданной записи
           schema:
-            type: object
+            $ref: '#/definitions/myservice.DefaultOutputModel'
         "500":
           description: Internal Server Error
           schema:
@@ -782,9 +805,9 @@ paths:
       - application/json
       responses:
         "201":
-          description: возвращает пустой объект
+          description: возвращает id созданной записи
           schema:
-            type: object
+            $ref: '#/definitions/myservice.DefaultOutputModel'
         "400":
           description: Bad Request
           schema:
@@ -889,11 +912,21 @@ paths:
         name: type
         schema:
           $ref: '#/definitions/myservice.PWICreateInput'
+      produces:
+      - application/json
       responses:
         "201":
-          description: возвращает пустой объект
+          description: возвращает id созданной записи
           schema:
-            type: object
+            $ref: '#/definitions/myservice.DefaultOutputModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
       summary: Добавить связь продукта и ингридиента в точку
   /pwis/:id:
     delete:
@@ -965,9 +998,9 @@ paths:
           $ref: '#/definitions/myservice.SessionsOpenOrCloseInput'
       responses:
         "201":
-          description: возвращает пустой объект
+          description: возвращает id созданной записи
           schema:
-            type: object
+            $ref: '#/definitions/myservice.SessionOpenOrCloseOutput'
       summary: Открыть или закрыть сессию в точке
   /sessions.Last:
     get:
