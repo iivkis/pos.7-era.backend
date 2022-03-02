@@ -74,7 +74,7 @@ type IngredientGetAllForOutletOutput []IngredientOutputModel
 //@Failure 500 {object} serviceError
 //@Router /ingredients [get]
 func (s *IngredientsService) GetAllForOutlet(c *gin.Context) {
-	ingredients, err := s.repo.Ingredients.GetAllByOutletID(c.MustGet("claims_outlet_id").(uint))
+	ingredients, err := s.repo.Ingredients.GetAllByOutletID(c.MustGet("claims_outlet_id"))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
@@ -123,7 +123,7 @@ func (s *IngredientsService) UpdateFields(c *gin.Context) {
 		MeasureUnit:   input.MeasureUnit,
 	}
 
-	if err := s.repo.Ingredients.Updates(&ingredient, c.Param("id"), c.MustGet("claims_outlet_id").(uint)); err != nil {
+	if err := s.repo.Ingredients.Updates(&ingredient, c.Param("id"), c.MustGet("claims_outlet_id")); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

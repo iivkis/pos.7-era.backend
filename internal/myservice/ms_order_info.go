@@ -51,7 +51,7 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 		return
 	}
 
-	sess, err := s.repo.Sessions.GetByEmployeeID(c.MustGet("claims_employee_id").(uint))
+	sess, err := s.repo.Sessions.GetByEmployeeID(c.MustGet("claims_employee_id"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusBadRequest, errRecordNotFound())
@@ -88,7 +88,7 @@ type OrdersInfoGetAllForOutletOutput []OrderInfoOutputModel
 //@Failure 500 {object} serviceError
 //@Router /orderInfo [get]
 func (s *OrdersInfoService) GetAllForOutlet(c *gin.Context) {
-	list, err := s.repo.OrdersInfo.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint))
+	list, err := s.repo.OrdersInfo.FindAllByOutletID(c.MustGet("claims_outlet_id"))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

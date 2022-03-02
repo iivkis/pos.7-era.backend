@@ -28,7 +28,7 @@ func (r *OutletsRepo) Create(m *OutletModel) error {
 	return nil
 }
 
-func (r *OutletsRepo) GetAll(orgID uint) ([]OutletModel, error) {
+func (r *OutletsRepo) FindAllByOrgID(orgID interface{}) ([]OutletModel, error) {
 	var models []OutletModel
 	if err := r.db.Where("org_id = ?", orgID).Find(&models).Error; err != nil {
 		return models, err

@@ -69,7 +69,7 @@ func (r *SessionsRepo) GetAllByOutletID(outletID uint) (models []SessionModel, e
 }
 
 //Возвращает сессию сотрудника
-func (r *SessionsRepo) GetByEmployeeID(employeeID uint) (model SessionModel, err error) {
+func (r *SessionsRepo) GetByEmployeeID(employeeID interface{}) (model SessionModel, err error) {
 	err = r.db.Where("employee_id = ?", employeeID).First(&model).Error
 	return
 }

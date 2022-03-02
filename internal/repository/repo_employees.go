@@ -63,7 +63,7 @@ func (r *EmployeesRepo) SetPassword(employeeID interface{}, orgID interface{}, p
 	return
 }
 
-func (r *EmployeesRepo) FindAllForOrg(orgID uint) (employees []EmployeeModel, err error) {
+func (r *EmployeesRepo) FindAllByOrgID(orgID interface{}) (employees []EmployeeModel, err error) {
 	if err = r.db.Where("org_id = ?", orgID).Find(&employees).Error; err != nil {
 		return employees, err
 	}

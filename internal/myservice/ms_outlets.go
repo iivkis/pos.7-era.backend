@@ -63,26 +63,18 @@ type getAllOutletsOutput []outletOutputModel
 //@Failure 500 {object} serviceError
 //@Router /outlets [get]
 func (s *OutletsService) GetAll(c *gin.Context) {
-	orgID := c.MustGet("claims_org_id").(uint)
-
-	outlets, err := s.repo.Outlets.GetAll(orgID)
+	outlets, err := s.repo.Outlets.FindAllByOrgID(c.MustGet("claims_org_id"))
 	if err != nil {
-		if dberr, ok := isDatabaseError(err); ok {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(dberr.Error()))
-			return
-		}
 		NewResponse(c, http.StatusInternalServerError, errUnknownServer(err.Error()))
 		return
 	}
 
 	output := make(getAllOutletsOutput, len(outlets))
-
 	for i, outlet := range outlets {
 		output[i] = outletOutputModel{
 			ID:   outlet.ID,
 			Name: outlet.Name,
 		}
 	}
-
 	NewResponse(c, http.StatusOK, output)
 }

@@ -34,7 +34,7 @@ type getAllEmployeesOutput []employeeOutputModel
 //@Failure 500 {object} serviceError
 //@Router /employees [get]
 func (s *EmployeesService) GetAllForOrg(c *gin.Context) {
-	employees, err := s.repo.Employees.FindAllForOrg(c.MustGet("claims_org_id").(uint))
+	employees, err := s.repo.Employees.FindAllByOrgID(c.MustGet("claims_org_id"))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
