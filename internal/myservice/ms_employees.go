@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
 type EmployeesService struct {

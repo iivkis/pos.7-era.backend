@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
 type IngredientOutputModel struct {
@@ -37,7 +37,7 @@ type IngredientCreateInput struct {
 //@param type body IngredientCreateInput false "Принимаемый объект"
 //@Accept json
 //@Produce json
-//@Success 201 {object} object "возвращает пустой объект"
+//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /ingredients [post]
@@ -61,7 +61,7 @@ func (s *IngredientsService) Create(c *gin.Context) {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
-	NewResponse(c, http.StatusCreated, nil)
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: ingredient.ID})
 }
 
 type IngredientGetAllForOutletOutput []IngredientOutputModel

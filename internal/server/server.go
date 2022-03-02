@@ -1,6 +1,6 @@
 package server
 
-import "github.com/iivkis/pos-ninja-backend/internal/handler"
+import "github.com/iivkis/pos.7-era.backend/internal/handler"
 
 type Server struct {
 	httphandler handler.HttpHandler

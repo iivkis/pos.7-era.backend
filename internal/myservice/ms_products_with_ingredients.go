@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
 type PWIOutputModel struct {
@@ -33,8 +33,11 @@ type PWICreateInput struct {
 
 //@Summary Добавить связь продукта и ингридиента в точку
 //@param type body PWICreateInput false "Принимаемый объект"
+//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Accept json
-//@Success 201 {object} object "возвращает пустой объект"
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
 //@Router /pwis [post]
 func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 	var input PWICreateInput
@@ -62,7 +65,7 @@ func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, nil)
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: m.ID})
 }
 
 type PWIGetAllForOutletOutput []PWIOutputModel

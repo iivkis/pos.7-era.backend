@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
 func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
@@ -86,13 +86,20 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	//order info
 	{
 		r.GET("/orderInfo", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Mware.StdQuery(), h.srv.OrdersInfo.GetAllForOutlet)
-		r.POST("/orderInfo", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Mware.StdQuery(), h.srv.OrdersInfo.Create)
+		r.POST("/orderInfo", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.Create)
 		r.DELETE("/orderInfo/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.Delete)
 	}
 
 	//order list
 	{
 		r.GET("/orderList", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Mware.StdQuery(), h.srv.OrdersList.GetAllForOutlet)
-		r.POST("/orderList", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Mware.StdQuery(), h.srv.OrdersList.Create)
+		r.POST("/orderList", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersList.Create)
+	}
+
+	//cash changes
+	{
+		r.GET("cashChanges", h.srv.Mware.AuthEmployee(r_owner))
+		r.GET("cashChanges.CurrentSession", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier))
+		r.POST("cashChanges", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier))
 	}
 }

@@ -68,9 +68,9 @@ func (r *SessionsRepo) GetAllByOutletID(outletID uint) (models []SessionModel, e
 	return
 }
 
-//Возвращает сессию сотрудника
+//Возвращает последнюю сессию сотрудника
 func (r *SessionsRepo) GetByEmployeeID(employeeID interface{}) (model SessionModel, err error) {
-	err = r.db.Where("employee_id = ?", employeeID).First(&model).Error
+	err = r.db.Where("employee_id = ?", employeeID).Last(&model).Error
 	return
 }
 

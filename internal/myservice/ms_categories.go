@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
 type CategoriesService struct {
@@ -30,7 +30,7 @@ type CategoryCreateInput struct {
 //@Summary Добавить новую категорию к точке
 //@param type body CategoryCreateInput false "Принимаемый объект"
 //@Accept json
-//@Success 201 {object} object "возвращает пустой объект"
+//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Router /categories [post]
 func (s *CategoriesService) Create(c *gin.Context) {
 	var input CategoryCreateInput
@@ -49,7 +49,7 @@ func (s *CategoriesService) Create(c *gin.Context) {
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, nil)
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: cat.ID})
 }
 
 type CategoryGetAllOutput []CategoryOutputModel

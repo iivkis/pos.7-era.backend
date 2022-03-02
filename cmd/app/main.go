@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/iivkis/pos-ninja-backend/internal/app"
-	_ "github.com/iivkis/pos-ninja-backend/internal/config"
+	"github.com/iivkis/pos.7-era.backend/internal/app"
+	_ "github.com/iivkis/pos.7-era.backend/internal/config"
 )
 
 //@BasePath /api/v1

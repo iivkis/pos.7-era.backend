@@ -1,6 +1,6 @@
 package handler
 
-import "github.com/iivkis/pos-ninja-backend/internal/repository"
+import "github.com/iivkis/pos.7-era.backend/internal/repository"
 
 const (
 	r_owner   = repository.R_OWNER

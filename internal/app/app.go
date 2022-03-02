@@ -7,13 +7,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/iivkis/pos-ninja-backend/internal/config"
-	"github.com/iivkis/pos-ninja-backend/internal/handler"
-	"github.com/iivkis/pos-ninja-backend/internal/myservice"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
-	"github.com/iivkis/pos-ninja-backend/internal/server"
-	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
-	"github.com/iivkis/pos-ninja-backend/pkg/mailagent"
+	"github.com/iivkis/pos.7-era.backend/internal/config"
+	"github.com/iivkis/pos.7-era.backend/internal/handler"
+	"github.com/iivkis/pos.7-era.backend/internal/myservice"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/server"
+	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
+	"github.com/iivkis/pos.7-era.backend/pkg/mailagent"
 	"github.com/iivkis/strcode"
 )
 

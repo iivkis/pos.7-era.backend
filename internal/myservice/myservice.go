@@ -1,11 +1,15 @@
 package myservice
 
 import (
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
-	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
-	"github.com/iivkis/pos-ninja-backend/pkg/mailagent"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
+	"github.com/iivkis/pos.7-era.backend/pkg/mailagent"
 	"github.com/iivkis/strcode"
 )
+
+type DefaultOutputModel struct {
+	ID uint `json:"id"`
+}
 
 type MyService struct {
 	Mware                   *MiddlewareService

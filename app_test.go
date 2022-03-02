@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/iivkis/pos-ninja-backend/internal/myservice"
+	"github.com/iivkis/pos.7-era.backend/internal/myservice"
 )
 
 var baseURL string

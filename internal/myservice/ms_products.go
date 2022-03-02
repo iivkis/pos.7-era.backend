@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 	"gorm.io/gorm"
 )
 
@@ -39,7 +39,7 @@ type ProductCreateInput struct {
 
 //@Summary Добавить новый продукт в точку
 //@param type body ProductCreateInput false "Принимаемый объект"
-//@Success 201 {object} object "возвращает пустой объект"
+//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
@@ -69,7 +69,7 @@ func (s *ProductsService) Create(c *gin.Context) {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
-	NewResponse(c, http.StatusCreated, nil)
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: newProduct.ID})
 }
 
 type ProductGetAllForOutletOutput []ProductOutputModel

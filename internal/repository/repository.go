@@ -3,8 +3,8 @@ package repository
 import (
 	"fmt"
 
-	"github.com/iivkis/pos-ninja-backend/internal/config"
-	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
+	"github.com/iivkis/pos.7-era.backend/internal/config"
+	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -20,6 +20,7 @@ type Repository struct {
 	OrdersList              *OrderListRepo
 	OrdersInfo              *OrderInfoRepo
 	ProductsWithIngredients *ProductsWithIngredientsRepo
+	CashChanges             *CashChangesRepo
 }
 
 func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
@@ -41,6 +42,7 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 		&CategoryModel{},
 		&IngredientModel{},
 		&ProductWithIngredientModel{},
+		&CashChangesModel{},
 	); err != nil {
 		panic(err)
 	}
@@ -56,5 +58,6 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 		OrdersList:              newOrderListRepo(db),
 		OrdersInfo:              newOrderInfoRepo(db),
 		ProductsWithIngredients: newProductsWithIngredientsRepo(db),
+		CashChanges:             newCashChangesRepo(db),
 	}
 }

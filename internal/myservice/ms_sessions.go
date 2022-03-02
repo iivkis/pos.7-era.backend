@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
 type SessionsService struct {
@@ -20,8 +20,8 @@ type SessionOutputModel struct {
 	CashOpen  float64 `json:"cash_open"`
 	CashClose float64 `json:"cash_close"`
 
-	DateOpen  int64 `json:"date_open"`
-	DateClose int64 `json:"date_close"`
+	DateOpen  int64 `json:"date_open"`  //unixmilli
+	DateClose int64 `json:"date_close"` //unixmilli
 }
 
 func newSessionsService(repo *repository.Repository) *SessionsService {
@@ -45,7 +45,7 @@ type SessionOpenOrCloseOutput struct {
 //@Description Открывает сессию с id указанным в jwt токен.
 //@Description - Поле `action` принимает два параметра `open` (для открытия сессии) и `close` (для закрытия сессии)
 //@param type body SessionsOpenOrCloseInput false "Принимаемый объект"
-//@Success 201 {object} object "возвращает пустой объект"
+//@Success 201 {object} SessionOpenOrCloseOutput "возвращает id созданной записи"
 //@Router /sessions [post]
 func (s *SessionsService) OpenOrClose(c *gin.Context) {
 	var input SessionsOpenOrCloseInput

@@ -6,9 +6,9 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/docs"
-	"github.com/iivkis/pos-ninja-backend/internal/myservice"
-	"github.com/iivkis/pos-ninja-backend/pkg/authjwt"
+	"github.com/iivkis/pos.7-era.backend/docs"
+	"github.com/iivkis/pos.7-era.backend/internal/myservice"
+	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
 
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -53,7 +53,7 @@ func (h *HttpHandler) Init() *gin.Engine {
 	root.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	root.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "POS-Ninja-Backend (version: 0.1-alpha)")
+		c.String(http.StatusOK, "pos.7-era.backend (version: 0.1-alpha)")
 	})
 
 	api := root.Group("/api")

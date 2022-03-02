@@ -1,4 +1,4 @@
-module github.com/iivkis/pos-ninja-backend
+module github.com/iivkis/pos.7-era.backend
 
 // +heroku goVersion go1.17
 go 1.17

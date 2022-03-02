@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
 type OutletsService struct {
@@ -31,7 +31,7 @@ type createOutletInput struct {
 //@Param json body createOutletInput true "Объект для добавления торговой точки."
 //@Accept json
 //@Produce json
-//@Success 200 {object} object "Возвращает пустой объект"
+//@Success 200 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Failure 500 {object} serviceError
 //@Router /outlets [post]
 func (s *OutletsService) Create(c *gin.Context) {
@@ -51,7 +51,7 @@ func (s *OutletsService) Create(c *gin.Context) {
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, nil)
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
 type getAllOutletsOutput []outletOutputModel

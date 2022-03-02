@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 	"gorm.io/gorm"
 )
 
@@ -35,14 +35,10 @@ type OrdersInfoCreateInput struct {
 	Date         int64  `json:"date" binding:"min=1"`
 }
 
-type OrdersInfoCreateOutput struct {
-	ID uint `json:"id"`
-}
-
 //@Summary Добавить orderInfo
 //@param type body OrdersInfoCreateInput false "Принимаемый объект"
 //@Accept json
-//@Success 201 {object} OrdersInfoCreateOutput "возвращает id созданного order info"
+//@Success 201 {object} DefaultOutputModel "возвращает id созданного order info"
 //@Router /orderInfo [post]
 func (s *OrdersInfoService) Create(c *gin.Context) {
 	var input OrdersInfoCreateInput
@@ -61,7 +57,7 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 		return
 	}
 
-	newModel := repository.OrderInfoModel{
+	m := repository.OrderInfoModel{
 		PayType:      input.PayType,
 		Date:         input.Date,
 		EmployeeName: input.EmployeeName,
@@ -69,13 +65,12 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 		OrgID:        c.MustGet("claims_org_id").(uint),
 		OutletID:     c.MustGet("claims_outlet_id").(uint),
 	}
-	if err = s.repo.OrdersInfo.Create(&newModel); err != nil {
+	if err = s.repo.OrdersInfo.Create(&m); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	output := OrdersInfoCreateOutput{ID: newModel.ID}
-	NewResponse(c, http.StatusCreated, output)
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: m.ID})
 }
 
 type OrdersInfoGetAllForOutletOutput []OrderInfoOutputModel

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/iivkis/pos-ninja-backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
 type OrderListOutputModel struct {
@@ -37,13 +37,9 @@ type OrderListCreateInput struct {
 	OrderInfoID uint `json:"order_info_id"`
 }
 
-type OrderListCreateOutput struct {
-	ID uint `json:"id"`
-}
-
 //@Summary Добавить orderList (список продутктов из которых состоит заказ)
 //@param type body OrderListCreateInput false "Принимаемый объект"
-//@Success 201 {object} object "возвращает пустой объект"
+//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
@@ -61,7 +57,7 @@ func (s *OrdersListService) Create(c *gin.Context) {
 		return
 	}
 
-	newModel := repository.OrderListModel{
+	m := repository.OrderListModel{
 		ProductName:  input.ProductName,
 		ProductPrice: input.ProductPrice,
 		ProductID:    input.ProductID,
@@ -71,13 +67,12 @@ func (s *OrdersListService) Create(c *gin.Context) {
 		OrgID:        c.MustGet("claims_org_id").(uint),
 	}
 
-	if err := s.repo.OrdersList.Create(&newModel); err != nil {
+	if err := s.repo.OrdersList.Create(&m); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	output := OrderListCreateOutput{ID: newModel.ID}
-	NewResponse(c, http.StatusCreated, output)
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: m.ID})
 }
 
 type OrderListGetAllForOutletOutput []OrderListOutputModel
