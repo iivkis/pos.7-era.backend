@@ -549,7 +549,7 @@ paths:
       - application/json
       responses:
         "201":
-          description: список изменений баланса кассы
+          description: список изменений баланса кассы (по текущей сессии)
           schema:
             items:
               $ref: '#/definitions/myservice.CashChangesOutputModel'

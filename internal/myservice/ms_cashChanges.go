@@ -123,7 +123,7 @@ type CashChangesGetAllForCurrentSessionOutput []CashChangesOutputModel
 
 //@Summary Получить информацию о снятии\вкладе денежных средств, которые были воспроизведены в текущей сессии (в точке)
 //@Description берет последнюю открытую сессию (т.е. текущую сессию) сотрудника и по этой сессии ищет записи об изменении баланса кассы
-//@Success 201 {object} CashChangesGetAllForCurrentSessionOutput "список изменений баланса кассы"
+//@Success 201 {object} CashChangesGetAllForCurrentSessionOutput "список изменений баланса кассы (по текущей сессии)"
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
