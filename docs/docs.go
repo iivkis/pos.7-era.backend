@@ -227,6 +227,111 @@ var doc = `{
                 }
             }
         },
+        "/cashChanges": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить всю информацию о снятии\\вкладе денежных средств (в точке)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "in unixmilli",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "in unixmilli",
+                        "name": "start",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "список изменений баланса кассы",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.CashChangesOutputModel"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "параметр ` + "`" + `date` + "`" + ` указывается в формате unixmilli",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Добавить информацию о снятии\\вкладе денежных средств",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.CashChangesCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает id созданной записи",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/cashChanges.CurrentSession": {
+            "get": {
+                "description": "берет последнюю открытую сессию (т.е. текущую сессию) сотрудника и по этой сессии ищет записи об изменении баланса кассы",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить информацию о снятии\\вкладе денежных средств, которые были воспроизведены в текущей сессии (в точке)",
+                "responses": {
+                    "201": {
+                        "description": "список изменений баланса кассы",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.CashChangesOutputModel"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/categories": {
             "get": {
                 "description": "Метод позволяет получить список категорий точки",
@@ -1119,6 +1224,33 @@ var doc = `{
                 },
                 "date": {
                     "description": "unixmilli",
+                    "type": "integer"
+                },
+                "reason": {
+                    "type": "integer"
+                },
+                "session_id": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.CashChangesOutputModel": {
+            "type": "object",
+            "properties": {
+                "comment": {
+                    "type": "string"
+                },
+                "date": {
+                    "description": "unixmilli",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "outletID": {
                     "type": "integer"
                 },
                 "reason": {

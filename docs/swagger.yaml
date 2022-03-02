@@ -14,6 +14,24 @@ definitions:
       total:
         type: number
     type: object
+  myservice.CashChangesOutputModel:
+    properties:
+      comment:
+        type: string
+      date:
+        description: unixmilli
+        type: integer
+      id:
+        type: integer
+      outletID:
+        type: integer
+      reason:
+        type: integer
+      session_id:
+        type: integer
+      total:
+        type: number
+    type: object
   myservice.CategoryCreateInput:
     properties:
       name:
@@ -472,6 +490,76 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Регистрация организации
+  /cashChanges:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: in unixmilli
+        in: query
+        name: end
+        type: integer
+      - description: in unixmilli
+        in: query
+        name: start
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: список изменений баланса кассы
+          schema:
+            items:
+              $ref: '#/definitions/myservice.CashChangesOutputModel'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить всю информацию о снятии\вкладе денежных средств (в точке)
+    post:
+      consumes:
+      - application/json
+      description: параметр `date` указывается в формате unixmilli
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.CashChangesCreateInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: возвращает id созданной записи
+          schema:
+            $ref: '#/definitions/myservice.DefaultOutputModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Добавить информацию о снятии\вкладе денежных средств
+  /cashChanges.CurrentSession:
+    get:
+      consumes:
+      - application/json
+      description: берет последнюю открытую сессию (т.е. текущую сессию) сотрудника
+        и по этой сессии ищет записи об изменении баланса кассы
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: список изменений баланса кассы
+          schema:
+            items:
+              $ref: '#/definitions/myservice.CashChangesOutputModel'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить информацию о снятии\вкладе денежных средств, которые были
+        воспроизведены в текущей сессии (в точке)
   /categories:
     get:
       description: Метод позволяет получить список категорий точки
