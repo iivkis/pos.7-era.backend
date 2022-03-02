@@ -1,6 +1,8 @@
 package repository
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type CashChangesModel struct {
 	ID uint
@@ -45,7 +47,11 @@ func (r CashChangesRepo) FindAllByOutletID(outletID interface{}) (m []CashChange
 	return
 }
 
-func (r CashChangesRepo) FindAllByOutletIDWithPeriod(dateStart int64, dateEnd int64, outletID interface{}) (m []CashChangesModel, err error) {
+func (r CashChangesRepo) FindAllByOutletIDWithPeriod(dateStart uint64, dateEnd uint64, outletID interface{}) (m []CashChangesModel, err error) {
+	if dateEnd <= 0 {
+		err = r.db.Where("date >= ? AND outlet_id = ?", dateStart, outletID).Find(&m).Error
+		return
+	}
 	err = r.db.Where("date >= ? AND date <= ? AND outlet_id = ?", dateStart, dateEnd, outletID).Find(&m).Error
 	return
 }

@@ -47,10 +47,10 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 		return
 	}
 
-	sess, err := s.repo.Sessions.GetByEmployeeID(c.MustGet("claims_employee_id"))
+	sess, err := s.repo.Sessions.GetLastOpenByEmployeeID(c.MustGet("claims_employee_id"))
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			NewResponse(c, http.StatusBadRequest, errRecordNotFound())
+			NewResponse(c, http.StatusBadRequest, errRecordNotFound("you should open new session"))
 			return
 		}
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))

@@ -69,8 +69,8 @@ func (r *SessionsRepo) GetAllByOutletID(outletID uint) (models []SessionModel, e
 }
 
 //Возвращает последнюю сессию сотрудника
-func (r *SessionsRepo) GetByEmployeeID(employeeID interface{}) (model SessionModel, err error) {
-	err = r.db.Where("employee_id = ?", employeeID).Last(&model).Error
+func (r *SessionsRepo) GetLastOpenByEmployeeID(employeeID interface{}) (model SessionModel, err error) {
+	err = r.db.Where("employee_id = ? AND date_close = 0", employeeID).Last(&model).Error
 	return
 }
 
@@ -92,10 +92,12 @@ func (r *SessionsRepo) GetLastForOutlet(outletID uint) (model SessionModel, err 
 	return
 }
 
+//при закрытие сессии обновляем поля
+// cash_session_close и date_close
 func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
-	err := r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).
+	err := r.db.Model(&SessionModel{}).Where("employee_id = ? AND date_close <> 0", employeeID).
 		Updates(sess).
-		First(sess).Error
+		Last(sess).Error
 	if err != nil {
 		return err
 	}
@@ -112,4 +114,8 @@ func (r *SessionsRepo) HasOpenSession(employeeID interface{}) (ok bool, err erro
 		return false, err
 	}
 	return true, nil
+}
+
+func (r *SessionsRepo) ExistsWithEmployeeID(sessionID interface{}, employeeID interface{}) bool {
+	return r.db.Where("id = ? AND employee_id = ?", sessionID, employeeID).First(&SessionModel{}).Error == nil
 }

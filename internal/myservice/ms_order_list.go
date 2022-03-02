@@ -57,6 +57,7 @@ func (s *OrdersListService) Create(c *gin.Context) {
 		return
 	}
 
+	//TODO: проверка есть ли orderInfo в точке
 	m := repository.OrderListModel{
 		ProductName:  input.ProductName,
 		ProductPrice: input.ProductPrice,

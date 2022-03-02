@@ -32,7 +32,7 @@ func newSessionsService(repo *repository.Repository) *SessionsService {
 
 type SessionsOpenOrCloseInput struct {
 	Action string  `json:"action" binding:"required"` // "open" or "close"
-	Date   int64   `json:"date"`
+	Date   int64   `json:"date" binding:"min=1"`
 	Cash   float64 `json:"cash"`
 }
 

@@ -1,11 +1,23 @@
 package myservice
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"gorm.io/gorm"
 )
+
+type CashChangesOutputModel struct {
+	ID        uint
+	Date      int64   `json:"date"` //unixmilli
+	Total     float64 `json:"total"`
+	Reason    int     `json:"reason" binding:"min=0,max=2"`
+	Comment   string  `json:"comment"`
+	SessionID uint    `json:"session_id"`
+	OutletID  uint    `json:"outletID"`
+}
 
 type CashChangesService struct {
 	repo *repository.Repository
@@ -25,18 +37,23 @@ type CashChangesCreateInput struct {
 	SessionID uint    `json:"session_id"`
 }
 
-//@Summary Добавить информацию о снятии\вкладе денежных средств в кассу
+//@Summary Добавить информацию о снятии\вкладе денежных средств
+//@Description параметр `date` указывается в формате unixmilli
 //@param type body CashChangesCreateInput false "Принимаемый объект"
 //@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /products [post]
+//@Router /cashChanges [post]
 func (s *CashChangesService) Create(c *gin.Context) {
 	var input CashChangesCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	if !s.repo.Sessions.ExistsWithEmployeeID(input.SessionID, c.MustGet("claims_employee_id")) {
+		NewResponse(c, http.StatusBadRequest, errRecordNotFound("session undefined"))
 		return
 	}
 
@@ -60,15 +77,85 @@ func (s *CashChangesService) Create(c *gin.Context) {
 }
 
 type CashChangesGetAllForOutletInput struct {
-	Start int64 `json:"start"` //in unixmilli
-	End   int64 `json:"end"`   //in unixmilli
+	Start uint64 `json:"start"` //in unixmilli
+	End   uint64 `json:"end"`   //in unixmilli
 }
 
-func GetAllForOutlet(c *gin.Context) {
+type CashChangesGetAllForOutletOutput []CashChangesOutputModel
+
+//@Summary Получить всю информацию о снятии\вкладе денежных средств (в точке)
+//@param type query CashChangesGetAllForOutletInput false "Принимаемый объект"
+//@Success 201 {object} CashChangesGetAllForOutletOutput "список изменений баланса кассы"
+//@Accept json
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Router /cashChanges [get]
+func (s *CashChangesService) GetAllForOutlet(c *gin.Context) {
 	var query CashChangesGetAllForOutletInput
 	if err := c.ShouldBindQuery(&query); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
+	items, err := s.repo.CashChanges.FindAllByOutletIDWithPeriod(query.Start, query.End, c.MustGet("claims_outlet_id"))
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	var output = make(CashChangesGetAllForOutletOutput, len(items))
+	for i, item := range items {
+		output[i] = CashChangesOutputModel{
+			ID:        item.ID,
+			Date:      item.Date,
+			Total:     item.Total,
+			Reason:    item.Reason,
+			Comment:   item.Comment,
+			SessionID: item.SessionID,
+			OutletID:  item.OutletID,
+		}
+	}
+
+	NewResponse(c, http.StatusOK, output)
+}
+
+type CashChangesGetAllForCurrentSessionOutput []CashChangesOutputModel
+
+//@Summary Получить информацию о снятии\вкладе денежных средств, которые были воспроизведены в текущей сессии (в точке)
+//@Description берет последнюю открытую сессию (т.е. текущую сессию) сотрудника и по этой сессии ищет записи об изменении баланса кассы
+//@Success 201 {object} CashChangesGetAllForCurrentSessionOutput "список изменений баланса кассы"
+//@Accept json
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Router /cashChanges.CurrentSession [get]
+func (s *CashChangesService) GetAllForCurrentSession(c *gin.Context) {
+	sess, err := s.repo.Sessions.GetLastOpenByEmployeeID(c.MustGet("claims_employee_id"))
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			NewResponse(c, http.StatusOK, make(CashChangesGetAllForCurrentSessionOutput, 0))
+		}
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	items, err := s.repo.CashChanges.FindAllBySessionID(sess.ID)
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	var output = make(CashChangesGetAllForCurrentSessionOutput, len(items))
+	for i, item := range items {
+		output[i] = CashChangesOutputModel{
+			ID:        item.ID,
+			Date:      item.Date,
+			Total:     item.Total,
+			Reason:    item.Reason,
+			Comment:   item.Comment,
+			SessionID: item.SessionID,
+			OutletID:  item.OutletID,
+		}
+	}
+
+	NewResponse(c, http.StatusOK, output)
 }

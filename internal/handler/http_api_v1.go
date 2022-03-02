@@ -98,8 +98,8 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 	//cash changes
 	{
-		r.GET("cashChanges", h.srv.Mware.AuthEmployee(r_owner))
-		r.GET("cashChanges.CurrentSession", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier))
-		r.POST("cashChanges", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier))
+		r.GET("cashChanges", h.srv.Mware.AuthEmployee(r_owner), h.srv.CashChages.GetAllForOutlet)
+		r.GET("cashChanges.CurrentSession", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.CashChages.GetAllForCurrentSession)
+		r.POST("cashChanges", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.CashChages.Create)
 	}
 }
