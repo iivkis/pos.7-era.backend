@@ -30,7 +30,7 @@ type IngredientCreateInput struct {
 	Name          string  `json:"name" binding:"required"`
 	Count         float64 `json:"count"`
 	PurchasePrice float64 `json:"purchase_price"`
-	MeasureUnit   int     `json:"measure_unit" binding:"min=1,max=3"`
+	MeasureUnit   int     `json:"measure_unit" binding:"min=0,max=2"`
 }
 
 //@Summary Добавить новый ингредиент в точку

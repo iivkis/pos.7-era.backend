@@ -42,7 +42,12 @@ func (r *IngredientsRepo) GetAllByOutletID(outletID interface{}) (ingredients []
 }
 
 func (r *IngredientsRepo) Updates(ingredient *IngredientModel, ingredientID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).Updates(ingredient).Error
+	return r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).
+		UpdateColumn("name", ingredient.Name).
+		UpdateColumn("count", ingredient.Count).
+		UpdateColumn("purchase_price", ingredient.PurchasePrice).
+		UpdateColumn("measure_unit", ingredient.MeasureUnit).
+		Error
 }
 
 func (r *IngredientsRepo) Delete(ingredientID interface{}, outletID interface{}) error {
