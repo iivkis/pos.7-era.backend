@@ -769,7 +769,7 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Список всех торговых точек",
+                "summary": "Список всех торговых точек (токен организации)",
                 "responses": {
                     "200": {
                         "description": "Возвращает массив торговых точек",
@@ -796,7 +796,7 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Добавить торговую точку",
+                "summary": "Добавить торговую точку (токен юзера)",
                 "parameters": [
                     {
                         "description": "Объект для добавления торговой точки.",
@@ -804,7 +804,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/myservice.createOutletInput"
+                            "$ref": "#/definitions/myservice.OutletCreateInput"
                         }
                     }
                 ],
@@ -813,6 +813,64 @@ var doc = `{
                         "description": "возвращает id созданной записи",
                         "schema": {
                             "$ref": "#/definitions/myservice.DefaultOutputModel"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/outlets/:id": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Обновить точку (токен юзера)",
+                "parameters": [
+                    {
+                        "description": "Обновляемые поля",
+                        "name": "json",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.OutletCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Удалить точку (токен юзера)",
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
                         }
                     },
                     "500": {
@@ -1281,6 +1339,9 @@ var doc = `{
                     "description": "unixmilli",
                     "type": "integer"
                 },
+                "employee_id": {
+                    "type": "integer"
+                },
                 "id": {
                     "type": "integer"
                 },
@@ -1477,6 +1538,17 @@ var doc = `{
                 },
                 "pay_type": {
                     "type": "integer"
+                }
+            }
+        },
+        "myservice.OutletCreateInput": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "name": {
+                    "type": "string"
                 }
             }
         },
@@ -1733,17 +1805,6 @@ var doc = `{
         },
         "myservice.UpdateCategoryInput": {
             "type": "object",
-            "properties": {
-                "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "myservice.createOutletInput": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
             "properties": {
                 "name": {
                     "type": "string"

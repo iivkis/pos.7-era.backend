@@ -4,9 +4,9 @@ import "gorm.io/gorm"
 
 type OutletModel struct {
 	gorm.Model
-	OrgID uint
 
-	Name string
+	Name  string
+	OrgID uint
 
 	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`
 }
@@ -22,18 +22,20 @@ func newOutletsRepo(db *gorm.DB) *OutletsRepo {
 }
 
 func (r *OutletsRepo) Create(m *OutletModel) error {
-	if err := r.db.Create(m).Error; err != nil {
-		return err
-	}
-	return nil
+	return r.db.Create(m).Error
 }
 
-func (r *OutletsRepo) FindAllByOrgID(orgID interface{}) ([]OutletModel, error) {
-	var models []OutletModel
-	if err := r.db.Where("org_id = ?", orgID).Find(&models).Error; err != nil {
-		return models, err
-	}
-	return models, nil
+func (r *OutletsRepo) Updates(m *OutletModel, outletID interface{}) error {
+	return r.db.Where("id = ?", outletID).Updates(m).Error
+}
+
+func (r *OutletsRepo) Delete(outletID interface{}, orgID interface{}) error {
+	return r.db.Where("id = ? AND org_id = ?", outletID, orgID).Delete(&OutletModel{}).Error
+}
+
+func (r *OutletsRepo) FindAllByOrgID(orgID interface{}) (models []OutletModel, err error) {
+	err = r.db.Where("org_id = ?", orgID).Find(&models).Error
+	return
 }
 
 func (r *OutletsRepo) ExistsInOrg(outletID interface{}, orgID interface{}) bool {

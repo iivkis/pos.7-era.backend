@@ -23,6 +23,8 @@ definitions:
       date:
         description: unixmilli
         type: integer
+      employee_id:
+        type: integer
       id:
         type: integer
       outletID:
@@ -151,6 +153,13 @@ definitions:
         type: integer
     required:
     - employee_name
+    type: object
+  myservice.OutletCreateInput:
+    properties:
+      name:
+        type: string
+    required:
+    - name
     type: object
   myservice.PWICreateInput:
     properties:
@@ -321,13 +330,6 @@ definitions:
     properties:
       name:
         type: string
-    type: object
-  myservice.createOutletInput:
-    properties:
-      name:
-        type: string
-    required:
-    - name
     type: object
   myservice.employeeOutputModel:
     properties:
@@ -858,7 +860,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/myservice.serviceError'
-      summary: Список всех торговых точек
+      summary: Список всех торговых точек (токен организации)
     post:
       consumes:
       - application/json
@@ -869,7 +871,7 @@ paths:
         name: json
         required: true
         schema:
-          $ref: '#/definitions/myservice.createOutletInput'
+          $ref: '#/definitions/myservice.OutletCreateInput'
       produces:
       - application/json
       responses:
@@ -881,7 +883,44 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/myservice.serviceError'
-      summary: Добавить торговую точку
+      summary: Добавить торговую точку (токен юзера)
+  /outlets/:id:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Удалить точку (токен юзера)
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Обновляемые поля
+        in: body
+        name: json
+        schema:
+          $ref: '#/definitions/myservice.OutletCreateInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Обновить точку (токен юзера)
   /products:
     get:
       consumes:

@@ -34,8 +34,8 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 	//api для торговых точек
 	{
-		r.POST("/outlets", h.srv.Mware.AuthOrg(), h.srv.Outlets.Create)
-		r.GET("/outlets", h.srv.Mware.AuthOrg(), h.srv.Outlets.GetAll)
+		r.POST("/outlets", h.srv.Mware.AuthEmployee(r_owner), h.srv.Outlets.Create)
+		r.GET("/outlets", h.srv.Mware.AuthOrg(), h.srv.Outlets.GetAllForOrg)
 	}
 
 	//api для сессий
