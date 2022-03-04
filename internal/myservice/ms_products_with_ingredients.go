@@ -123,7 +123,7 @@ type PWIUpdateFields struct {
 //@Success 200 {object} object "возвращает пустой объект"
 //@Router /pwis/:id [put]
 func (s *ProductsWithIngredientsService) UpdateFields(c *gin.Context) {
-	var input PWICreateInput
+	var input PWIUpdateFields
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
