@@ -9,7 +9,7 @@ type CashChangesModel struct {
 
 	Date    int64   //unixmilli
 	Total   float64 //сумма операции
-	Reason  int     //причина снятия, либо внесения; 0 - снятие; 1 - вклад; 2 -
+	Reason  string  //причина сняти
 	Comment string  //комментарий к операции
 
 	SessionID  uint

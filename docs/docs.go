@@ -570,6 +570,37 @@ var doc = `{
                 }
             }
         },
+        "/ingredients/:id": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Удаляет ингридиент из точки",
+                "responses": {
+                    "201": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/orderInfo": {
             "get": {
                 "consumes": [
@@ -1218,6 +1249,9 @@ var doc = `{
     "definitions": {
         "myservice.CashChangesCreateInput": {
             "type": "object",
+            "required": [
+                "reason"
+            ],
             "properties": {
                 "comment": {
                     "type": "string"
@@ -1227,7 +1261,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "reason": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "session_id": {
                     "type": "integer"
@@ -1254,7 +1288,7 @@ var doc = `{
                     "type": "integer"
                 },
                 "reason": {
-                    "type": "integer"
+                    "type": "string"
                 },
                 "session_id": {
                     "type": "integer"
@@ -1538,6 +1572,9 @@ var doc = `{
             "type": "object",
             "properties": {
                 "amount": {
+                    "type": "integer"
+                },
+                "category_id": {
                     "type": "integer"
                 },
                 "name": {

@@ -13,7 +13,7 @@ type CashChangesOutputModel struct {
 	ID        uint
 	Date      int64   `json:"date"` //unixmilli
 	Total     float64 `json:"total"`
-	Reason    int     `json:"reason" binding:"min=0,max=2"`
+	Reason    string  `json:"reason"`
 	Comment   string  `json:"comment"`
 	SessionID uint    `json:"session_id"`
 	OutletID  uint    `json:"outletID"`
@@ -32,7 +32,7 @@ func newCashChangesService(repo *repository.Repository) *CashChangesService {
 type CashChangesCreateInput struct {
 	Date      int64   `json:"date"` //unixmilli
 	Total     float64 `json:"total"`
-	Reason    int     `json:"reason" binding:"min=0,max=2"`
+	Reason    string  `json:"reason" binding:"required"`
 	Comment   string  `json:"comment"`
 	SessionID uint    `json:"session_id"`
 }

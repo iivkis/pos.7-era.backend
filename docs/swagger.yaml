@@ -8,11 +8,13 @@ definitions:
         description: unixmilli
         type: integer
       reason:
-        type: integer
+        type: string
       session_id:
         type: integer
       total:
         type: number
+    required:
+    - reason
     type: object
   myservice.CashChangesOutputModel:
     properties:
@@ -26,7 +28,7 @@ definitions:
       outletID:
         type: integer
       reason:
-        type: integer
+        type: string
       session_id:
         type: integer
       total:
@@ -210,6 +212,8 @@ definitions:
   myservice.ProductUpdateInput:
     properties:
       amount:
+        type: integer
+      category_id:
         type: integer
       name:
         type: string
@@ -713,6 +717,26 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Обновить ингредиент
+  /ingredients/:id:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: возвращает пустой объект
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Удаляет ингридиент из точки
   /orderInfo:
     get:
       consumes:
