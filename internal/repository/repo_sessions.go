@@ -51,8 +51,6 @@ func (r *SessionsRepo) Open(m *SessionModel) error {
 	if err != nil {
 		return err
 	}
-
-	err = r.db.Model(&EmployeeModel{}).Where("id = ?", m.EmployeeID).Update("online", true).Error
 	return err
 }
 
@@ -95,15 +93,9 @@ func (r *SessionsRepo) GetLastForOutlet(outletID uint) (model SessionModel, err 
 //при закрытие сессии обновляем поля
 // cash_session_close и date_close
 func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
-	err := r.db.Model(&SessionModel{}).Where("employee_id = ? AND date_close <> 0", employeeID).
+	return r.db.Model(&SessionModel{}).Where("employee_id = ? AND date_close <> 0", employeeID).
 		Updates(sess).
 		Last(sess).Error
-	if err != nil {
-		return err
-	}
-
-	err = r.db.Model(&EmployeeModel{}).Where("id = ?", employeeID).Update("online", false).Error
-	return err
 }
 
 func (r *SessionsRepo) HasOpenSession(employeeID interface{}) (ok bool, err error) {

@@ -77,3 +77,11 @@ func (r *EmployeesRepo) checkPasswordCorret(pwd string) error {
 	}
 	return nil
 }
+
+func (r *EmployeesRepo) SetOnline(employeeID interface{}) error {
+	return r.db.Where("id = ?", employeeID).UpdateColumn("online", true).Error
+}
+
+func (r *EmployeesRepo) SetOffline(employeeID interface{}) error {
+	return r.db.Where("id = ?", employeeID).UpdateColumn("online", false).Error
+}

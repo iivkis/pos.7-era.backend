@@ -72,6 +72,12 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 				return
 			}
+
+			if err := s.repo.Employees.SetOnline(c.MustGet("claims_employee_id")); err != nil {
+				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+				return
+			}
+
 			NewResponse(c, http.StatusOK, SessionOpenOrCloseOutput{ID: sess.ID, EmployeeID: sess.EmployeeID})
 		}
 	case "close":
@@ -82,6 +88,11 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 			}
 			err := s.repo.Sessions.Close(c.MustGet("claims_employee_id"), &sess)
 			if err != nil {
+				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+				return
+			}
+
+			if err := s.repo.Employees.SetOffline(c.MustGet("claims_employee_id")); err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 				return
 			}

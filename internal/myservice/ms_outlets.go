@@ -51,6 +51,19 @@ func (s *OutletsService) Create(c *gin.Context) {
 		return
 	}
 
+	emplModel := repository.EmployeeModel{
+		Name:     "Администратор",
+		Password: "000000",
+		Role:     repository.R_ADMIN,
+		OutletID: model.ID,
+		OrgID:    c.MustGet("claims_org_id").(uint),
+	}
+
+	if err := s.repo.Employees.Create(&emplModel); err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
