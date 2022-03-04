@@ -48,3 +48,7 @@ func (r *CategoriesRepo) Updates(categoryID interface{}, outletID interface{}, m
 	err = r.db.Where("id = ? AND outlet_id = ?", categoryID, outletID).Updates(m).Error
 	return err
 }
+
+func (r *CategoriesRepo) ExistsInOutlet(categoryID interface{}, outletID interface{}) bool {
+	return r.db.Where("id = ? AND outlet_id = ?", categoryID, outletID).First(&CategoryModel{}).Error == nil
+}

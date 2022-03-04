@@ -2,6 +2,7 @@ package myservice
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -51,6 +52,11 @@ func (s *ProductsService) Create(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 	}
 
+	if !s.repo.Categories.ExistsInOutlet(input.CategoryID, c.MustGet("claims_outlet_id")) {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
+		return
+	}
+
 	newProduct := repository.ProductModel{
 		Name:       input.Name,
 		Amount:     input.Amount,
@@ -62,10 +68,6 @@ func (s *ProductsService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.Products.Create(&newProduct); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
-			return
-		}
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -134,10 +136,11 @@ func (s *ProductsService) GetOneForOutlet(c *gin.Context) {
 }
 
 type ProductUpdateInput struct {
-	Name   string  `json:"name"`
-	Amount int     `json:"amount"`
-	Price  float64 `json:"price"`
-	Photo  string  `json:"photo"`
+	Name       string  `json:"name"`
+	Amount     int     `json:"amount"`
+	Price      float64 `json:"price"`
+	Photo      string  `json:"photo"`
+	CategoryID uint    `json:"category_id"`
 }
 
 //@Summary Обновить продукт в точке
@@ -155,11 +158,19 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(s.repo.Categories.ExistsInOutlet(input.CategoryID, c.MustGet("claims_outlet_id")))
+
+	if input.CategoryID != 0 && !s.repo.Categories.ExistsInOutlet(input.CategoryID, c.MustGet("claims_outlet_id")) {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
+		return
+	}
+
 	product := repository.ProductModel{
-		Name:   input.Name,
-		Amount: input.Amount,
-		Price:  input.Price,
-		Photo:  input.Photo,
+		Name:       input.Name,
+		Amount:     input.Amount,
+		Price:      input.Price,
+		Photo:      input.Photo,
+		CategoryID: input.CategoryID,
 	}
 
 	if err := s.repo.Products.Updates(c.Param("id"), c.MustGet("claims_outlet_id"), &product); err != nil {

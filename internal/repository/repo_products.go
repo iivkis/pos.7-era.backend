@@ -46,11 +46,6 @@ func (r *ProductsRepo) FindOneByOutletID(productID interface{}, outletID interfa
 }
 
 func (r *ProductsRepo) Create(product *ProductModel) (err error) {
-	//провкрка существует ли категория с указанным id в указанной точке
-	err = r.db.Where("outlet_id = ? AND id = ?", product.OutletID, product.CategoryID).First(&CategoryModel{}).Error
-	if err != nil {
-		return err
-	}
 	err = r.db.Create(product).Error
 	return err
 }
