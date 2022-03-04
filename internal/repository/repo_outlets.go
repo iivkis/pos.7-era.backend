@@ -29,8 +29,8 @@ func (r *OutletsRepo) Updates(m *OutletModel, outletID interface{}) error {
 	return r.db.Where("id = ?", outletID).Updates(m).Error
 }
 
-func (r *OutletsRepo) Delete(outletID interface{}, orgID interface{}) error {
-	return r.db.Where("id = ? AND org_id = ?", outletID, orgID).Delete(&OutletModel{}).Error
+func (r *OutletsRepo) Delete(outletID interface{}) error {
+	return r.db.Where("id = ?", outletID).Delete(&OutletModel{}).Error
 }
 
 func (r *OutletsRepo) FindAllByOrgID(orgID interface{}) (models []OutletModel, err error) {

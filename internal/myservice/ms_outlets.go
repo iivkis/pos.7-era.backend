@@ -114,7 +114,12 @@ func (s *OutletsService) UpdateFields(c *gin.Context) {
 		Name: input.Name,
 	}
 
-	if err := s.repo.Outlets.Updates(&m, c.MustGet("claims_outlet_id")); err != nil {
+	if !s.repo.Outlets.ExistsInOrg(c.Param("id"), c.MustGet("claims_org_id")) {
+		NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined outlet with this `id` in your organization"))
+		return
+	}
+
+	if err := s.repo.Outlets.Updates(&m, c.Param("id")); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -129,7 +134,12 @@ func (s *OutletsService) UpdateFields(c *gin.Context) {
 //@Failure 500 {object} serviceError
 //@Router /outlets/:id [delete]
 func (s *OutletsService) Delete(c *gin.Context) {
-	if err := s.repo.Outlets.Delete(c.MustGet("claims_outlet_id"), c.MustGet("claims_org_id")); err != nil {
+	if !s.repo.Outlets.ExistsInOrg(c.Param("id"), c.MustGet("claims_org_id")) {
+		NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined outlet with this `id` in your organization"))
+		return
+	}
+
+	if err := s.repo.Outlets.Delete(c.MustGet("claims_outlet_id")); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
