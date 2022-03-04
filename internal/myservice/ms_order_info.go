@@ -30,7 +30,7 @@ func newOrdersInfoService(repo *repository.Repository) *OrdersInfoService {
 }
 
 type OrdersInfoCreateInput struct {
-	PayType      int    `json:"pay_type" binding:"min=0,max=2"`
+	PayType      int    `json:"pay_type" binding:"min=1,max=3"`
 	EmployeeName string `json:"employee_name" binding:"required"`
 	Date         int64  `json:"date" binding:"min=1"`
 }

@@ -28,9 +28,9 @@ func newIngredientsService(repo *repository.Repository) *IngredientsService {
 
 type IngredientCreateInput struct {
 	Name          string  `json:"name" binding:"required"`
-	Count         float64 `json:"count"`
-	PurchasePrice float64 `json:"purchase_price"`
-	MeasureUnit   int     `json:"measure_unit" binding:"min=0,max=2"`
+	Count         float64 `json:"count" binding:"min=0"`
+	PurchasePrice float64 `json:"purchase_price" binding:"min=0"`
+	MeasureUnit   int     `json:"measure_unit" binding:"min=1,max=3"`
 }
 
 //@Summary Добавить новый ингредиент в точку
@@ -96,9 +96,9 @@ func (s *IngredientsService) GetAllForOutlet(c *gin.Context) {
 
 type IngredientUpdateInput struct {
 	Name          string  `json:"name"`
-	Count         float64 `json:"count"`
-	PurchasePrice float64 `json:"purchase_price"`
-	MeasureUnit   int     `json:"measure_unit"`
+	Count         float64 `json:"count" binding:"min=0"`
+	PurchasePrice float64 `json:"purchase_price" binding:"min=0"`
+	MeasureUnit   int     `json:"measure_unit" binding:"min=0,max=3"`
 }
 
 //@Summary Обновить ингредиент
@@ -130,6 +130,13 @@ func (s *IngredientsService) UpdateFields(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
+//@Summary Удаляет ингридиент из точки
+//@Accept json
+//@Produce json
+//@Success 201 {object} object "возвращает пустой объект"
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
+//@Router /ingredients/:id [delete]
 func (s *IngredientsService) Delete(c *gin.Context) {
 	if err := s.repo.Ingredients.Delete(c.Param("id"), c.MustGet("claims_outlet_id")); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))

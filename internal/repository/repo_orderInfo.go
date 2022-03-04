@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type OrderInfoModel struct {
 	gorm.Model
 
-	PayType      int // 0 - наличные, 1 - безналичные, 2 - смешанный
+	PayType      int // 1 - наличные, 2 - безналичные, 3 - смешанный
 	Date         int64
 	EmployeeName string
 	SessionID    uint
