@@ -10,13 +10,14 @@ import (
 )
 
 type CashChangesOutputModel struct {
-	ID        uint
-	Date      int64   `json:"date"` //unixmilli
-	Total     float64 `json:"total"`
-	Reason    string  `json:"reason"`
-	Comment   string  `json:"comment"`
-	SessionID uint    `json:"session_id"`
-	OutletID  uint    `json:"outletID"`
+	ID         uint
+	Date       int64   `json:"date"` //unixmilli
+	Total      float64 `json:"total"`
+	Reason     string  `json:"reason"`
+	Comment    string  `json:"comment"`
+	SessionID  uint    `json:"session_id"`
+	EmployeeID uint    `json:"employee_id"`
+	OutletID   uint    `json:"outletID"`
 }
 
 type CashChangesService struct {
@@ -106,13 +107,14 @@ func (s *CashChangesService) GetAllForOutlet(c *gin.Context) {
 	var output = make(CashChangesGetAllForOutletOutput, len(items))
 	for i, item := range items {
 		output[i] = CashChangesOutputModel{
-			ID:        item.ID,
-			Date:      item.Date,
-			Total:     item.Total,
-			Reason:    item.Reason,
-			Comment:   item.Comment,
-			SessionID: item.SessionID,
-			OutletID:  item.OutletID,
+			ID:         item.ID,
+			Date:       item.Date,
+			Total:      item.Total,
+			Reason:     item.Reason,
+			Comment:    item.Comment,
+			SessionID:  item.SessionID,
+			EmployeeID: item.EmployeeID,
+			OutletID:   item.OutletID,
 		}
 	}
 
@@ -147,13 +149,14 @@ func (s *CashChangesService) GetAllForCurrentSession(c *gin.Context) {
 	var output = make(CashChangesGetAllForCurrentSessionOutput, len(items))
 	for i, item := range items {
 		output[i] = CashChangesOutputModel{
-			ID:        item.ID,
-			Date:      item.Date,
-			Total:     item.Total,
-			Reason:    item.Reason,
-			Comment:   item.Comment,
-			SessionID: item.SessionID,
-			OutletID:  item.OutletID,
+			ID:         item.ID,
+			Date:       item.Date,
+			Total:      item.Total,
+			Reason:     item.Reason,
+			Comment:    item.Comment,
+			SessionID:  item.SessionID,
+			EmployeeID: item.EmployeeID,
+			OutletID:   item.OutletID,
 		}
 	}
 
