@@ -57,6 +57,30 @@ definitions:
       id:
         type: integer
     type: object
+  myservice.EmployeeOutputModel:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      online:
+        type: boolean
+      outlet_id:
+        type: integer
+      role:
+        type: string
+      role_id:
+        type: integer
+    type: object
+  myservice.EmployeeUpdateFieldsInput:
+    properties:
+      name:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+    type: object
   myservice.IngredientCreateInput:
     properties:
       count:
@@ -329,19 +353,6 @@ definitions:
   myservice.UpdateCategoryInput:
     properties:
       name:
-        type: string
-    type: object
-  myservice.employeeOutputModel:
-    properties:
-      id:
-        type: integer
-      name:
-        type: string
-      online:
-        type: boolean
-      outlet_id:
-        type: integer
-      role:
         type: string
     type: object
   myservice.outletOutputModel:
@@ -640,13 +651,50 @@ paths:
           description: Возвращает массив сотрудников
           schema:
             items:
-              $ref: '#/definitions/myservice.employeeOutputModel'
+              $ref: '#/definitions/myservice.EmployeeOutputModel'
             type: array
         "500":
           description: Internal Server Error
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Список всех сотрудников организации
+  /employees/:id:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Позволяет удалить сотрудника
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.EmployeeUpdateFieldsInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Позволяет обновить поля сотрудника
   /ingredients:
     get:
       consumes:

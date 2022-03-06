@@ -97,7 +97,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 	}
 
 	//Создание аккаунта владельца
-	employeeModelOwner := repository.EmployeeModel{
+	employeeOwnerModel := repository.EmployeeModel{
 		Name:     "Управление организацией",
 		Password: "000000",
 		Role:     repository.R_OWNER,
@@ -105,7 +105,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 		OutletID: outletModel.ID,
 	}
 
-	if err := s.repo.Employees.Create(&employeeModelOwner); err != nil {
+	if err := s.repo.Employees.Create(&employeeOwnerModel, repository.R_ROOT); err != nil {
 		NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -119,7 +119,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 		OutletID: outletModel.ID,
 	}
 
-	if err := s.repo.Employees.Create(&employeeModelCashier); err != nil {
+	if err := s.repo.Employees.Create(&employeeModelCashier, repository.R_ROOT); err != nil {
 		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
 		return
 	}
@@ -152,11 +152,6 @@ func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 		return
 	}
 
-	if input.Role == repository.R_OWNER {
-		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("you cannot create a user with the owner role"))
-		return
-	}
-
 	//create model and add
 	model := repository.EmployeeModel{
 		Name:     input.Name,
@@ -166,15 +161,19 @@ func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 		OrgID:    orgID,
 	}
 
-	if err := s.repo.Employees.Create(&model); err != nil {
-		if errors.Is(err, repository.ErrOnlyNumInPassword) || errors.Is(err, repository.ErrUndefinedRole) {
+	if err := s.repo.Employees.Create(&model, c.MustGet("claims_role").(string)); err != nil {
+		if errors.Is(err, repository.ErrOnlyNumCanBeInPassword) || errors.Is(err, repository.ErrUndefinedRole) {
 			NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
-			return
+		} else if errors.Is(err, gorm.ErrRecordNotFound) {
+			NewResponse(c, http.StatusBadRequest, errRecordNotFound(err.Error()))
+		} else if errors.Is(err, repository.ErrPermissionDenided) {
+			NewResponse(c, http.StatusBadRequest, errPermissionDenided())
+		} else {
+			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		}
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 		return
 	}
-	NewResponse(c, http.StatusCreated, nil)
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
 type SignInOrgInput struct {

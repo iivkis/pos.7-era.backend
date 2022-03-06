@@ -59,7 +59,7 @@ func (s *OutletsService) Create(c *gin.Context) {
 		OrgID:    c.MustGet("claims_org_id").(uint),
 	}
 
-	if err := s.repo.Employees.Create(&emplModel); err != nil {
+	if err := s.repo.Employees.Create(&emplModel, repository.R_OWNER); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

@@ -30,6 +30,8 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	//api для сотрудников
 	{
 		r.GET("/employees", h.srv.Mware.AuthOrg(), h.srv.Employees.GetAllForOrg)
+		r.PUT("/employees", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Employees.UpdateFields)
+		r.DELETE("/employees", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Employees.Delete)
 	}
 
 	//api для торговых точек
@@ -44,10 +46,8 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	{
 		r.POST("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Sessions.OpenOrClose)
 		r.GET("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Sessions.GetAllForOutlet)
-
 		r.GET("/sessions.Last", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Mware.StdQuery(), h.srv.Sessions.GetLastForOutlet)
 		r.GET("/sessions.Last.Closed", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Mware.StdQuery(), h.srv.Sessions.GetLastClosedForOutlet)
-
 	}
 
 	//api для категорий

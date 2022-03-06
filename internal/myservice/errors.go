@@ -44,6 +44,7 @@ var (
 	errIncorrectPassword   = newServiceError(204, "invalid password")
 	errOnDelet             = newServiceError(205, "error deleting a record")
 	errRecordAlreadyExists = newServiceError(206, "the record already exists")
+	errPermissionDenided   = newServiceError(207, "permission denided")
 )
 
 //300-399 - ошибки для внешнего импорта

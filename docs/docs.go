@@ -445,12 +445,70 @@ var doc = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/myservice.employeeOutputModel"
+                                "$ref": "#/definitions/myservice.EmployeeOutputModel"
                             }
                         }
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/employees/:id": {
+            "put": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Позволяет обновить поля сотрудника",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.EmployeeUpdateFieldsInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Позволяет удалить сотрудника",
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/myservice.serviceError"
                         }
@@ -1392,6 +1450,43 @@ var doc = `{
                 }
             }
         },
+        "myservice.EmployeeOutputModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "online": {
+                    "type": "boolean"
+                },
+                "outlet_id": {
+                    "type": "integer"
+                },
+                "role": {
+                    "type": "string"
+                },
+                "role_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.EmployeeUpdateFieldsInput": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string"
+                }
+            }
+        },
         "myservice.IngredientCreateInput": {
             "type": "object",
             "required": [
@@ -1807,26 +1902,6 @@ var doc = `{
             "type": "object",
             "properties": {
                 "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "myservice.employeeOutputModel": {
-            "type": "object",
-            "properties": {
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "online": {
-                    "type": "boolean"
-                },
-                "outlet_id": {
-                    "type": "integer"
-                },
-                "role": {
                     "type": "string"
                 }
             }
