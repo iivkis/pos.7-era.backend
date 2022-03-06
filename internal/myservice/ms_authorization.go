@@ -131,7 +131,6 @@ type SignUpEmployeeInput struct {
 	Name     string `json:"name" binding:"required,min=2,max=200"`
 	Password string `json:"password" binding:"required,min=6,max=6"`
 	Role     string `json:"role" binding:"required,max=20"`
-	OutletID uint   `json:"outlet_id" binding:"min=1"`
 }
 
 //@Summary Регистрация сотрудника
@@ -144,7 +143,6 @@ type SignUpEmployeeInput struct {
 //@Router /auth/signUp.Employee [post]
 func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 	var orgID = c.MustGet("claims_org_id").(uint)
-
 	//parse JSON body
 	var input SignUpEmployeeInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -157,7 +155,7 @@ func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 		Name:     input.Name,
 		Password: input.Password,
 		Role:     input.Role,
-		OutletID: input.OutletID,
+		OutletID: c.MustGet("claims_outlet_id").(uint),
 		OrgID:    orgID,
 	}
 
