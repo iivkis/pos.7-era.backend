@@ -79,7 +79,7 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 	//products with ingredients
 	{
-		r.GET("/pwis", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Mware.StdQuery(), h.srv.ProductsWithIngredients.GetAllForOutlet)
+		r.GET("/pwis", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Mware.StdQuery(), h.srv.ProductsWithIngredients.Get)
 		r.POST("/pwis", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Mware.StdQuery(), h.srv.ProductsWithIngredients.Create)
 		r.PUT("/pwis/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Mware.StdQuery(), h.srv.ProductsWithIngredients.UpdateFields)
 		r.DELETE("/pwis/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Mware.StdQuery(), h.srv.ProductsWithIngredients.Delete)
