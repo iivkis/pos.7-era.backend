@@ -55,10 +55,10 @@ func (r *ProductsWithIngredientsRepo) FindAllByOutletID(outletID interface{}, wh
 	return
 }
 
-// func (r *ProductsWithIngredientsRepo) FindAllByProductID(productID interface{}, inOutletID interface{}) (m []ProductWithIngredientModel, err error) {
-// 	err = r.db.Where("product_id = ? AND outlet_id = ?", productID, inOutletID).Find(&m).Error
-// 	return
-// }
+func (r *ProductsWithIngredientsRepo) FindAllByProductID(productID interface{}, inOutletID interface{}) (m []ProductWithIngredientModel, err error) {
+	err = r.db.Where("product_id = ? AND outlet_id = ?", productID, inOutletID).Find(&m).Error
+	return
+}
 
 func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID interface{}, count int, inOutletID interface{}) (err error) {
 	var list []ProductWithIngredientModel
