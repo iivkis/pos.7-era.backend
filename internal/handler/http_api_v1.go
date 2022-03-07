@@ -30,8 +30,8 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	//api для сотрудников
 	{
 		r.GET("/employees", h.srv.Mware.AuthOrg(), h.srv.Employees.GetAllForOrg)
-		r.PUT("/employees", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Mware.StdQuery(), h.srv.Employees.UpdateFields)
-		r.DELETE("/employees", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Mware.StdQuery(), h.srv.Employees.Delete)
+		r.PUT("/employees/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Mware.StdQuery(), h.srv.Employees.UpdateFields)
+		r.DELETE("/employees/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Mware.StdQuery(), h.srv.Employees.Delete)
 	}
 
 	//api для торговых точек
