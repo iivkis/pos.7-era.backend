@@ -1868,9 +1868,6 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
-                "outlet_id": {
-                    "type": "integer"
-                },
                 "password": {
                     "type": "string"
                 },
