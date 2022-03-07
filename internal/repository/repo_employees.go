@@ -183,7 +183,7 @@ func (r *EmployeesRepo) FindAllByOrgID(orgID interface{}, whereOutletID uint) (e
 	if whereOutletID == 0 {
 		err = r.db.Where("org_id = ?", orgID).Find(&employees).Error
 	} else {
-		err = r.db.Where("org_id = ? AND outlet_id = >", orgID, whereOutletID).Find(&employees).Error
+		err = r.db.Where("org_id = ? AND outlet_id = ?", orgID, whereOutletID).Find(&employees).Error
 	}
 	return
 }
