@@ -77,8 +77,8 @@ type PWIGetAllForOutletOutput []PWIOutputModel
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /pwis [get]
-func (s *ProductsWithIngredientsService) GetAllForOutlet(c *gin.Context) {
-	pwis, err := s.repo.ProductsWithIngredients.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint))
+func (s *ProductsWithIngredientsService) Get(c *gin.Context) {
+	pwis, err := s.repo.ProductsWithIngredients.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint), c.MustGet("claims_product_id").(uint))
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

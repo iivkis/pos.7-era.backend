@@ -46,19 +46,23 @@ func (r *ProductsWithIngredientsRepo) FindAllByOrgID(orgID interface{}) (m []Pro
 	return
 }
 
-func (r *ProductsWithIngredientsRepo) FindAllByOutletID(outlet interface{}) (m []ProductWithIngredientModel, err error) {
-	err = r.db.Where("outlet_id = ?", outlet).Find(&m).Error
+func (r *ProductsWithIngredientsRepo) FindAllByOutletID(outletID interface{}, whereProductID uint) (m []ProductWithIngredientModel, err error) {
+	if whereProductID == 0 {
+		err = r.db.Where("outlet_id = ? ", outletID).Find(&m).Error
+	} else {
+		err = r.db.Where("outlet_id = ? AND product_id = ?", outletID, whereProductID).Find(&m).Error
+	}
 	return
 }
 
-func (r *ProductsWithIngredientsRepo) FindAllByProductID(productID interface{}) (m []ProductWithIngredientModel, err error) {
-	err = r.db.Where("product_id = ?", productID).Find(&m).Error
-	return
-}
+// func (r *ProductsWithIngredientsRepo) FindAllByProductID(productID interface{}, inOutletID interface{}) (m []ProductWithIngredientModel, err error) {
+// 	err = r.db.Where("product_id = ? AND outlet_id = ?", productID, inOutletID).Find(&m).Error
+// 	return
+// }
 
-func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID interface{}, count int, outletID interface{}) (err error) {
+func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID interface{}, count int, inOutletID interface{}) (err error) {
 	var list []ProductWithIngredientModel
-	if err = r.db.Where("product_id = ? AND outlet_id = ?", productID, outletID).Find(&list).Error; err != nil {
+	if err = r.db.Where("product_id = ? AND outlet_id = ?", productID, inOutletID).Find(&list).Error; err != nil {
 		return err
 	}
 

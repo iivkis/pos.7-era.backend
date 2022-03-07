@@ -85,7 +85,8 @@ func (s *MiddlewareService) AuthEmployee(allowedRoles ...string) func(*gin.Conte
 func (s *MiddlewareService) StdQuery() func(*gin.Context) {
 	return func(c *gin.Context) {
 		var query struct {
-			OutletID uint `form:"outlet_id"`
+			OutletID  uint `form:"outlet_id"`
+			ProductID uint `form:"product_id"`
 		}
 
 		if err := c.ShouldBindQuery(&query); err != nil {
@@ -104,5 +105,7 @@ func (s *MiddlewareService) StdQuery() func(*gin.Context) {
 				return
 			}
 		}
+
+		c.Set("claims_product_id", query.ProductID)
 	}
 }
