@@ -179,11 +179,13 @@ func (r *EmployeesRepo) Delete(employeeID interface{}, outletID interface{}, myR
 	return r.db.Where("id = ? AND outlet_id = ?", employeeID, outletID).Delete(&EmployeeModel{}).Error
 }
 
-func (r *EmployeesRepo) FindAllByOrgID(orgID interface{}) (employees []EmployeeModel, err error) {
-	if err = r.db.Where("org_id = ?", orgID).Find(&employees).Error; err != nil {
-		return employees, err
+func (r *EmployeesRepo) FindAllByOrgID(orgID interface{}, whereOutletID uint) (employees []EmployeeModel, err error) {
+	if whereOutletID == 0 {
+		err = r.db.Where("org_id = ?", orgID).Find(&employees).Error
+	} else {
+		err = r.db.Where("org_id = ? AND outlet_id = >", orgID, whereOutletID).Find(&employees).Error
 	}
-	return employees, nil
+	return
 }
 
 func (r *EmployeesRepo) SetOnline(employeeID interface{}) error {

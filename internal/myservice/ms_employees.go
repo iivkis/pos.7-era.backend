@@ -28,22 +28,31 @@ func newEmployeesService(repo *repository.Repository) *EmployeesService {
 	}
 }
 
-type getAllEmployeesOutput []EmployeeOutputModel
+type EmployeesGetAllForOrgInputQuery struct {
+	OutletID uint `form:"outlet_id"`
+}
+type EmployeesGetAllForOrgOutput []EmployeeOutputModel
 
 //@Summary Список всех сотрудников организации
 //@Description Метод позволяет получить список всех сотрудников организации
 //@Produce json
-//@Success 200 {object} getAllEmployeesOutput "Возвращает массив сотрудников"
+//@Success 200 {object} EmployeesGetAllForOrgOutput "Возвращает массив сотрудников"
 //@Failure 500 {object} serviceError
 //@Router /employees [get]
 func (s *EmployeesService) GetAllForOrg(c *gin.Context) {
-	employees, err := s.repo.Employees.FindAllByOrgID(c.MustGet("claims_org_id"))
+	var query EmployeesGetAllForOrgInputQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	employees, err := s.repo.Employees.FindAllByOrgID(c.MustGet("claims_org_id"), query.OutletID)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	output := make(getAllEmployeesOutput, len(employees))
+	output := make(EmployeesGetAllForOrgOutput, len(employees))
 	for i, employee := range employees {
 		if err != nil {
 			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
