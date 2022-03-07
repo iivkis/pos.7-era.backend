@@ -38,7 +38,7 @@ func (r *ProductsWithIngredientsRepo) Updates(m *ProductWithIngredientModel, ID 
 }
 
 func (r *ProductsWithIngredientsRepo) Delete(ID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", ID, outletID).Delete(&ProductModel{}).Error
+	return r.db.Where("id = ? AND outlet_id = ?", ID, outletID).Delete(&ProductWithIngredientModel{}).Error
 }
 
 func (r *ProductsWithIngredientsRepo) FindAllByOrgID(orgID interface{}) (m []ProductWithIngredientModel, err error) {

@@ -139,7 +139,7 @@ func (s *OutletsService) Delete(c *gin.Context) {
 		return
 	}
 
-	if err := s.repo.Outlets.Delete(c.MustGet("claims_outlet_id")); err != nil {
+	if err := s.repo.Outlets.Delete(c.Param("id")); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
