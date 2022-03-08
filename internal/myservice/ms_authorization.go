@@ -130,7 +130,8 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 type SignUpEmployeeInput struct {
 	Name     string `json:"name" binding:"required,min=2,max=200"`
 	Password string `json:"password" binding:"required,min=6,max=6"`
-	Role     string `json:"role" binding:"required,max=20"`
+	// Role     string `json:"role" binding:"required,max=20"`
+	RoleID int `json:"role_id" binding:"min=1"`
 }
 
 //@Summary Регистрация сотрудника
@@ -142,7 +143,6 @@ type SignUpEmployeeInput struct {
 //@Failure 400 {object} serviceError
 //@Router /auth/signUp.Employee [post]
 func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
-	var orgID = c.MustGet("claims_org_id").(uint)
 	//parse JSON body
 	var input SignUpEmployeeInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -154,9 +154,9 @@ func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 	model := repository.EmployeeModel{
 		Name:     input.Name,
 		Password: input.Password,
-		Role:     input.Role,
+		Role:     repository.RoleIDToName(input.RoleID),
 		OutletID: c.MustGet("claims_outlet_id").(uint),
-		OrgID:    orgID,
+		OrgID:    c.MustGet("claims_org_id").(uint),
 	}
 
 	if err := s.repo.Employees.Create(&model, c.MustGet("claims_role").(string)); err != nil {

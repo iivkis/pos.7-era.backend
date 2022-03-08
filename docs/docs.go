@@ -1861,8 +1861,7 @@ var doc = `{
             "type": "object",
             "required": [
                 "name",
-                "password",
-                "role"
+                "password"
             ],
             "properties": {
                 "name": {
@@ -1871,8 +1870,9 @@ var doc = `{
                 "password": {
                     "type": "string"
                 },
-                "role": {
-                    "type": "string"
+                "role_id": {
+                    "description": "Role     string ` + "`" + `json:\"role\" binding:\"required,max=20\"` + "`" + `",
+                    "type": "integer"
                 }
             }
         },

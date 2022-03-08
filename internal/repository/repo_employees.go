@@ -26,7 +26,7 @@ type EmployeeModel struct {
 }
 
 func (m *EmployeeModel) GetRoleID() int {
-	return rolesMap[m.Role]
+	return RoleNameToID(m.Role)
 }
 
 func (m *EmployeeModel) passwordValidation() bool {

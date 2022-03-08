@@ -11,15 +11,31 @@ const (
 
 var (
 	//роли, которые могу быть занесены в БД
-	rolesMap map[string]int = map[string]int{
+	rolesMapByString map[string]int = map[string]int{
 		R_OWNER:    1,
 		R_DIRECTOR: 2,
 		R_ADMIN:    3,
 		R_CASHIER:  4,
 	}
+
+	rolesMapByInt map[int]string = make(map[int]string)
 )
 
+func init() {
+	for k, v := range rolesMapByString {
+		rolesMapByInt[v] = k
+	}
+}
+
 func roleIsExists(role string) (ok bool) {
-	_, ok = rolesMap[role]
+	_, ok = rolesMapByString[role]
 	return
+}
+
+func RoleNameToID(role string) int {
+	return rolesMapByString[role]
+}
+
+func RoleIDToName(roleID int) string {
+	return rolesMapByInt[roleID]
 }
