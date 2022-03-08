@@ -54,6 +54,15 @@ func (r *SessionsRepo) Open(m *SessionModel) error {
 	return err
 }
 
+//при закрытие сессии обновляем поля
+// cash_session_close и date_close
+func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
+	if err := r.db.Model(&SessionModel{}).Where("employee_id = ? AND date_close = 0", employeeID).Updates(sess).Error; err != nil {
+		return err
+	}
+	return r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).Last(sess).Error
+}
+
 //Возвращает все сессии организации (в том числе удаленные)
 func (r *SessionsRepo) GetAllByOrgID(orgID uint) (models []SessionModel, err error) {
 	err = r.db.Unscoped().Where("org_id = ?", orgID).Order("id desc").Find(&models).Error
@@ -88,14 +97,6 @@ func (r *SessionsRepo) GetLastForOutlet(outletID uint) (model SessionModel, err 
 		err = nil
 	}
 	return
-}
-
-//при закрытие сессии обновляем поля
-// cash_session_close и date_close
-func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
-	return r.db.Model(&SessionModel{}).Where("employee_id = ? AND date_close <> 0", employeeID).
-		Updates(sess).
-		Last(sess).Error
 }
 
 func (r *SessionsRepo) HasOpenSession(employeeID interface{}) (ok bool, err error) {
