@@ -32,9 +32,7 @@ func (r *ProductsWithIngredientsRepo) Create(m *ProductWithIngredientModel) erro
 }
 
 func (r *ProductsWithIngredientsRepo) Updates(m *ProductWithIngredientModel, ID interface{}, outletID interface{}) error {
-	return r.db.Model(&ProductWithIngredientModel{}).
-		Where("id = ? AND outlet_id = ?", ID, outletID).
-		Updates(m).Error
+	return r.db.Where("id = ? AND outlet_id = ?", ID, outletID).Updates(m).Error
 }
 
 func (r *ProductsWithIngredientsRepo) Delete(ID interface{}, outletID interface{}) error {
