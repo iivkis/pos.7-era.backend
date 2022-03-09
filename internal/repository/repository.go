@@ -2,6 +2,7 @@ package repository
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/iivkis/pos.7-era.backend/internal/config"
 	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
@@ -32,22 +33,25 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 		panic(err)
 	}
 
-	if err := db.AutoMigrate(
-		&OrganizationModel{},
-		&EmployeeModel{},
-		&OutletModel{},
-		&SessionModel{},
-		&ProductModel{},
-		&OrderInfoModel{},
-		&OrderListModel{},
-		&CategoryModel{},
-		&IngredientModel{},
-		&ProductWithIngredientModel{},
-		&CashChangesModel{},
-		&InventoryHistoryModel{},
-	); err != nil {
-		panic(err)
-	}
+	go func() {
+		if err := db.AutoMigrate(
+			&OrganizationModel{},
+			&EmployeeModel{},
+			&OutletModel{},
+			&SessionModel{},
+			&ProductModel{},
+			&OrderInfoModel{},
+			&OrderListModel{},
+			&CategoryModel{},
+			&IngredientModel{},
+			&ProductWithIngredientModel{},
+			&CashChangesModel{},
+			&InventoryHistoryModel{},
+		); err != nil {
+			panic(err)
+		}
+		log.Println("migration done")
+	}()
 
 	return &Repository{
 		Organizations:           newOrganizationsRepo(db),
