@@ -142,3 +142,5 @@ func (s *ProductsWithIngredientsService) UpdateFields(c *gin.Context) {
 	}
 	NewResponse(c, http.StatusOK, nil)
 }
+
+//
