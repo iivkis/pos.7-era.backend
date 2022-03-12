@@ -52,6 +52,11 @@ definitions:
       outlet_id:
         type: integer
     type: object
+  myservice.CategoryUpdateFieldsInput:
+    properties:
+      name:
+        type: string
+    type: object
   myservice.DefaultOutputModel:
     properties:
       id:
@@ -119,6 +124,25 @@ definitions:
         type: string
       purchase_price:
         type: number
+    type: object
+  myservice.InventoryHistoryCreateInput:
+    properties:
+      date:
+        description: unixmilli
+        type: integer
+    type: object
+  myservice.InventoryHistoryOutputModel:
+    properties:
+      date:
+        description: unixmilli
+        type: integer
+      employee_id:
+        description: сотрудник, который делал инветаризацию
+        type: integer
+      id:
+        type: integer
+      outlet_id:
+        type: integer
     type: object
   myservice.OrderInfoOutputModel:
     properties:
@@ -351,11 +375,6 @@ definitions:
     - name
     - password
     type: object
-  myservice.UpdateCategoryInput:
-    properties:
-      name:
-        type: string
-    type: object
   myservice.outletOutputModel:
     properties:
       id:
@@ -580,7 +599,6 @@ paths:
         воспроизведены в текущей сессии (в точке)
   /categories:
     get:
-      description: Метод позволяет получить список категорий точки
       produces:
       - application/json
       responses:
@@ -594,7 +612,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/myservice.serviceError'
-      summary: Список всех категорий точки
+      summary: Список всех категорий организации для владельца и точки для админа/кассира
     post:
       consumes:
       - application/json
@@ -633,7 +651,7 @@ paths:
         in: body
         name: type
         schema:
-          $ref: '#/definitions/myservice.UpdateCategoryInput'
+          $ref: '#/definitions/myservice.CategoryUpdateFieldsInput'
       produces:
       - application/json
       responses:
@@ -788,6 +806,49 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Удаляет ингридиент из точки
+  /invetoryHistory:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращаемый объект
+          schema:
+            items:
+              $ref: '#/definitions/myservice.InventoryHistoryOutputModel'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить всю историю инвернтаризации
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.InventoryHistoryCreateInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: возвращает id созданной записи
+          schema:
+            $ref: '#/definitions/myservice.DefaultOutputModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Добавить новую историю инвентаризации
   /orderInfo:
     get:
       consumes:
@@ -796,7 +857,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: список завершенных заказов точки
+          description: список завершенных заказов
           schema:
             items:
               $ref: '#/definitions/myservice.OrderInfoOutputModel'
@@ -809,7 +870,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/myservice.serviceError'
-      summary: Получить список завершенных заказов точки (orderInfo)
+      summary: Получить список завершенных заказов (orderInfo)
     post:
       consumes:
       - application/json

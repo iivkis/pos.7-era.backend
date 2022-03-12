@@ -106,4 +106,10 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		r.GET("cashChanges.CurrentSession", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.CashChages.GetAllForCurrentSession)
 		r.POST("cashChanges", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.CashChages.Create)
 	}
+
+	//invetoryHistory
+	{
+		r.GET("/invetoryHistory", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.InventoryHistory.GetAll)
+		r.POST("/invetoryHistory", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.InventoryHistory.Create)
+	}
 }

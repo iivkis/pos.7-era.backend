@@ -24,6 +24,7 @@ type MyService struct {
 	OrdersInfo              *OrdersInfoService
 	ProductsWithIngredients *ProductsWithIngredientsService
 	CashChages              *CashChangesService
+	InventoryHistory        *InventoryHistoryService
 }
 
 func NewMyService(repo *repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent, authjwt *authjwt.AuthJWT) MyService {
@@ -40,5 +41,6 @@ func NewMyService(repo *repository.Repository, strcode *strcode.Strcode, mailage
 		OrdersInfo:              newOrdersInfoService(repo),
 		ProductsWithIngredients: newProductsWithIngredientsService(repo),
 		CashChages:              newCashChangesService(repo),
+		InventoryHistory:        newInventoryHistoryService(repo),
 	}
 }

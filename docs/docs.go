@@ -334,11 +334,10 @@ var doc = `{
         },
         "/categories": {
             "get": {
-                "description": "Метод позволяет получить список категорий точки",
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Список всех категорий точки",
+                "summary": "Список всех категорий организации для владельца и точки для админа/кассира",
                 "responses": {
                     "200": {
                         "description": "Возвращает массив категорий",
@@ -397,7 +396,7 @@ var doc = `{
                         "name": "type",
                         "in": "body",
                         "schema": {
-                            "$ref": "#/definitions/myservice.UpdateCategoryInput"
+                            "$ref": "#/definitions/myservice.CategoryUpdateFieldsInput"
                         }
                     }
                 ],
@@ -659,6 +658,73 @@ var doc = `{
                 }
             }
         },
+        "/invetoryHistory": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить всю историю инвернтаризации",
+                "responses": {
+                    "200": {
+                        "description": "возвращаемый объект",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.InventoryHistoryOutputModel"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Добавить новую историю инвентаризации",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.InventoryHistoryCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает id созданной записи",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/orderInfo": {
             "get": {
                 "consumes": [
@@ -667,10 +733,10 @@ var doc = `{
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Получить список завершенных заказов точки (orderInfo)",
+                "summary": "Получить список завершенных заказов (orderInfo)",
                 "responses": {
                     "200": {
-                        "description": "список завершенных заказов точки",
+                        "description": "список завершенных заказов",
                         "schema": {
                             "type": "array",
                             "items": {
@@ -1442,6 +1508,14 @@ var doc = `{
                 }
             }
         },
+        "myservice.CategoryUpdateFieldsInput": {
+            "type": "object",
+            "properties": {
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
         "myservice.DefaultOutputModel": {
             "type": "object",
             "properties": {
@@ -1544,6 +1618,34 @@ var doc = `{
                 },
                 "purchase_price": {
                     "type": "number"
+                }
+            }
+        },
+        "myservice.InventoryHistoryCreateInput": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "description": "unixmilli",
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.InventoryHistoryOutputModel": {
+            "type": "object",
+            "properties": {
+                "date": {
+                    "description": "unixmilli",
+                    "type": "integer"
+                },
+                "employee_id": {
+                    "description": "сотрудник, который делал инветаризацию",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "outlet_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1896,14 +1998,6 @@ var doc = `{
                     "type": "string"
                 },
                 "password": {
-                    "type": "string"
-                }
-            }
-        },
-        "myservice.UpdateCategoryInput": {
-            "type": "object",
-            "properties": {
-                "name": {
                     "type": "string"
                 }
             }

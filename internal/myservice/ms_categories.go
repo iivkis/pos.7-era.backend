@@ -35,33 +35,32 @@ type CategoryCreateInput struct {
 //@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Router /categories [post]
 func (s *CategoriesService) Create(c *gin.Context) {
-	claims := mustGetEmployeeClaims(c)
-
 	var input CategoryCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	cat := repository.CategoryModel{
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	categoryModel := repository.CategoryModel{
 		Name:     input.Name,
 		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
-		stdQuery := mustGetStdQuery(c)
 		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
-			cat.OutletID = stdQuery.OutletID
+			categoryModel.OutletID = stdQuery.OutletID
 		}
 	}
 
-	if err := s.repo.Categories.Create(&cat); err != nil {
+	if err := s.repo.Categories.Create(&categoryModel); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: cat.ID})
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: categoryModel.ID})
 }
 
 type CategoryGetAll []CategoryOutputModel
