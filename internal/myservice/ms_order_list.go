@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 type OrderListOutputModel struct {
@@ -52,47 +53,64 @@ func (s *OrdersListService) Create(c *gin.Context) {
 		return
 	}
 
-	if err := s.repo.ProductsWithIngredients.WriteOffIngredients(input.ProductID, input.Count, c.MustGet("claims_outlet_id").(uint)); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
-		return
-	}
+	claims := mustGetEmployeeClaims(c)
 
-	//TODO: проверка есть ли orderInfo в точке
-	m := repository.OrderListModel{
+	model := repository.OrderListModel{
 		ProductName:  input.ProductName,
 		ProductPrice: input.ProductPrice,
 		ProductID:    input.ProductID,
 		Count:        input.Count,
 		OrderInfoID:  input.OrderInfoID,
-		OutletID:     c.MustGet("claims_outlet_id").(uint),
-		OrgID:        c.MustGet("claims_org_id").(uint),
+		OutletID:     claims.OutletID,
+		OrgID:        claims.OrganizationID,
 	}
 
-	if err := s.repo.OrdersList.Create(&m); err != nil {
+	if !s.repo.OrdersInfo.Exists(&repository.OrderInfoModel{Model: gorm.Model{ID: model.OrderInfoID}, OutletID: model.OutletID}) {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("unidefiden `order_info` with this `id`"))
+		return
+	}
+
+	if err := s.repo.ProductsWithIngredients.WriteOffIngredients(model.ProductID, model.Count); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: m.ID})
+	if err := s.repo.OrdersList.Create(&model); err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
-type OrderListGetAllForOutletOutput []OrderListOutputModel
+type OrderListGetAllOutput []OrderListOutputModel
 
 //@Summary Получить список orderList точки (список продутктов из которых состоит заказ)
-//@Success 200 {object} OrderListGetAllForOutletOutput "список orderList точки"
+//@Success 200 {object} OrderListGetAllOutput "список orderList точки"
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /orderList [get]
-func (s *OrdersListService) GetAllForOutlet(c *gin.Context) {
-	models, err := s.repo.OrdersList.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint))
+func (s *OrdersListService) GetAll(c *gin.Context) {
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	where := &repository.OrderListModel{
+		OrgID:    claims.OrganizationID,
+		OutletID: claims.OutletID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	models, err := s.repo.OrdersList.Find(where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 	}
 
-	var output OrderListGetAllForOutletOutput = make(OrderListGetAllForOutletOutput, len(models))
-	for i, item := range models {
+	var output OrderListGetAllOutput = make(OrderListGetAllOutput, len(*models))
+	for i, item := range *models {
 		output[i] = OrderListOutputModel{
 			ID:           item.ID,
 			Count:        item.Count,

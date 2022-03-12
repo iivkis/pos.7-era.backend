@@ -32,24 +32,21 @@ func newOrderListRepo(db *gorm.DB) *OrderListRepo {
 	}
 }
 
-func (r *OrderListRepo) Create(m *OrderListModel) error {
+//actual
+func (r *OrderListRepo) Create(m *OrderListModel) (err error) {
 	return r.db.Create(m).Error
 }
 
-func (r *OrderListRepo) FindAllByOrgID(orgID interface{}) (orders []OrderListModel, err error) {
-	err = r.db.Where("org_id = ?", orgID).Find(&orders).Error
+func (r *OrderListRepo) Find(where *OrderListModel) (result *[]OrderListModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
 	return
 }
 
-func (r *OrderListRepo) FindAllByOutletID(outletID interface{}) (orders []OrderListModel, err error) {
-	err = r.db.Where("outlet_id = ?", outletID).Find(&orders).Error
+func (r *OrderListRepo) Updates(where *OrderListModel, updatedFields *OrderListModel) error {
+	return r.db.Where(where).Updates(updatedFields).Error
+}
+
+func (r *OrderListRepo) Delete(where *OrderListModel) (err error) {
+	err = r.db.Where(where).Delete(&OrderListModel{}).Error
 	return
-}
-
-func (r *OrderListRepo) Updates(m *OrderListModel, orderListID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", orderListID, outletID).Updates(m).Error
-}
-
-func (r *OrderListRepo) Delete(orderListID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", orderListID, outletID).Delete(&OrderListModel{}).Error
 }

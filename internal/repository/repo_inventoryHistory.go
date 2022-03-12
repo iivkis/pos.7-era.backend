@@ -25,11 +25,24 @@ func newInventoryHistoryRepo(db *gorm.DB) *InventoryHistoryRepo {
 	}
 }
 
-func (r *InventoryHistoryRepo) Create(m *IngredientModel) error {
+func (r *InventoryHistoryRepo) Create(m *InventoryHistoryModel) error {
 	return r.db.Create(m).Error
 }
 
-func (r *InventoryHistoryRepo) FindAllByOutletID(outletID interface{}) (m []IngredientModel, err error) {
-	err = r.db.Where("outlet_id = ?", outletID).Find(&m).Error
+func (r InventoryHistoryRepo) Find(where *InventoryHistoryModel) (result *[]InventoryHistoryModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
 	return
+}
+
+func (r *InventoryHistoryRepo) Updates(where *InventoryHistoryModel, updatedFields *InventoryHistoryModel) error {
+	return r.db.Where(where).Updates(updatedFields).Error
+}
+
+func (r *InventoryHistoryRepo) Delete(where *InventoryHistoryModel) (err error) {
+	err = r.db.Where(where).Delete(&InventoryHistoryModel{}).Error
+	return
+}
+
+func (r *InventoryHistoryRepo) Exists(where *InventoryHistoryModel) bool {
+	return r.db.Where(where).First(&InventoryHistoryModel{}).Error == nil
 }

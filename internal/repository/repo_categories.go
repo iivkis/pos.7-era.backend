@@ -23,32 +23,25 @@ func newCategoriesRepo(db *gorm.DB) *CategoriesRepo {
 	}
 }
 
+//actual
 func (r *CategoriesRepo) Create(m *CategoryModel) (err error) {
-	err = r.db.Create(m).Error
+	return r.db.Create(m).Error
+}
+
+func (r *CategoriesRepo) Find(where *CategoryModel) (result *[]CategoryModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
 	return
 }
 
-func (r *CategoriesRepo) FindAllByOutletID(outletID interface{}) (cats []CategoryModel, err error) {
-	err = r.db.Where("outlet_id = ?", outletID).Find(&cats).Error
+func (r *CategoriesRepo) Updates(where *CategoryModel, updatedFields *CategoryModel) error {
+	return r.db.Where(where).Updates(updatedFields).Error
+}
+
+func (r *CategoriesRepo) Delete(where *CategoryModel) (err error) {
+	err = r.db.Where(where).Delete(&CategoryModel{}).Error
 	return
 }
 
-func (r *CategoriesRepo) FindAllByOrgID(orgID uint) (cats []CategoryModel, err error) {
-	err = r.db.Where("org_id = ?", orgID).Find(&cats).Error
-	return
-}
-
-func (r *CategoriesRepo) DeleteByID(outletID interface{}, paramCategoryID string) (err error) {
-	err = r.db.Where("id = ? AND outlet_id = ?", paramCategoryID, outletID).
-		Delete(&CategoryModel{}).Error
-	return
-}
-
-func (r *CategoriesRepo) Updates(categoryID interface{}, outletID interface{}, m *CategoryModel) (err error) {
-	err = r.db.Where("id = ? AND outlet_id = ?", categoryID, outletID).Updates(m).Error
-	return err
-}
-
-func (r *CategoriesRepo) ExistsInOutlet(categoryID interface{}, outletID interface{}) bool {
-	return r.db.Where("id = ? AND outlet_id = ?", categoryID, outletID).First(&CategoryModel{}).Error == nil
+func (r *CategoriesRepo) Exists(where *CategoryModel) bool {
+	return r.db.Where(where).First(&CategoryModel{}).Error == nil
 }

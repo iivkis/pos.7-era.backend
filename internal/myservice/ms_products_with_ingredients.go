@@ -2,9 +2,11 @@ package myservice
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 type PWIOutputModel struct {
@@ -46,26 +48,35 @@ func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 		return
 	}
 
-	if !s.repo.Products.ExistsInOutlet(input.ProductID, c.MustGet("claims_outlet_id").(uint)) ||
-		!s.repo.Ingredients.ExistsInOutlet(input.IngredientID, c.MustGet("claims_outlet_id").(uint)) {
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
+	pwiModel := &repository.ProductWithIngredientModel{
+		CountTakeForSell: input.CountTakeForSell,
+		IngredientID:     input.IngredientID,
+		ProductID:        input.ProductID,
+		OutletID:         claims.OutletID,
+		OrgID:            claims.OrganizationID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
+			pwiModel.OutletID = stdQuery.OutletID
+		}
+	}
+
+	if !s.repo.Products.Exists(&repository.ProductModel{Model: gorm.Model{ID: pwiModel.ProductID}, OutletID: pwiModel.OutletID}) ||
+		!s.repo.Ingredients.Exists(&repository.IngredientModel{Model: gorm.Model{ID: pwiModel.IngredientID}, OutletID: pwiModel.OutletID}) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("not found product or ingredient with this `id` in outlet"))
 		return
 	}
 
-	m := repository.ProductWithIngredientModel{
-		CountTakeForSell: input.CountTakeForSell,
-		IngredientID:     input.IngredientID,
-		ProductID:        input.ProductID,
-		OutletID:         c.MustGet("claims_outlet_id").(uint),
-		OrgID:            c.MustGet("claims_org_id").(uint),
-	}
-
-	if err := s.repo.ProductsWithIngredients.Create(&m); err != nil {
+	if err := s.repo.ProductsWithIngredients.Create(pwiModel); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: m.ID})
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: pwiModel.ID})
 }
 
 type PWIGetAllForOutletOutput []PWIOutputModel
@@ -77,15 +88,28 @@ type PWIGetAllForOutletOutput []PWIOutputModel
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /pwis [get]
-func (s *ProductsWithIngredientsService) Get(c *gin.Context) {
-	pwis, err := s.repo.ProductsWithIngredients.FindAllByOutletID(c.MustGet("claims_outlet_id").(uint), c.MustGet("claims_product_id").(uint))
+func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
+	where := &repository.ProductWithIngredientModel{
+		ProductID: stdQuery.ProductID,
+		OutletID:  claims.OutletID,
+		OrgID:     claims.OrganizationID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	pwis, err := s.repo.ProductsWithIngredients.Find(where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	output := make(PWIGetAllForOutletOutput, len(pwis))
-	for i, pwi := range pwis {
+	output := make(PWIGetAllForOutletOutput, len(*pwis))
+	for i, pwi := range *pwis {
 		output[i] = PWIOutputModel{
 			ID:               pwi.ID,
 			CountTakeForSell: pwi.CountTakeForSell,
@@ -105,11 +129,24 @@ func (s *ProductsWithIngredientsService) Get(c *gin.Context) {
 //@Failure 500 {object} serviceError
 //@Router /pwis/:id [delete]
 func (s *ProductsWithIngredientsService) Delete(c *gin.Context) {
-	err := s.repo.ProductsWithIngredients.Delete(c.Param("id"), c.MustGet("claims_outlet_id"))
+	pwiID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
+
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	where := &repository.ProductWithIngredientModel{Model: gorm.Model{ID: uint(pwiID)}, OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	if err := s.repo.ProductsWithIngredients.Delete(where); err != nil {
+		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		return
+	}
+
 	NewResponse(c, http.StatusOK, nil)
 }
 
@@ -131,12 +168,25 @@ func (s *ProductsWithIngredientsService) UpdateFields(c *gin.Context) {
 		return
 	}
 
-	m := repository.ProductWithIngredientModel{
+	pwiID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	where := &repository.ProductWithIngredientModel{Model: gorm.Model{ID: uint(pwiID)}, OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	updatedFields := &repository.ProductWithIngredientModel{
 		CountTakeForSell: input.CountTakeForSell,
 		ProductID:        input.ProductID,
 		IngredientID:     input.IngredientID,
 	}
-	if err := s.repo.ProductsWithIngredients.Updates(&m, c.Param("id"), c.MustGet("claims_outlet_id").(uint)); err != nil {
+	if err := s.repo.ProductsWithIngredients.Updates(where, updatedFields); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

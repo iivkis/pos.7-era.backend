@@ -21,24 +21,29 @@ func newOutletsRepo(db *gorm.DB) *OutletsRepo {
 	}
 }
 
+//actual
 func (r *OutletsRepo) Create(m *OutletModel) error {
 	return r.db.Create(m).Error
 }
 
-func (r *OutletsRepo) Updates(m *OutletModel, outletID interface{}) error {
-	return r.db.Where("id = ?", outletID).Updates(m).Error
+func (r *OutletsRepo) Updates(where *OutletModel, updatedFields *OutletModel) error {
+	return r.db.Where(where).Updates(updatedFields).Error
 }
 
-func (r *OutletsRepo) Delete(outletID interface{}) error {
-	return r.db.Where("id = ?", outletID).Delete(&OutletModel{}).Error
+func (r *OutletsRepo) Delete(where *OutletModel) error {
+	return r.db.Where(where).Delete(&OutletModel{}).Error
 }
 
-func (r *OutletsRepo) FindAllByOrgID(orgID interface{}) (models []OutletModel, err error) {
-	err = r.db.Where("org_id = ?", orgID).Find(&models).Error
+func (r *OutletsRepo) Find(where *OutletModel) (result *[]OutletModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
 	return
 }
 
-func (r *OutletsRepo) ExistsInOrg(outletID interface{}, orgID interface{}) bool {
+func (r *OutletsRepo) Exists(where *OutletModel) bool {
+	return r.db.Where(where).First(&OutletModel{}).Error == nil
+}
+
+func (r *OutletsRepo) ExistsInOrg(outletID uint, orgID uint) bool {
 	err := r.db.Where("id = ? AND org_id = ?", outletID, orgID).First(&OutletModel{}).Error
 	return err == nil
 }

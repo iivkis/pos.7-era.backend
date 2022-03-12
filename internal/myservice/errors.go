@@ -42,14 +42,13 @@ var (
 	errEmailNotFound       = newServiceError(202, "email not found")
 	errRecordNotFound      = newServiceError(203, "record not found")
 	errIncorrectPassword   = newServiceError(204, "invalid password")
-	errOnDelet             = newServiceError(205, "error deleting a record")
 	errRecordAlreadyExists = newServiceError(206, "the record already exists")
-	errPermissionDenided   = newServiceError(207, "permission denided")
 )
 
-//300-399 - ошибки для внешнего импорта
+//300-399 - ошибки связанные с токеном и доступом
 var (
-	ErrParsingJWT     = newServiceError(300, "jwt token parsing error")
-	ErrUndefinedJWT   = newServiceError(301, "jwt token undefined in header `Authorization`")
-	ErrNoAccessRights = newServiceError(302, "no access rights")
+	errParsingJWT        = newServiceError(300, "jwt token parsing error")
+	errUndefinedJWT      = newServiceError(301, "jwt token undefined in header `Authorization`")
+	errNoAccessRights    = newServiceError(302, "no access rights")
+	errPermissionDenided = newServiceError(303, "permission denided")
 )

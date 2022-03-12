@@ -28,24 +28,26 @@ func newOrderInfoRepo(db *gorm.DB) *OrderInfoRepo {
 		db: db,
 	}
 }
-func (r *OrderInfoRepo) Create(m *OrderInfoModel) error {
-	return r.db.Create(m).Error
+
+//actual
+func (r *OrderInfoRepo) Create(model *OrderInfoModel) error {
+	return r.db.Create(model).Error
 }
 
-func (r *OrderInfoRepo) Updates(m *OrderInfoModel, orderInfoID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", orderInfoID, outletID).Updates(m).Error
-}
-
-func (r *OrderInfoRepo) FindAllByOrgID(orgID interface{}) (m []OrderInfoModel, err error) {
-	err = r.db.Unscoped().Where("org_id = ?", orgID).Find(&m).Error
+func (r OrderInfoRepo) Find(where *OrderInfoModel) (result *[]OrderInfoModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
 	return
 }
 
-func (r *OrderInfoRepo) FindAllByOutletID(outletID interface{}) (m []OrderInfoModel, err error) {
-	err = r.db.Unscoped().Where("outlet_id = ?", outletID).Find(&m).Error
+func (r *OrderInfoRepo) Updates(where *OrderInfoModel, updatedFields *OrderInfoModel) error {
+	return r.db.Where(where).Updates(updatedFields).Error
+}
+
+func (r *OrderInfoRepo) Delete(where *OrderInfoModel) (err error) {
+	err = r.db.Where(where).Delete(&OrderInfoModel{}).Error
 	return
 }
 
-func (r *OrderInfoRepo) Delete(orderInfoID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", orderInfoID, outletID).Error
+func (r *OrderInfoRepo) Exists(where *OrderInfoModel) bool {
+	return r.db.Where(where).First(&OrderInfoModel{}).Error == nil
 }

@@ -2,9 +2,11 @@ package myservice
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 type OutletsService struct {
@@ -41,9 +43,11 @@ func (s *OutletsService) Create(c *gin.Context) {
 		return
 	}
 
+	claims := mustGetEmployeeClaims(c)
+
 	model := repository.OutletModel{
 		Name:  input.Name,
-		OrgID: c.MustGet("claims_org_id").(uint),
+		OrgID: claims.OrganizationID,
 	}
 
 	if err := s.repo.Outlets.Create(&model); err != nil {
@@ -51,15 +55,15 @@ func (s *OutletsService) Create(c *gin.Context) {
 		return
 	}
 
-	emplModel := repository.EmployeeModel{
+	employeeModel := repository.EmployeeModel{
 		Name:     "Администратор",
 		Password: "000000",
 		Role:     repository.R_ADMIN,
 		OutletID: model.ID,
-		OrgID:    c.MustGet("claims_org_id").(uint),
+		OrgID:    claims.OrganizationID,
 	}
 
-	if err := s.repo.Employees.Create(&emplModel, repository.R_OWNER); err != nil {
+	if err := s.repo.Employees.Create(&employeeModel); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -67,23 +71,24 @@ func (s *OutletsService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
-type OutletGetAllForOrgOutput []outletOutputModel
+type OutletGetAllOutput []outletOutputModel
 
 //@Summary Список всех торговых точек (токен организации)
 //@Description Метод позволяет получить список всех торговых точек
 //@Produce json
-//@Success 200 {object} OutletGetAllForOrgOutput "Возвращает массив торговых точек"
+//@Success 200 {object} OutletGetAllOutput "Возвращает массив торговых точек"
 //@Failure 500 {object} serviceError
 //@Router /outlets [get]
 func (s *OutletsService) GetAllForOrg(c *gin.Context) {
-	outlets, err := s.repo.Outlets.FindAllByOrgID(c.MustGet("claims_org_id"))
+	claims := mustGetOrganizationClaims(c)
+	outlets, err := s.repo.Outlets.Find(&repository.OutletModel{OrgID: claims.OrganizationID})
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	output := make(OutletGetAllForOrgOutput, len(outlets))
-	for i, outlet := range outlets {
+	output := make(OutletGetAllOutput, len(*outlets))
+	for i, outlet := range *outlets {
 		output[i] = outletOutputModel{
 			ID:   outlet.ID,
 			Name: outlet.Name,
@@ -110,16 +115,24 @@ func (s *OutletsService) UpdateFields(c *gin.Context) {
 		return
 	}
 
-	m := repository.OutletModel{
+	claims := mustGetEmployeeClaims(c)
+
+	updatedFields := &repository.OutletModel{
 		Name: input.Name,
 	}
 
-	if !s.repo.Outlets.ExistsInOrg(c.Param("id"), c.MustGet("claims_org_id")) {
+	outletID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	if !s.repo.Outlets.ExistsInOrg(uint(outletID), claims.OrganizationID) {
 		NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined outlet with this `id` in your organization"))
 		return
 	}
 
-	if err := s.repo.Outlets.Updates(&m, c.Param("id")); err != nil {
+	if err := s.repo.Outlets.Updates(&repository.OutletModel{Model: gorm.Model{ID: uint(outletID)}, OrgID: claims.OrganizationID}, updatedFields); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -134,12 +147,19 @@ func (s *OutletsService) UpdateFields(c *gin.Context) {
 //@Failure 500 {object} serviceError
 //@Router /outlets/:id [delete]
 func (s *OutletsService) Delete(c *gin.Context) {
-	if !s.repo.Outlets.ExistsInOrg(c.Param("id"), c.MustGet("claims_org_id")) {
+	claims := mustGetEmployeeClaims(c)
+
+	outletID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+	if !s.repo.Outlets.ExistsInOrg(uint(outletID), claims.OrganizationID) {
 		NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined outlet with this `id` in your organization"))
 		return
 	}
 
-	if err := s.repo.Outlets.Delete(c.Param("id")); err != nil {
+	if err := s.repo.Outlets.Delete(&repository.OutletModel{Model: gorm.Model{ID: uint(outletID)}, OrgID: claims.OrganizationID}); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

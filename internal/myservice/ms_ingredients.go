@@ -2,9 +2,11 @@ package myservice
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 type IngredientOutputModel struct {
@@ -48,40 +50,62 @@ func (s *IngredientsService) Create(c *gin.Context) {
 		return
 	}
 
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
 	ingredient := repository.IngredientModel{
 		Name:          input.Name,
 		Count:         input.Count,
 		PurchasePrice: input.PurchasePrice,
 		MeasureUnit:   input.MeasureUnit,
-		OutletID:      c.MustGet("claims_outlet_id").(uint),
-		OrgID:         c.MustGet("claims_org_id").(uint),
+		OutletID:      claims.OutletID,
+		OrgID:         claims.OrganizationID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
+			ingredient.OutletID = stdQuery.OutletID
+		}
 	}
 
 	if err := s.repo.Ingredients.Create(&ingredient); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
+
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: ingredient.ID})
 }
 
-type IngredientGetAllForOutletOutput []IngredientOutputModel
+type IngredientGetAllOutput []IngredientOutputModel
 
 //@Summary Получить все ингредиенты точки
 //@Accept json
 //@Produce json
-//@Success 200 {object} IngredientGetAllForOutletOutput "возвращает все ингредиенты текущей точки"
+//@Success 200 {object} IngredientGetAllOutput "возвращает все ингредиенты текущей точки"
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /ingredients [get]
-func (s *IngredientsService) GetAllForOutlet(c *gin.Context) {
-	ingredients, err := s.repo.Ingredients.GetAllByOutletID(c.MustGet("claims_outlet_id"))
+func (s *IngredientsService) GetAll(c *gin.Context) {
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
+	where := &repository.IngredientModel{
+		OrgID:    claims.OrganizationID,
+		OutletID: claims.OutletID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	ingredients, err := s.repo.Ingredients.Find(where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	var output IngredientGetAllForOutletOutput = make(IngredientGetAllForOutletOutput, len(ingredients))
-	for i, ingredient := range ingredients {
+	var output IngredientGetAllOutput = make(IngredientGetAllOutput, len(*ingredients))
+	for i, ingredient := range *ingredients {
 		output[i] = IngredientOutputModel{
 			ID:            ingredient.ID,
 			Name:          ingredient.Name,
@@ -116,14 +140,33 @@ func (s *IngredientsService) UpdateFields(c *gin.Context) {
 		return
 	}
 
-	ingredient := repository.IngredientModel{
+	ingrID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
+	where := &repository.IngredientModel{
+		Model:    gorm.Model{ID: uint(ingrID)},
+		OrgID:    claims.OrganizationID,
+		OutletID: claims.OutletID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	updatedFields := &repository.IngredientModel{
 		Name:          input.Name,
 		PurchasePrice: input.PurchasePrice,
 		Count:         input.Count,
 		MeasureUnit:   input.MeasureUnit,
 	}
 
-	if err := s.repo.Ingredients.Updates(&ingredient, c.Param("id"), c.MustGet("claims_outlet_id")); err != nil {
+	if err := s.repo.Ingredients.Updates(where, updatedFields); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -138,7 +181,26 @@ func (s *IngredientsService) UpdateFields(c *gin.Context) {
 //@Failure 500 {object} serviceError
 //@Router /ingredients/:id [delete]
 func (s *IngredientsService) Delete(c *gin.Context) {
-	if err := s.repo.Ingredients.Delete(c.Param("id"), c.MustGet("claims_outlet_id")); err != nil {
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
+	ingrID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	where := &repository.IngredientModel{
+		Model:    gorm.Model{ID: uint(ingrID)},
+		OrgID:    claims.OrganizationID,
+		OutletID: claims.OutletID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	if err := s.repo.Ingredients.Delete(where); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

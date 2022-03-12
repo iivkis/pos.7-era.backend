@@ -54,15 +54,17 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 		return
 	}
 
+	claims := mustGetEmployeeClaims(c)
+
 	switch input.Action {
 	case "open":
 		{
 			sess := repository.SessionModel{
 				CashSessionOpen: input.Cash,
 				DateOpen:        input.Date,
-				EmployeeID:      c.MustGet("claims_employee_id").(uint),
-				OutletID:        c.MustGet("claims_outlet_id").(uint),
-				OrgID:           c.MustGet("claims_org_id").(uint),
+				EmployeeID:      claims.EmployeeID,
+				OutletID:        claims.OutletID,
+				OrgID:           claims.OrganizationID,
 			}
 			if err := s.repo.Sessions.Open(&sess); err != nil {
 				if errors.Is(err, repository.ErrSessionAlreadyOpen) {
@@ -73,7 +75,7 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 				return
 			}
 
-			if err := s.repo.Employees.SetOnline(c.MustGet("claims_employee_id")); err != nil {
+			if err := s.repo.Employees.SetOnline(claims.EmployeeID); err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 				return
 			}
@@ -86,13 +88,13 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 				DateClose:        input.Date,
 				CashSessionClose: input.Cash,
 			}
-			err := s.repo.Sessions.Close(c.MustGet("claims_employee_id"), &sess)
+			err := s.repo.Sessions.Close(claims.EmployeeID, &sess)
 			if err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 				return
 			}
 
-			if err := s.repo.Employees.SetOffline(c.MustGet("claims_employee_id")); err != nil {
+			if err := s.repo.Employees.SetOffline(claims.EmployeeID); err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 				return
 			}
@@ -104,25 +106,36 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 	}
 }
 
-type SessionsGetAllForOutletOutput []SessionOutputModel
+type SessionsGetAllOutput []SessionOutputModel
 
 //@Summary Список всех сессий точки
 //@Description Метод позволяет получить список всех сессий точки
-//@Success 200 {object} SessionsGetAllForOutletOutput "Возвращает массив сессий точки"
+//@Success 200 {object} SessionsGetAllOutput "Возвращает массив сессий точки"
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /sessions [get]
 func (s *SessionsService) GetAllForOutlet(c *gin.Context) {
-	sessions, err := s.repo.Sessions.GetAllByOutletID(c.MustGet("claims_outlet_id").(uint))
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	where := &repository.SessionModel{
+		OrgID:    claims.OrganizationID,
+		OutletID: claims.OutletID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	sessions, err := s.repo.Sessions.Find(where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	var output SessionsGetAllForOutletOutput = make(SessionsGetAllForOutletOutput, len(sessions))
-	for i, sess := range sessions {
+	var output SessionsGetAllOutput = make(SessionsGetAllOutput, len(*sessions))
+	for i, sess := range *sessions {
 		output[i] = SessionOutputModel{
 			ID:         sess.ID,
 			EmployeeID: sess.EmployeeID,
@@ -146,7 +159,16 @@ func (s *SessionsService) GetAllForOutlet(c *gin.Context) {
 //@Failure 500 {object} serviceError
 //@Router /sessions.Last.Closed [get]
 func (s *SessionsService) GetLastClosedForOutlet(c *gin.Context) {
-	sess, err := s.repo.Sessions.GetLastClosedForOutlet(c.MustGet("claims_outlet_id").(uint))
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	outletID := claims.OutletID
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
+			outletID = stdQuery.OutletID
+		}
+	}
+
+	sess, err := s.repo.Sessions.GetLastClosedForOutlet(outletID)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
@@ -174,7 +196,16 @@ func (s *SessionsService) GetLastClosedForOutlet(c *gin.Context) {
 //@Failure 500 {object} serviceError
 //@Router /sessions.Last [get]
 func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
-	sess, err := s.repo.Sessions.GetLastForOutlet(c.MustGet("claims_outlet_id").(uint))
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	outletID := claims.OutletID
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
+			outletID = stdQuery.OutletID
+		}
+	}
+
+	sess, err := s.repo.Sessions.GetLastForOutlet(outletID)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

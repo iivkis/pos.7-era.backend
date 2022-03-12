@@ -3,6 +3,7 @@ package myservice
 import (
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
@@ -47,7 +48,9 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 		return
 	}
 
-	sess, err := s.repo.Sessions.GetLastOpenByEmployeeID(c.MustGet("claims_employee_id"))
+	claims := mustGetEmployeeClaims(c)
+
+	sess, err := s.repo.Sessions.GetLastOpenByEmployeeID(claims.EmployeeID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusBadRequest, errRecordNotFound("you should open new session"))
@@ -57,40 +60,51 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 		return
 	}
 
-	m := repository.OrderInfoModel{
+	model := repository.OrderInfoModel{
 		PayType:      input.PayType,
 		Date:         input.Date,
 		EmployeeName: input.EmployeeName,
 		SessionID:    sess.ID,
-		OrgID:        c.MustGet("claims_org_id").(uint),
-		OutletID:     c.MustGet("claims_outlet_id").(uint),
+		OrgID:        claims.OrganizationID,
+		OutletID:     claims.OutletID,
 	}
-	if err = s.repo.OrdersInfo.Create(&m); err != nil {
+	if err = s.repo.OrdersInfo.Create(&model); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: m.ID})
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
-type OrdersInfoGetAllForOutletOutput []OrderInfoOutputModel
+type OrdersInfoGetAllOutput []OrderInfoOutputModel
 
-//@Summary Получить список завершенных заказов точки (orderInfo)
+//@Summary Получить список завершенных заказов (orderInfo)
 //@Accept json
 //@Produce json
-//@Success 200 {object} OrdersInfoGetAllForOutletOutput "список завершенных заказов точки"
+//@Success 200 {object} OrdersInfoGetAllOutput "список завершенных заказов"
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /orderInfo [get]
 func (s *OrdersInfoService) GetAllForOutlet(c *gin.Context) {
-	list, err := s.repo.OrdersInfo.FindAllByOutletID(c.MustGet("claims_outlet_id"))
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	where := &repository.OrderInfoModel{
+		OrgID:    claims.OrganizationID,
+		OutletID: claims.OutletID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	list, err := s.repo.OrdersInfo.Find(where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	output := make(OrdersInfoGetAllForOutletOutput, len(list))
-	for i, item := range list {
+	output := make(OrdersInfoGetAllOutput, len(*list))
+	for i, item := range *list {
 		output[i] = OrderInfoOutputModel{
 			ID:           item.ID,
 			PayType:      item.PayType,
@@ -112,8 +126,24 @@ func (s *OrdersInfoService) GetAllForOutlet(c *gin.Context) {
 //@Failure 500 {object} serviceError
 //@Router /orderInfo/:id [delete]
 func (s *OrdersInfoService) Delete(c *gin.Context) {
-	err := s.repo.OrdersInfo.Delete(c.Param("id"), c.MustGet("claims_outlet_id"))
+	orderInfoID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	where := &repository.OrderInfoModel{
+		Model: gorm.Model{ID: uint(orderInfoID)},
+		OrgID: claims.OrganizationID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	if err := s.repo.OrdersInfo.Delete(where); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

@@ -2,9 +2,11 @@ package myservice
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 type CategoriesService struct {
@@ -33,6 +35,8 @@ type CategoryCreateInput struct {
 //@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Router /categories [post]
 func (s *CategoriesService) Create(c *gin.Context) {
+	claims := mustGetEmployeeClaims(c)
+
 	var input CategoryCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -41,9 +45,17 @@ func (s *CategoriesService) Create(c *gin.Context) {
 
 	cat := repository.CategoryModel{
 		Name:     input.Name,
-		OrgID:    c.MustGet("claims_org_id").(uint),
-		OutletID: c.MustGet("claims_outlet_id").(uint),
+		OrgID:    claims.OrganizationID,
+		OutletID: claims.OutletID,
 	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		stdQuery := mustGetStdQuery(c)
+		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
+			cat.OutletID = stdQuery.OutletID
+		}
+	}
+
 	if err := s.repo.Categories.Create(&cat); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
@@ -52,23 +64,34 @@ func (s *CategoriesService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: cat.ID})
 }
 
-type CategoryGetAllOutput []CategoryOutputModel
+type CategoryGetAll []CategoryOutputModel
 
-//@Summary Список всех категорий точки
-//@Description Метод позволяет получить список категорий точки
+//@Summary Список всех категорий организации для владельца и точки для админа/кассира
 //@Produce json
-//@Success 200 {object} CategoryGetAllOutput "Возвращает массив категорий"
+//@Success 200 {object} CategoryGetAll "Возвращает массив категорий"
 //@Failure 500 {object} serviceError
 //@Router /categories [get]
-func (s *CategoriesService) GetAllForOutlet(c *gin.Context) {
-	cats, err := s.repo.Categories.FindAllByOutletID(c.MustGet("claims_outlet_id"))
+func (s *CategoriesService) GetAll(c *gin.Context) {
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
+	where := &repository.CategoryModel{
+		OrgID:    claims.OrganizationID,
+		OutletID: claims.OutletID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	cats, err := s.repo.Categories.Find(where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	var output CategoryGetAllOutput = make(CategoryGetAllOutput, len(cats))
-	for i, cat := range cats {
+	var output CategoryGetAll = make(CategoryGetAll, len(*cats))
+	for i, cat := range *cats {
 		output[i] = CategoryOutputModel{
 			ID:       cat.ID,
 			Name:     cat.Name,
@@ -86,37 +109,69 @@ func (s *CategoriesService) GetAllForOutlet(c *gin.Context) {
 //@Failure 500 {object} serviceError
 //@Router /categories/:id [delete]
 func (s *CategoriesService) Delete(c *gin.Context) {
-	id := c.Param("id")
-	if err := s.repo.Categories.DeleteByID(c.MustGet("claims_outlet_id"), id); err != nil {
-		NewResponse(c, http.StatusBadRequest, errOnDelet(err.Error()))
+	catID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
+	where := &repository.CategoryModel{Model: gorm.Model{ID: uint(catID)}, OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	if err := s.repo.Categories.Delete(where); err != nil {
+		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 		return
 	}
 
 	NewResponse(c, http.StatusOK, nil)
 }
 
-type UpdateCategoryInput struct {
+type CategoryUpdateFieldsInput struct {
 	Name string `json:"name"`
 }
 
 //@Summary Обновить поля категории
-//@param type body UpdateCategoryInput false "Принимаемый объект"
+//@param type body CategoryUpdateFieldsInput false "Принимаемый объект"
 //@Accept json
 //@Produce json
 //@Success 200 {object} object "возвращает пустой объект"
 //@Router /categories/:id [put]
-func (s *CategoriesService) Update(c *gin.Context) {
-	var input UpdateCategoryInput
+func (s *CategoriesService) UpdateFields(c *gin.Context) {
+	var input CategoryUpdateFieldsInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	cat := repository.CategoryModel{
+	catID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
+	where := &repository.CategoryModel{
+		Model:    gorm.Model{ID: uint(catID)},
+		OrgID:    claims.OrganizationID,
+		OutletID: claims.OutletID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	updatedFields := &repository.CategoryModel{
 		Name: input.Name,
 	}
 
-	if err := s.repo.Categories.Updates(c.Param("id"), c.MustGet("claims_outlet_id"), &cat); err != nil {
+	if err := s.repo.Categories.Updates(where, updatedFields); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

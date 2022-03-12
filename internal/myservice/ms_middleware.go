@@ -24,19 +24,19 @@ func (s *MiddlewareService) AuthOrg() func(*gin.Context) {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 		if token == "" {
-			NewResponse(c, http.StatusUnauthorized, ErrUndefinedJWT())
+			NewResponse(c, http.StatusUnauthorized, errUndefinedJWT())
 			c.Abort()
 			return
 		}
 
 		claims, err := s.authjwt.ParseOrganizationToken(token)
 		if err != nil {
-			NewResponse(c, http.StatusUnauthorized, ErrParsingJWT(err.Error()))
+			NewResponse(c, http.StatusUnauthorized, errParsingJWT(err.Error()))
 			c.Abort()
 			return
 		}
 
-		c.Set("claims_org_id", claims.OrganizationID)
+		c.Set("claims", claims)
 	}
 }
 
@@ -55,7 +55,7 @@ func (s *MiddlewareService) AuthEmployee(allowedRoles ...string) func(*gin.Conte
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
 		if token == "" {
-			NewResponse(c, http.StatusUnauthorized, ErrUndefinedJWT())
+			NewResponse(c, http.StatusUnauthorized, errUndefinedJWT())
 			c.Abort()
 			return
 		}
@@ -63,49 +63,38 @@ func (s *MiddlewareService) AuthEmployee(allowedRoles ...string) func(*gin.Conte
 		//парсинг токена
 		claims, err := s.authjwt.ParseEmployeeToken(token)
 		if err != nil {
-			NewResponse(c, http.StatusUnauthorized, ErrParsingJWT(err.Error()))
+			NewResponse(c, http.StatusUnauthorized, errParsingJWT(err.Error()))
 			c.Abort()
 			return
 		}
 
 		//проверка прав доступа
 		if !isAllowed(claims.Role) {
-			NewResponse(c, http.StatusUnauthorized, ErrNoAccessRights())
+			NewResponse(c, http.StatusUnauthorized, errNoAccessRights())
 			c.Abort()
 			return
 		}
 
-		c.Set("claims_org_id", claims.OrganizationID)
-		c.Set("claims_outlet_id", claims.OutletID)
-		c.Set("claims_employee_id", claims.EmployeeID)
-		c.Set("claims_role", claims.Role)
+		c.Set("claims", claims)
 	}
 }
 
+type MiddlewareStdQueryInput struct {
+	OutletID  uint `form:"outlet_id"`
+	ProductID uint `form:"product_id"`
+	Offset    int  `form:"offset"`
+	Limit     int  `form:"limit"`
+}
+
+//Standart Query
 func (s *MiddlewareService) StdQuery() func(*gin.Context) {
 	return func(c *gin.Context) {
-		var query struct {
-			OutletID  uint `form:"outlet_id"`
-			ProductID uint `form:"product_id"`
-		}
-
+		var query MiddlewareStdQueryInput
 		if err := c.ShouldBindQuery(&query); err != nil {
 			NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 			c.Abort()
 			return
 		}
-
-		if query.OutletID != 0 &&
-			c.MustGet("claims_role").(string) == repository.R_OWNER {
-			if s.repo.Outlets.ExistsInOrg(query.OutletID, c.MustGet("claims_org_id")) {
-				c.Set("claims_outlet_id", query.OutletID)
-			} else {
-				NewResponse(c, http.StatusBadRequest, errRecordNotFound("outlet with this ID undefined"))
-				c.Abort()
-				return
-			}
-		}
-
-		c.Set("claims_product_id", query.ProductID)
+		c.Set("std_query", &query)
 	}
 }

@@ -33,25 +33,21 @@ func newCashChangesRepo(db *gorm.DB) *CashChangesRepo {
 	}
 }
 
-func (r *CashChangesRepo) Create(m *CashChangesModel) error {
-	return r.db.Create(m).Error
+//actual
+func (r *CashChangesRepo) Create(model *CashChangesModel) error {
+	return r.db.Create(model).Error
 }
 
-func (r *CashChangesRepo) FindAllBySessionID(sessionID interface{}) (m []CashChangesModel, err error) {
-	err = r.db.Where("session_id = ?", sessionID).Find(&m).Error
+func (r *CashChangesRepo) Find(where *CashChangesModel) (result *[]CashChangesModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
 	return
 }
 
-func (r CashChangesRepo) FindAllByOutletID(outletID interface{}) (m []CashChangesModel, err error) {
-	err = r.db.Where("outlet_id = ?", outletID).Find(&m).Error
-	return
-}
-
-func (r CashChangesRepo) FindAllByOutletIDWithPeriod(dateStart uint64, dateEnd uint64, outletID interface{}) (m []CashChangesModel, err error) {
+func (r CashChangesRepo) FindWithPeriod(dateStart uint64, dateEnd uint64, where *CashChangesModel) (result *[]CashChangesModel, err error) {
 	if dateEnd <= 0 {
-		err = r.db.Where("date >= ? AND outlet_id = ?", dateStart, outletID).Find(&m).Error
+		err = r.db.Where("date >= ?", dateStart).Find(&result, where).Error
 		return
 	}
-	err = r.db.Where("date >= ? AND date <= ? AND outlet_id = ?", dateStart, dateEnd, outletID).Find(&m).Error
+	err = r.db.Where("date >= ? AND date <= ?", dateStart, dateEnd).Find(&result, where).Error
 	return
 }

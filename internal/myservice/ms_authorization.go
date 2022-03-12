@@ -105,7 +105,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 		OutletID: outletModel.ID,
 	}
 
-	if err := s.repo.Employees.Create(&employeeOwnerModel, repository.R_ROOT); err != nil {
+	if err := s.repo.Employees.Create(&employeeOwnerModel); err != nil {
 		NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -119,7 +119,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 		OutletID: outletModel.ID,
 	}
 
-	if err := s.repo.Employees.Create(&employeeModelCashier, repository.R_ROOT); err != nil {
+	if err := s.repo.Employees.Create(&employeeModelCashier); err != nil {
 		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
 		return
 	}
@@ -130,8 +130,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 type SignUpEmployeeInput struct {
 	Name     string `json:"name" binding:"required,min=2,max=200"`
 	Password string `json:"password" binding:"required,min=6,max=6"`
-	// Role     string `json:"role" binding:"required,max=20"`
-	RoleID int `json:"role_id" binding:"min=1"`
+	RoleID   int    `json:"role_id" binding:"min=1"`
 }
 
 //@Summary Регистрация сотрудника
@@ -143,35 +142,66 @@ type SignUpEmployeeInput struct {
 //@Failure 400 {object} serviceError
 //@Router /auth/signUp.Employee [post]
 func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
-	//parse JSON body
 	var input SignUpEmployeeInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	//create model and add
-	model := repository.EmployeeModel{
+	claims := mustGetEmployeeClaims(c)
+	stdQuery := mustGetStdQuery(c)
+
+	employeeModel := repository.EmployeeModel{
 		Name:     input.Name,
 		Password: input.Password,
 		Role:     repository.RoleIDToName(input.RoleID),
-		OutletID: c.MustGet("claims_outlet_id").(uint),
-		OrgID:    c.MustGet("claims_org_id").(uint),
+		OutletID: claims.OutletID,
+		OrgID:    claims.OrganizationID,
 	}
 
-	if err := s.repo.Employees.Create(&model, c.MustGet("claims_role").(string)); err != nil {
-		if errors.Is(err, repository.ErrOnlyNumCanBeInPassword) || errors.Is(err, repository.ErrUndefinedRole) {
-			NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
-		} else if errors.Is(err, gorm.ErrRecordNotFound) {
-			NewResponse(c, http.StatusBadRequest, errRecordNotFound(err.Error()))
-		} else if errors.Is(err, repository.ErrPermissionDenided) {
-			NewResponse(c, http.StatusBadRequest, errPermissionDenided())
-		} else {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
-		}
+	if !repository.RoleIsExists(employeeModel.Role) {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("undefined role"))
 		return
 	}
-	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
+
+	switch claims.Role {
+	case repository.R_OWNER:
+		//владелец может создавать только директоров, админов и кассиров
+		if !employeeModel.HasRole(repository.R_DIRECTOR, repository.R_ADMIN, repository.R_CASHIER) {
+			NewResponse(c, http.StatusBadRequest, errPermissionDenided())
+			return
+		}
+
+		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
+			employeeModel.OutletID = stdQuery.OutletID
+		}
+
+	case repository.R_DIRECTOR:
+		if !employeeModel.HasRole(repository.R_ADMIN, repository.R_CASHIER) {
+			NewResponse(c, http.StatusBadRequest, errPermissionDenided())
+			return
+		}
+		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
+			employeeModel.OutletID = stdQuery.OutletID
+		}
+
+	case repository.R_ADMIN:
+		if !employeeModel.HasRole(repository.R_ADMIN, repository.R_CASHIER) {
+			NewResponse(c, http.StatusBadRequest, errPermissionDenided())
+			return
+		}
+
+	default:
+		NewResponse(c, http.StatusBadRequest, errPermissionDenided())
+		return
+	}
+
+	if err := s.repo.Employees.Create(&employeeModel); err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: employeeModel.ID})
 }
 
 type SignInOrgInput struct {
@@ -249,11 +279,10 @@ func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 		NewResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
 		return
 	}
-
-	var orgID = c.MustGet("claims_org_id").(uint)
+	claims := mustGetOrganizationClaims(c)
 
 	//return employee model if find
-	empl, err := s.repo.Employees.SignIn(input.ID, input.Password, orgID)
+	empl, err := s.repo.Employees.SignIn(input.ID, input.Password, claims.OrganizationID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusUnauthorized, errRecordNotFound())
@@ -264,14 +293,14 @@ func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 	}
 
 	//create new claims
-	claims := authjwt.EmployeeClaims{
-		OrganizationID: orgID,
+	newEmployeeClaims := authjwt.EmployeeClaims{
+		OrganizationID: claims.OrganizationID,
 		OutletID:       empl.OutletID,
 		EmployeeID:     empl.ID,
 		Role:           empl.Role,
 	}
 
-	token, err := s.authjwt.SignInEmployee(&claims)
+	token, err := s.authjwt.SignInEmployee(&newEmployeeClaims)
 	if err != nil {
 		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
 		return

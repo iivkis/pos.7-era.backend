@@ -27,30 +27,25 @@ func newIngredientsRepo(db *gorm.DB) *IngredientsRepo {
 	}
 }
 
+//actual
 func (r *IngredientsRepo) Create(ingredient *IngredientModel) error {
 	return r.db.Create(ingredient).Error
 }
 
-func (r *IngredientsRepo) GetAllByOrgID(orgID interface{}) (ingredients []IngredientModel, err error) {
-	err = r.db.Where("org_id = ?", orgID).Find(&ingredients).Error
+func (r IngredientsRepo) Find(where *IngredientModel) (result *[]IngredientModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
 	return
 }
 
-func (r *IngredientsRepo) GetAllByOutletID(outletID interface{}) (ingredients []IngredientModel, err error) {
-	err = r.db.Where("outlet_id = ?", outletID).Find(&ingredients).Error
+func (r *IngredientsRepo) Updates(where *IngredientModel, updatedFields *IngredientModel) error {
+	return r.db.Where(where).Updates(updatedFields).Error
+}
+
+func (r *IngredientsRepo) Delete(where *IngredientModel) (err error) {
+	err = r.db.Where(where).Delete(&IngredientModel{}).Error
 	return
 }
 
-func (r *IngredientsRepo) Updates(ingredient *IngredientModel, ingredientID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).
-		Updates(ingredient).Error
-}
-
-func (r *IngredientsRepo) Delete(ingredientID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).Delete(&IngredientModel{}).Error
-}
-
-func (r *IngredientsRepo) ExistsInOutlet(ingredientID interface{}, outletID interface{}) bool {
-	err := r.db.Where("id = ? AND outlet_id = ?", ingredientID, outletID).First(&IngredientModel{}).Error
-	return err == nil
+func (r *IngredientsRepo) Exists(where *IngredientModel) bool {
+	return r.db.Where(where).First(&IngredientModel{}).Error == nil
 }

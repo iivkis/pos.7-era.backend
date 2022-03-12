@@ -27,7 +27,7 @@ func init() {
 	}
 }
 
-func roleIsExists(role string) (ok bool) {
+func RoleIsExists(role string) (ok bool) {
 	_, ok = rolesMapByString[role]
 	return
 }

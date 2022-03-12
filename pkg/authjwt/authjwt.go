@@ -29,6 +29,16 @@ type EmployeeClaims struct {
 	jwt.StandardClaims
 }
 
+//проверка, имеет ли сотрудник какую-либо роль из массива roles
+func (m *EmployeeClaims) HasRole(roles ...string) bool {
+	for _, role := range roles {
+		if role == m.Role {
+			return true
+		}
+	}
+	return false
+}
+
 func NewAuthJWT(secret []byte) *AuthJWT {
 	return &AuthJWT{
 		secretOrg:      secret,

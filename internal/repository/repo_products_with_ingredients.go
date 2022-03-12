@@ -27,53 +27,39 @@ func newProductsWithIngredientsRepo(db *gorm.DB) *ProductsWithIngredientsRepo {
 	}
 }
 
+//actual
 func (r *ProductsWithIngredientsRepo) Create(m *ProductWithIngredientModel) error {
 	return r.db.Create(m).Error
 }
 
-func (r *ProductsWithIngredientsRepo) Updates(m *ProductWithIngredientModel, ID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", ID, outletID).Updates(m).Error
-}
-
-func (r *ProductsWithIngredientsRepo) Delete(ID interface{}, outletID interface{}) error {
-	return r.db.Where("id = ? AND outlet_id = ?", ID, outletID).Delete(&ProductWithIngredientModel{}).Error
-}
-
-func (r *ProductsWithIngredientsRepo) FindAllByOrgID(orgID interface{}) (m []ProductWithIngredientModel, err error) {
-	err = r.db.Where("org_id = ?", orgID).Find(&m).Error
+func (r *ProductsWithIngredientsRepo) Find(where *ProductWithIngredientModel) (result *[]ProductWithIngredientModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
 	return
 }
 
-func (r *ProductsWithIngredientsRepo) FindAllByOutletID(outletID interface{}, whereProductID uint) (m []ProductWithIngredientModel, err error) {
-	if whereProductID == 0 {
-		err = r.db.Where("outlet_id = ? ", outletID).Find(&m).Error
-	} else {
-		err = r.db.Where("outlet_id = ? AND product_id = ?", outletID, whereProductID).Find(&m).Error
-	}
+func (r *ProductsWithIngredientsRepo) Updates(where *ProductWithIngredientModel, updatedFields *ProductWithIngredientModel) error {
+	return r.db.Where(where).Updates(updatedFields).Error
+}
+
+func (r *ProductsWithIngredientsRepo) Delete(where *ProductWithIngredientModel) (err error) {
+	err = r.db.Where(where).Delete(&ProductWithIngredientModel{}).Error
 	return
 }
 
-func (r *ProductsWithIngredientsRepo) FindAllByProductID(productID interface{}, inOutletID interface{}) (m []ProductWithIngredientModel, err error) {
-	err = r.db.Where("product_id = ? AND outlet_id = ?", productID, inOutletID).Find(&m).Error
-	return
-}
-
-func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID interface{}, count int, inOutletID interface{}) (err error) {
-	var list []ProductWithIngredientModel
-	if err = r.db.Where("product_id = ? AND outlet_id = ?", productID, inOutletID).Find(&list).Error; err != nil {
+func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID uint, count int) (err error) {
+	var pwiList []ProductWithIngredientModel
+	if err = r.db.Where("product_id =", productID).Find(&pwiList).Error; err != nil {
 		return err
 	}
 
-	for _, item := range list {
-		var m IngredientModel
-		if err = r.db.Where("id = ?", item.IngredientID).First(&m).Error; err != nil {
+	for _, pwi := range pwiList {
+		var ingredient IngredientModel
+		if err = r.db.Where("id = ?", pwi.IngredientID).First(&ingredient).Error; err != nil {
 			return err
 		}
 
-		//write off
-		m.Count -= item.CountTakeForSell * float64(count)
-
-		if err = r.db.Updates(&m).Error; err != nil {
+		ingredient.Count -= pwi.CountTakeForSell * float64(count)
+		if err = r.db.UpdateColumn("count", ingredient.Count).Error; err != nil {
 			return err
 		}
 	}

@@ -7,7 +7,7 @@ import (
 )
 
 type SessionModel struct {
-	ID uint
+	gorm.Model
 
 	DateOpen  int64
 	DateClose int64
@@ -54,6 +54,8 @@ func (r *SessionsRepo) Open(m *SessionModel) error {
 	return err
 }
 
+//actual
+
 //при закрытие сессии обновляем поля
 // cash_session_close и date_close
 func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
@@ -61,18 +63,6 @@ func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
 		return err
 	}
 	return r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).Last(sess).Error
-}
-
-//Возвращает все сессии организации (в том числе удаленные)
-func (r *SessionsRepo) GetAllByOrgID(orgID uint) (models []SessionModel, err error) {
-	err = r.db.Unscoped().Where("org_id = ?", orgID).Order("id desc").Find(&models).Error
-	return
-}
-
-//Возвращает все сессии организации (в том числе удаленные)
-func (r *SessionsRepo) GetAllByOutletID(outletID uint) (models []SessionModel, err error) {
-	err = r.db.Unscoped().Where("outlet_id = ?", outletID).Order("id desc").Find(&models).Error
-	return
 }
 
 //Возвращает последнюю сессию сотрудника
@@ -111,4 +101,13 @@ func (r *SessionsRepo) HasOpenSession(employeeID interface{}) (ok bool, err erro
 
 func (r *SessionsRepo) ExistsWithEmployeeID(sessionID interface{}, employeeID interface{}) bool {
 	return r.db.Where("id = ? AND employee_id = ?", sessionID, employeeID).First(&SessionModel{}).Error == nil
+}
+
+func (r *SessionsRepo) Find(where *SessionModel) (result *[]SessionModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
+	return
+}
+
+func (r *SessionsRepo) Exists(where *SessionModel) bool {
+	return r.db.Where(where).First(&SessionModel{}).Error == nil
 }

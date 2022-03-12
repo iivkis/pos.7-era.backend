@@ -1482,8 +1482,8 @@ var doc = `{
                 "password": {
                     "type": "string"
                 },
-                "role": {
-                    "type": "string"
+                "role_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1686,6 +1686,12 @@ var doc = `{
             "properties": {
                 "count_take_for_sell": {
                     "type": "number"
+                },
+                "ingredient_id": {
+                    "type": "integer"
+                },
+                "product_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1871,7 +1877,6 @@ var doc = `{
                     "type": "string"
                 },
                 "role_id": {
-                    "description": "Role     string ` + "`" + `json:\"role\" binding:\"required,max=20\"` + "`" + `",
                     "type": "integer"
                 }
             }
