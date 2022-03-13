@@ -34,6 +34,15 @@ func (r InventoryHistoryRepo) Find(where *InventoryHistoryModel) (result *[]Inve
 	return
 }
 
+func (r InventoryHistoryRepo) FindWithPeriod(where *InventoryHistoryModel, start uint64, end uint64) (result *[]InventoryHistoryModel, err error) {
+	if end == 0 {
+		err = r.db.Where("date >= ?", start).Find(&result, where).Error
+	} else {
+		err = r.db.Where("date >= ? AND date <= ?", start, end).Find(&result, where).Error
+	}
+	return
+}
+
 func (r *InventoryHistoryRepo) Updates(where *InventoryHistoryModel, updatedFields *InventoryHistoryModel) error {
 	return r.db.Where(where).Updates(updatedFields).Error
 }

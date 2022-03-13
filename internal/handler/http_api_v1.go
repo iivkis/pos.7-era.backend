@@ -109,7 +109,13 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 	//invetoryHistory
 	{
-		r.GET("/invetoryHistory", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.InventoryHistory.GetAll)
-		r.POST("/invetoryHistory", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.InventoryHistory.Create)
+		r.GET("/inventoryHistory", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.InventoryHistory.GetAll)
+		r.POST("/inventoryHistory", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.InventoryHistory.Create)
+	}
+
+	//inventoryList
+	{
+		r.GET("/inventoryList", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.InventoryList.GetAll)
+		r.POST("/inventoryList", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.InventoryList.Create)
 	}
 }

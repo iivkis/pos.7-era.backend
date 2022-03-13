@@ -1,6 +1,7 @@
 package myservice
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -34,7 +35,7 @@ type InventoryHistoryCreateInput struct {
 //@Produce json
 //@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Failure 400 {object} serviceError
-//@Router /invetoryHistory [post]
+//@Router /inventoryHistory [post]
 func (s *InventoryHistoryService) Create(c *gin.Context) {
 	var input InventoryHistoryCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -59,6 +60,11 @@ func (s *InventoryHistoryService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
+type InventoryHistoryGetAllQuery struct {
+	Start uint64 `form:"start"` //in unixmilli
+	End   uint64 `form:"end"`   //in unixmilli
+}
+
 type InventoryHistoryGetAllOutput []InventoryHistoryOutputModel
 
 //@Summary Получить всю историю инвернтаризации
@@ -67,8 +73,16 @@ type InventoryHistoryGetAllOutput []InventoryHistoryOutputModel
 //@Success 200 {object} InventoryHistoryGetAllOutput "возвращаемый объект"
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
-//@Router /invetoryHistory [get]
+//@Router /inventoryHistory [get]
 func (s *InventoryHistoryService) GetAll(c *gin.Context) {
+	var query InventoryHistoryGetAllQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	fmt.Println(query)
+
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	where := &repository.InventoryHistoryModel{
@@ -80,7 +94,7 @@ func (s *InventoryHistoryService) GetAll(c *gin.Context) {
 		where.OutletID = stdQuery.OutletID
 	}
 
-	invetoryHistoryList, err := s.repo.InventoryHistory.Find(where)
+	invetoryHistoryList, err := s.repo.InventoryHistory.FindWithPeriod(where, query.Start, query.End)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

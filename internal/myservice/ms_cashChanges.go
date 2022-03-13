@@ -80,22 +80,22 @@ func (s *CashChangesService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusOK, DefaultOutputModel{ID: model.ID})
 }
 
-type CashChangesGetAllForOutletInput struct {
-	Start uint64 `json:"start"` //in unixmilli
-	End   uint64 `json:"end"`   //in unixmilli
+type CashChangesGetAllInput struct {
+	Start uint64 `form:"start"` //in unixmilli
+	End   uint64 `form:"end"`   //in unixmilli
 }
 
 type CashChangesGetAllOutput []CashChangesOutputModel
 
 //@Summary Получить всю информацию о снятии\вкладе денежных средств (в точке)
-//@param type query CashChangesGetAllForOutletInput false "Принимаемый объект"
+//@param type query CashChangesGetAllInput false "Принимаемый объект"
 //@Success 201 {object} CashChangesGetAllOutput "список изменений баланса кассы"
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
 //@Router /cashChanges [get]
 func (s *CashChangesService) GetAll(c *gin.Context) {
-	var query CashChangesGetAllForOutletInput
+	var query CashChangesGetAllInput
 	if err := c.ShouldBindQuery(&query); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return

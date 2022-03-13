@@ -37,6 +37,11 @@ func (r IngredientsRepo) Find(where *IngredientModel) (result *[]IngredientModel
 	return
 }
 
+func (r IngredientsRepo) FindFirts(where *IngredientModel) (result *IngredientModel, err error) {
+	err = r.db.Where(where).First(&result).Error
+	return
+}
+
 func (r *IngredientsRepo) Updates(where *IngredientModel, updatedFields *IngredientModel) error {
 	return r.db.Where(where).Updates(updatedFields).Error
 }

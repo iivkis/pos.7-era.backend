@@ -23,6 +23,7 @@ type Repository struct {
 	ProductsWithIngredients *ProductsWithIngredientsRepo
 	CashChanges             *CashChangesRepo
 	InventoryHistory        *InventoryHistoryRepo
+	InventoryList           *InventoryListRepo
 }
 
 func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
@@ -47,6 +48,7 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 			&ProductWithIngredientModel{},
 			&CashChangesModel{},
 			&InventoryHistoryModel{},
+			&InventoryListModel{},
 		); err != nil {
 			panic(err)
 		}
@@ -66,5 +68,6 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 		ProductsWithIngredients: newProductsWithIngredientsRepo(db),
 		CashChanges:             newCashChangesRepo(db),
 		InventoryHistory:        newInventoryHistoryRepo(db),
+		InventoryList:           newInventoryListRepo(db),
 	}
 }

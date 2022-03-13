@@ -144,6 +144,32 @@ definitions:
       outlet_id:
         type: integer
     type: object
+  myservice.InventoryListCreateInput:
+    properties:
+      ingredient_id:
+        type: integer
+      inventory_history_id:
+        type: integer
+      new_count:
+        type: number
+    type: object
+  myservice.InventoryListOutputModel:
+    properties:
+      id:
+        type: integer
+      ingredient_id:
+        type: integer
+      inventory_history_id:
+        type: integer
+      new_count:
+        type: number
+      old_count:
+        type: number
+      outletID:
+        type: integer
+      price:
+        type: number
+    type: object
   myservice.OrderInfoOutputModel:
     properties:
       date:
@@ -806,7 +832,7 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Удаляет ингридиент из точки
-  /invetoryHistory:
+  /inventoryHistory:
     get:
       consumes:
       - application/json
@@ -849,6 +875,53 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Добавить новую историю инвентаризации
+  /inventoryList:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - in: query
+        name: inventoryHistoryID
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращаемый объект
+          schema:
+            items:
+              $ref: '#/definitions/myservice.InventoryListOutputModel'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить всю историю инвернтаризации
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.InventoryListCreateInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: возвращает id созданной записи
+          schema:
+            $ref: '#/definitions/myservice.DefaultOutputModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Добавить InventoryList
   /orderInfo:
     get:
       consumes:

@@ -658,7 +658,7 @@ var doc = `{
                 }
             }
         },
-        "/invetoryHistory": {
+        "/inventoryHistory": {
             "get": {
                 "consumes": [
                     "application/json"
@@ -706,6 +706,80 @@ var doc = `{
                         "in": "body",
                         "schema": {
                             "$ref": "#/definitions/myservice.InventoryHistoryCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает id созданной записи",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/inventoryList": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить всю историю инвернтаризации",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "inventoryHistoryID",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращаемый объект",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.InventoryListOutputModel"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Добавить InventoryList",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.InventoryListCreateInput"
                         }
                     }
                 ],
@@ -1646,6 +1720,46 @@ var doc = `{
                 },
                 "outlet_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "myservice.InventoryListCreateInput": {
+            "type": "object",
+            "properties": {
+                "ingredient_id": {
+                    "type": "integer"
+                },
+                "inventory_history_id": {
+                    "type": "integer"
+                },
+                "new_count": {
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.InventoryListOutputModel": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "ingredient_id": {
+                    "type": "integer"
+                },
+                "inventory_history_id": {
+                    "type": "integer"
+                },
+                "new_count": {
+                    "type": "number"
+                },
+                "old_count": {
+                    "type": "number"
+                },
+                "outletID": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
                 }
             }
         },
