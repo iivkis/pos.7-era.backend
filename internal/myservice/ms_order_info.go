@@ -36,7 +36,7 @@ type OrdersInfoCreateInput struct {
 	Date         int64  `json:"date" binding:"min=1"`
 }
 
-//@Summary Добавить orderInfo
+//@Summary Добавить orderInfo (список завершенных заказов)
 //@param type body OrdersInfoCreateInput false "Принимаемый объект"
 //@Accept json
 //@Success 201 {object} DefaultOutputModel "возвращает id созданного order info"

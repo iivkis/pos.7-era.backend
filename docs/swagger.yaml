@@ -966,7 +966,7 @@ paths:
           description: возвращает id созданного order info
           schema:
             $ref: '#/definitions/myservice.DefaultOutputModel'
-      summary: Добавить orderInfo
+      summary: Добавить orderInfo (список завершенных заказов)
   /orderInfo/:id:
     delete:
       consumes:

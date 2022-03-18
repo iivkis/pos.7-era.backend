@@ -836,7 +836,7 @@ var doc = `{
                 "consumes": [
                     "application/json"
                 ],
-                "summary": "Добавить orderInfo",
+                "summary": "Добавить orderInfo (список завершенных заказов)",
                 "parameters": [
                     {
                         "description": "Принимаемый объект",
