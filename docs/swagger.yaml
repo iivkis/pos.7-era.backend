@@ -318,7 +318,11 @@ definitions:
     type: object
   myservice.SessionOutputModel:
     properties:
+      bank_earned:
+        type: number
       cash_close:
+        type: number
+      cash_earned:
         type: number
       cash_open:
         type: number
@@ -340,7 +344,11 @@ definitions:
       action:
         description: '"open" or "close"'
         type: string
+      bank_earned:
+        type: number
       cash:
+        type: number
+      cash_earned:
         type: number
       date:
         type: integer

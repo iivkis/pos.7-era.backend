@@ -34,26 +34,28 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 		panic(err)
 	}
 
-	go func() {
-		if err := db.AutoMigrate(
-			&OrganizationModel{},
-			&EmployeeModel{},
-			&OutletModel{},
-			&SessionModel{},
-			&ProductModel{},
-			&OrderInfoModel{},
-			&OrderListModel{},
-			&CategoryModel{},
-			&IngredientModel{},
-			&ProductWithIngredientModel{},
-			&CashChangesModel{},
-			&InventoryHistoryModel{},
-			&InventoryListModel{},
-		); err != nil {
-			panic(err)
-		}
-		log.Println("migration done")
-	}()
+	if *config.Flags.Migration {
+		go func() {
+			if err := db.AutoMigrate(
+				&OrganizationModel{},
+				&EmployeeModel{},
+				&OutletModel{},
+				&SessionModel{},
+				&ProductModel{},
+				&OrderInfoModel{},
+				&OrderListModel{},
+				&CategoryModel{},
+				&IngredientModel{},
+				&ProductWithIngredientModel{},
+				&CashChangesModel{},
+				&InventoryHistoryModel{},
+				&InventoryListModel{},
+			); err != nil {
+				panic(err)
+			}
+			log.Println("migration done")
+		}()
+	}
 
 	return &Repository{
 		Organizations:           newOrganizationsRepo(db),

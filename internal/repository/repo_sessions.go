@@ -15,6 +15,11 @@ type SessionModel struct {
 	CashSessionOpen  float64
 	CashSessionClose float64
 
+	CashEarned float64
+	BankEarned float64
+
+	AddedToReport bool //добавлена ли сессия в отчет
+
 	EmployeeID uint `gorm:"index"`
 	OutletID   uint `gorm:"index"`
 	OrgID      uint `gorm:"index"`
@@ -99,12 +104,27 @@ func (r *SessionsRepo) HasOpenSession(employeeID interface{}) (ok bool, err erro
 	return true, nil
 }
 
-func (r *SessionsRepo) ExistsWithEmployeeID(sessionID interface{}, employeeID interface{}) bool {
-	return r.db.Where("id = ? AND employee_id = ?", sessionID, employeeID).First(&SessionModel{}).Error == nil
-}
-
 func (r *SessionsRepo) Find(where *SessionModel) (result *[]SessionModel, err error) {
 	err = r.db.Where(where).Find(&result).Error
+	return
+}
+
+//поиск outlet_id, где есть новые сессии
+func (r *SessionsRepo) FindOutletIDForReport(where *SessionModel) (result *[]uint, err error) {
+	err = r.db.Table("session_models").Select("outlet_id").
+		Where("(added_to_report = 0 OR added_to_report IS NULL) AND date_close <> 0").
+		Distinct("outlet_id").Find(&result, where).Error
+	return
+}
+
+//поиск новых сесстий для отчёта
+func (r *SessionsRepo) FindSessionsForReport(where *SessionModel) (result *[]SessionModel, err error) {
+	err = r.db.Where("(added_to_report = 0 OR added_to_report IS NULL) AND date_close <> 0").Find(&result, where).Error
+	return
+}
+
+func (r *SessionsRepo) SetFieldAddedToReport(val bool, sessionID ...uint) (result *[]SessionModel, err error) {
+	err = r.db.Where("id IN", sessionID).UpdateColumn("added_to_report", val).Error
 	return
 }
 

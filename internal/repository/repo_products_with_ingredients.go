@@ -48,7 +48,7 @@ func (r *ProductsWithIngredientsRepo) Delete(where *ProductWithIngredientModel) 
 
 func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID uint, count int) (err error) {
 	var pwiList []ProductWithIngredientModel
-	if err = r.db.Where("product_id =", productID).Find(&pwiList).Error; err != nil {
+	if err = r.db.Where("product_id = ?", productID).Find(&pwiList).Error; err != nil {
 		return err
 	}
 

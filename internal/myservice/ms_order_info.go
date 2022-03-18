@@ -15,8 +15,8 @@ type OrderInfoOutputModel struct {
 	PayType      int    `json:"pay_type"`
 	Date         int64  `json:"date"`
 	EmployeeName string `json:"employee_name"`
-	SessionID    uint   `json:"session_id"`
 	IsDelete     bool   `json:"is_delete"`
+	SessionID    uint   `json:"session_id"`
 	OutletID     uint   `json:"outlet_id"`
 }
 

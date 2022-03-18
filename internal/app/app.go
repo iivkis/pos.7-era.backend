@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/iivkis/pos.7-era.backend/internal/autoreport"
 	"github.com/iivkis/pos.7-era.backend/internal/config"
 	"github.com/iivkis/pos.7-era.backend/internal/handler"
 	"github.com/iivkis/pos.7-era.backend/internal/myservice"
@@ -36,14 +37,21 @@ func Launch() {
 	_handler := handler.NewHttpHandler(_service, _authjwt)
 	_server := server.NewServer(_handler)
 
+	//autoreport for org revenue
+	if *config.Flags.Autoreport {
+		_autoreport := autoreport.NewAutoReport(_repo)
+		_autoreport.Run()
+		fmt.Println("Autoreport launched")
+	}
+
 	//run server
-	var done = make(chan uint8)
+	var done = make(chan string)
 	go func() {
-		if err := _server.Listen(); err != nil {
-			panic(err)
+		if err := _server.Listen(*config.Flags.Port); err != nil {
+			done <- err.Error()
 		}
 	}()
 
 	fmt.Print("Server launched =D\n\n")
-	<-done
+	panic(<-done)
 }

@@ -1,0 +1,8 @@
+services:
+  app:
+    build: .
+    environment:
+      - POSN_PROTOCOL=http
+      - POSN_HOST=localhost
+      - POSN_PORT=8080
+      - POSN_SERVER_NAME=http://localhost

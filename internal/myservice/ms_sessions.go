@@ -13,15 +13,19 @@ type SessionsService struct {
 }
 
 type SessionOutputModel struct {
-	ID         uint `json:"id"`
-	EmployeeID uint `json:"employee_id"`
-	OutletID   uint `json:"outlet_id"`
+	ID uint `json:"id"`
+
+	СashEarned float64 `json:"cash_earned"`
+	BankEarned float64 `json:"bank_earned"`
 
 	CashOpen  float64 `json:"cash_open"`
 	CashClose float64 `json:"cash_close"`
 
 	DateOpen  int64 `json:"date_open"`  //unixmilli
 	DateClose int64 `json:"date_close"` //unixmilli
+
+	EmployeeID uint `json:"employee_id"`
+	OutletID   uint `json:"outlet_id"`
 }
 
 func newSessionsService(repo *repository.Repository) *SessionsService {
@@ -31,9 +35,13 @@ func newSessionsService(repo *repository.Repository) *SessionsService {
 }
 
 type SessionsOpenOrCloseInput struct {
-	Action string  `json:"action" binding:"required"` // "open" or "close"
-	Date   int64   `json:"date" binding:"min=1"`
-	Cash   float64 `json:"cash"`
+	Action string `json:"action" binding:"required"` // "open" or "close"
+
+	Date int64   `json:"date" binding:"min=1"`
+	Cash float64 `json:"cash"`
+
+	CashEarned float64 `json:"cash_earned"`
+	BankEarned float64 `json:"bank_earned"`
 }
 
 type SessionOpenOrCloseOutput struct {
@@ -87,6 +95,8 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 			sess := repository.SessionModel{
 				DateClose:        input.Date,
 				CashSessionClose: input.Cash,
+				BankEarned:       input.BankEarned,
+				CashEarned:       input.CashEarned,
 			}
 			err := s.repo.Sessions.Close(claims.EmployeeID, &sess)
 			if err != nil {

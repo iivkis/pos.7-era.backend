@@ -2,6 +2,7 @@ package config
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -28,8 +29,15 @@ var Env struct {
 	DatabaseIP       string
 }
 
+var Flags struct {
+	Port       *string
+	Autoreport *bool
+	Migration  *bool
+}
+
 func init() {
 	loadEnv()
+	loadFlags()
 	loadJSON("./config.json")
 }
 
@@ -89,4 +97,11 @@ func loadEnv() {
 	Env.DatabaseLogin = getEnv("POSN_DATABASE_LOGIN")
 	Env.DatabasePassword = getEnv("POSN_DATABASE_PASSWORD")
 	Env.DatabaseIP = getEnv("POSN_DATABASE_IP")
+}
+
+func loadFlags() {
+	Flags.Port = flag.String("port", "80", "server port")
+	Flags.Autoreport = flag.Bool("autoreport", false, "enable autoreport about organizations revenue")
+	Flags.Migration = flag.Bool("migration", false, "use database migrations")
+	flag.Parse()
 }

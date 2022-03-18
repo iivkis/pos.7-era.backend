@@ -149,6 +149,9 @@ func (s *CashChangesService) GetAllForCurrentSession(c *gin.Context) {
 
 	items, err := s.repo.CashChanges.Find(&repository.CashChangesModel{SessionID: sess.ID})
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			NewResponse(c, http.StatusOK, CashChangesGetAllForCurrentSessionOutput{})
+		}
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

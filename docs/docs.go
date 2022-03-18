@@ -1991,7 +1991,13 @@ var doc = `{
         "myservice.SessionOutputModel": {
             "type": "object",
             "properties": {
+                "bank_earned": {
+                    "type": "number"
+                },
                 "cash_close": {
+                    "type": "number"
+                },
+                "cash_earned": {
                     "type": "number"
                 },
                 "cash_open": {
@@ -2026,7 +2032,13 @@ var doc = `{
                     "description": "\"open\" or \"close\"",
                     "type": "string"
                 },
+                "bank_earned": {
+                    "type": "number"
+                },
                 "cash": {
+                    "type": "number"
+                },
+                "cash_earned": {
                     "type": "number"
                 },
                 "date": {
