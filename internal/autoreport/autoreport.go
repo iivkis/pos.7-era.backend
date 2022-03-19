@@ -52,12 +52,13 @@ func (a *AutoReport) createReport() {
 		if err != nil {
 			a.errlog.Println(err)
 		}
-
 		report := &repository.ReportRevenueModel{}
 		for _, sess := range *sessions {
 			report.BankEarned += sess.BankEarned
 			report.CashEarned += sess.CashEarned
 			report.Date = sess.DateClose
 		}
+		d := time.UnixMilli(report.Date)
 	}
+
 }
