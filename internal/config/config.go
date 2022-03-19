@@ -100,7 +100,13 @@ func loadEnv() {
 }
 
 func loadFlags() {
-	Flags.Port = flag.String("port", "80", "server port")
+	var port string
+	port, ok := os.LookupEnv("PORT")
+	if !ok {
+		port = "80"
+	}
+
+	Flags.Port = flag.String("port", port, "server port")
 	Flags.Autoreport = flag.Bool("autoreport", false, "enable autoreport about organizations revenue")
 	Flags.Migration = flag.Bool("migration", false, "use database migrations")
 	flag.Parse()
