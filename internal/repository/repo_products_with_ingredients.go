@@ -59,7 +59,7 @@ func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID uint, count 
 		}
 
 		ingredient.Count -= pwi.CountTakeForSell * float64(count)
-		if err = r.db.Where(&IngredientModel{Model: gorm.Model{ID: ingredient.ID}}).UpdateColumn("count", ingredient.Count).Error; err != nil {
+		if err = r.db.Model(&IngredientModel{}).Where(&IngredientModel{Model: gorm.Model{ID: ingredient.ID}}).UpdateColumn("count", ingredient.Count).Error; err != nil {
 			return err
 		}
 	}
