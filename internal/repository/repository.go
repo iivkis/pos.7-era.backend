@@ -24,6 +24,7 @@ type Repository struct {
 	CashChanges             *CashChangesRepo
 	InventoryHistory        *InventoryHistoryRepo
 	InventoryList           *InventoryListRepo
+	ReportRevenue           *ReportRevenueRepo
 }
 
 func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
@@ -35,26 +36,25 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 	}
 
 	if *config.Flags.Migration {
-		go func() {
-			if err := db.AutoMigrate(
-				&OrganizationModel{},
-				&EmployeeModel{},
-				&OutletModel{},
-				&SessionModel{},
-				&ProductModel{},
-				&OrderInfoModel{},
-				&OrderListModel{},
-				&CategoryModel{},
-				&IngredientModel{},
-				&ProductWithIngredientModel{},
-				&CashChangesModel{},
-				&InventoryHistoryModel{},
-				&InventoryListModel{},
-			); err != nil {
-				panic(err)
-			}
-			log.Println("migration done")
-		}()
+		if err := db.AutoMigrate(
+			&OrganizationModel{},
+			&EmployeeModel{},
+			&OutletModel{},
+			&SessionModel{},
+			&ProductModel{},
+			&OrderInfoModel{},
+			&OrderListModel{},
+			&CategoryModel{},
+			&IngredientModel{},
+			&ProductWithIngredientModel{},
+			&CashChangesModel{},
+			&InventoryHistoryModel{},
+			&InventoryListModel{},
+			&ReportRevenueModel{},
+		); err != nil {
+			panic(err)
+		}
+		log.Println("migration done")
 	}
 
 	return &Repository{
@@ -71,5 +71,6 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 		CashChanges:             newCashChangesRepo(db),
 		InventoryHistory:        newInventoryHistoryRepo(db),
 		InventoryList:           newInventoryListRepo(db),
+		ReportRevenue:           newReportRevenueRepo(db),
 	}
 }

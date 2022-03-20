@@ -65,8 +65,13 @@ func (s *OrdersListService) Create(c *gin.Context) {
 		OrgID:        claims.OrganizationID,
 	}
 
-	if !s.repo.OrdersInfo.Exists(&repository.OrderInfoModel{Model: gorm.Model{ID: model.OrderInfoID}, OutletID: model.OutletID}) {
-		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("unidefiden `order_info` with this `id`"))
+	if model.OrderInfoID == 0 || !s.repo.OrdersInfo.Exists(&repository.OrderInfoModel{Model: gorm.Model{ID: model.OrderInfoID}, OutletID: model.OutletID}) {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("undefiden `order_info_id` with this `id`"))
+		return
+	}
+
+	if model.ProductID == 0 || !s.repo.Products.Exists(&repository.ProductModel{Model: gorm.Model{ID: model.ProductID}, OutletID: model.OutletID}) {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("undefiden `product_id` with this `id`"))
 		return
 	}
 
