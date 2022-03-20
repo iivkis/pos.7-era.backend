@@ -71,7 +71,7 @@ func (a *AutoReport) createReport() {
 		date := time.UnixMilli(newRreport.Date)
 		newRreport.Date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC).UnixMilli()
 
-		report, err := a.repo.ReportRevenue.FindFirts(&repository.ReportRevenueModel{Date: newRreport.Date})
+		report, err := a.repo.ReportRevenue.FindFirts(&repository.ReportRevenueModel{Date: newRreport.Date, OutletID: outletID})
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				if err := a.repo.ReportRevenue.Create(newRreport); err != nil {

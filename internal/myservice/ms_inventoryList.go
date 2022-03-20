@@ -79,6 +79,14 @@ func (s *InventoryListService) Create(c *gin.Context) {
 
 	if model.OldCount != model.NewCount {
 		model.LossPrice = (model.OldCount - model.NewCount) * ingredient.PurchasePrice
+
+		if err := s.repo.Ingredients.Updates(
+			&repository.IngredientModel{Model: gorm.Model{ID: ingredient.ID}},
+			&repository.IngredientModel{Count: model.NewCount},
+		); err != nil {
+			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			return
+		}
 	}
 
 	if err := s.repo.InventoryList.Create(model); err != nil {
