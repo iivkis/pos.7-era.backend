@@ -66,6 +66,8 @@ func (a *AutoReport) createReport() {
 			newRreport.BankEarned += sess.BankEarned
 			newRreport.CashEarned += sess.CashEarned
 			newRreport.Date = sess.DateClose
+
+			newRreport.OrgID = sess.OrgID
 		}
 
 		date := time.UnixMilli(newRreport.Date)

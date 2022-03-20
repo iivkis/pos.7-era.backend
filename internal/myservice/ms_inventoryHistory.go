@@ -1,7 +1,6 @@
 package myservice
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -68,6 +67,7 @@ type InventoryHistoryGetAllQuery struct {
 type InventoryHistoryGetAllOutput []InventoryHistoryOutputModel
 
 //@Summary Получить всю историю инвернтаризации
+//@param type query InventoryHistoryGetAllQuery false "Принимаемый объект"
 //@Accept json
 //@Produce json
 //@Success 200 {object} InventoryHistoryGetAllOutput "возвращаемый объект"
@@ -80,8 +80,6 @@ func (s *InventoryHistoryService) GetAll(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
-
-	fmt.Println(query)
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
