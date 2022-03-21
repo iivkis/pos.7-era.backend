@@ -1,6 +1,8 @@
 package repository
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type ProductWithIngredientModel struct {
 	gorm.Model
@@ -47,6 +49,28 @@ func (r *ProductsWithIngredientsRepo) Delete(where *ProductWithIngredientModel) 
 }
 
 func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID uint, count int) (err error) {
+	//находим связи с ингредиентами, для продукта
+	var pwiList []ProductWithIngredientModel
+	if err = r.db.Where("product_id = ?", productID).Find(&pwiList).Error; err != nil {
+		return err
+	}
+
+	//для каждой связи ищем ингредиент. Отнимаем нужное кол-во ингредиента
+	for _, pwi := range pwiList {
+		var ingredient IngredientModel
+		if err = r.db.Where("id = ?", pwi.IngredientID).First(&ingredient).Error; err != nil {
+			return err
+		}
+
+		ingredient.Count -= pwi.CountTakeForSell * float64(count)
+		if err = r.db.Model(&IngredientModel{}).Where(&IngredientModel{Model: gorm.Model{ID: ingredient.ID}}).UpdateColumn("count", ingredient.Count).Error; err != nil {
+			return err
+		}
+	}
+	return
+}
+
+func (r *ProductsWithIngredientsRepo) ReturnIngredients(productID uint, count int) (err error) {
 	var pwiList []ProductWithIngredientModel
 	if err = r.db.Where("product_id = ?", productID).Find(&pwiList).Error; err != nil {
 		return err
@@ -58,7 +82,7 @@ func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID uint, count 
 			return err
 		}
 
-		ingredient.Count -= pwi.CountTakeForSell * float64(count)
+		ingredient.Count += pwi.CountTakeForSell * float64(count)
 		if err = r.db.Model(&IngredientModel{}).Where(&IngredientModel{Model: gorm.Model{ID: ingredient.ID}}).UpdateColumn("count", ingredient.Count).Error; err != nil {
 			return err
 		}

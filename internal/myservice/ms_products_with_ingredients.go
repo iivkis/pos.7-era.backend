@@ -153,7 +153,6 @@ func (s *ProductsWithIngredientsService) Delete(c *gin.Context) {
 type PWIUpdateFields struct {
 	CountTakeForSell float64 `json:"count_take_for_sell"`
 	ProductID        uint    `json:"product_id"`
-	IngredientID     uint    `json:"ingredient_id"`
 }
 
 //@Summary Обновить связь
@@ -184,8 +183,8 @@ func (s *ProductsWithIngredientsService) UpdateFields(c *gin.Context) {
 	updatedFields := &repository.ProductWithIngredientModel{
 		CountTakeForSell: input.CountTakeForSell,
 		ProductID:        input.ProductID,
-		IngredientID:     input.IngredientID,
 	}
+
 	if err := s.repo.ProductsWithIngredients.Updates(where, updatedFields); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

@@ -42,11 +42,21 @@ func (r *OrderListRepo) Find(where *OrderListModel) (result *[]OrderListModel, e
 	return
 }
 
+func (r *OrderListRepo) FindUnscoped(where *OrderListModel) (result *[]OrderListModel, err error) {
+	err = r.db.Unscoped().Where(where).Find(&result).Error
+	return
+}
+
 func (r *OrderListRepo) Updates(where *OrderListModel, updatedFields *OrderListModel) error {
 	return r.db.Where(where).Updates(updatedFields).Error
 }
 
 func (r *OrderListRepo) Delete(where *OrderListModel) (err error) {
 	err = r.db.Where(where).Delete(&OrderListModel{}).Error
+	return
+}
+
+func (r *OrderListRepo) Recovery(where *OrderListModel) (err error) {
+	err = r.db.Model(&OrderListModel{}).Unscoped().Where(where).UpdateColumn("deleted_at", nil).Error
 	return
 }

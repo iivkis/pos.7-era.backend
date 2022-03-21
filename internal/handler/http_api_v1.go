@@ -92,6 +92,7 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		r.GET("/orderInfo", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.GetAllForOutlet)
 		r.POST("/orderInfo", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.Create)
 		r.DELETE("/orderInfo/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.Delete)
+		r.POST("/orderInfo/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.Recovery)
 	}
 
 	//order list

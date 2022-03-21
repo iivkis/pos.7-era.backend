@@ -2,6 +2,7 @@ package autoreport
 
 import (
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"time"
@@ -46,6 +47,9 @@ func (a *AutoReport) Run() {
 
 func (a *AutoReport) createReport() {
 	outletIDs, err := a.repo.Sessions.FindOutletIDForReport(&repository.SessionModel{})
+
+	fmt.Println("Create report for outlets (", len(*outletIDs), ")")
+
 	if err != nil {
 		a.errlog.Println(err)
 	}
@@ -98,5 +102,4 @@ func (a *AutoReport) createReport() {
 			a.errlog.Println(err.Error())
 		}
 	}
-
 }

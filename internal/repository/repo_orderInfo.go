@@ -39,6 +39,11 @@ func (r OrderInfoRepo) Find(where *OrderInfoModel) (result *[]OrderInfoModel, er
 	return
 }
 
+func (r OrderInfoRepo) FindUnscoped(where *OrderInfoModel) (result *[]OrderInfoModel, err error) {
+	err = r.db.Unscoped().Where(where).Find(&result).Error
+	return
+}
+
 func (r *OrderInfoRepo) Updates(where *OrderInfoModel, updatedFields *OrderInfoModel) error {
 	return r.db.Where(where).Updates(updatedFields).Error
 }
@@ -50,4 +55,13 @@ func (r *OrderInfoRepo) Delete(where *OrderInfoModel) (err error) {
 
 func (r *OrderInfoRepo) Exists(where *OrderInfoModel) bool {
 	return r.db.Where(where).First(&OrderInfoModel{}).Error == nil
+}
+
+func (r *OrderInfoRepo) ExistsUnscoped(where *OrderInfoModel) bool {
+	return r.db.Unscoped().Where(where).First(&OrderInfoModel{}).Error == nil
+}
+
+func (r *OrderInfoRepo) Recovery(where *OrderInfoModel) (err error) {
+	err = r.db.Model(&OrderInfoModel{}).Unscoped().Where(where).UpdateColumn("deleted_at", nil).Error
+	return
 }

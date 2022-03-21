@@ -68,6 +68,7 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 		OrgID:        claims.OrganizationID,
 		OutletID:     claims.OutletID,
 	}
+
 	if err = s.repo.OrdersInfo.Create(&model); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
@@ -97,7 +98,7 @@ func (s *OrdersInfoService) GetAllForOutlet(c *gin.Context) {
 		where.OutletID = stdQuery.OutletID
 	}
 
-	list, err := s.repo.OrdersInfo.Find(where)
+	list, err := s.repo.OrdersInfo.FindUnscoped(where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
@@ -135,15 +136,101 @@ func (s *OrdersInfoService) Delete(c *gin.Context) {
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	where := &repository.OrderInfoModel{
-		Model: gorm.Model{ID: uint(orderInfoID)},
-		OrgID: claims.OrganizationID,
+		Model:    gorm.Model{ID: uint(orderInfoID)},
+		OutletID: claims.OutletID,
+		OrgID:    claims.OrganizationID,
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
 		where.OutletID = stdQuery.OutletID
 	}
 
+	//есть ли orderInfo в точке и организации
+	if !s.repo.OrdersInfo.Exists(where) {
+		NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined `order_info` with this `id`"))
+		return
+	}
+
+	orderLists, err := s.repo.OrdersList.Find(&repository.OrderListModel{OrderInfoID: where.ID})
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	for _, orderList := range *orderLists {
+		if err := s.repo.ProductsWithIngredients.ReturnIngredients(orderList.ProductID, orderList.Count); err != nil {
+			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			return
+		}
+
+		if err := s.repo.OrdersList.Delete(&repository.OrderListModel{Model: gorm.Model{ID: orderList.ID}}); err != nil {
+			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			return
+		}
+	}
+
 	if err := s.repo.OrdersInfo.Delete(where); err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+	NewResponse(c, http.StatusOK, nil)
+}
+
+//@Summary Восстановить orderInfo в точке по его id
+//@Success 200 {object} object "возвращает пустой объект"
+//@Produce json
+//@Accept json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
+//@Router /orderInfo/:id [post]
+func (s *OrdersInfoService) Recovery(c *gin.Context) {
+	orderInfoID, err := strconv.Atoi(c.Param("id"))
+	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	where := &repository.OrderInfoModel{
+		Model:    gorm.Model{ID: uint(orderInfoID)},
+		OutletID: claims.OutletID,
+		OrgID:    claims.OrganizationID,
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	if s.repo.OrdersInfo.Exists(where) {
+		NewResponse(c, http.StatusBadRequest, errRecordNotFound("`order_info` with this `id` already recovery"))
+		return
+	}
+
+	if !s.repo.OrdersInfo.ExistsUnscoped(where) {
+		NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined `order_info` with this `id`"))
+		return
+	}
+
+	orderLists, err := s.repo.OrdersList.FindUnscoped(&repository.OrderListModel{OrderInfoID: where.ID, OutletID: where.OutletID, OrgID: where.OrgID})
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	for _, orderList := range *orderLists {
+		if err := s.repo.ProductsWithIngredients.WriteOffIngredients(orderList.ProductID, orderList.Count); err != nil {
+			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			return
+		}
+
+		if err := s.repo.OrdersList.Recovery(&repository.OrderListModel{Model: gorm.Model{ID: orderList.ID}}); err != nil {
+			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			return
+		}
+	}
+
+	if err := s.repo.OrdersInfo.Recovery(where); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
