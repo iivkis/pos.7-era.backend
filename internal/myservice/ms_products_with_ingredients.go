@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"gorm.io/gorm"
 )
 
 type PWIOutputModel struct {
@@ -65,8 +64,8 @@ func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 		}
 	}
 
-	if !s.repo.Products.Exists(&repository.ProductModel{Model: gorm.Model{ID: pwiModel.ProductID}, OutletID: pwiModel.OutletID}) ||
-		!s.repo.Ingredients.Exists(&repository.IngredientModel{Model: gorm.Model{ID: pwiModel.IngredientID}, OutletID: pwiModel.OutletID}) {
+	if !s.repo.Products.Exists(&repository.ProductModel{ID: pwiModel.ProductID, OutletID: pwiModel.OutletID}) ||
+		!s.repo.Ingredients.Exists(&repository.IngredientModel{ID: pwiModel.IngredientID, OutletID: pwiModel.OutletID}) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("not found product or ingredient with this `id` in outlet"))
 		return
 	}
@@ -137,7 +136,7 @@ func (s *ProductsWithIngredientsService) Delete(c *gin.Context) {
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
-	where := &repository.ProductWithIngredientModel{Model: gorm.Model{ID: uint(pwiID)}, OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	where := &repository.ProductWithIngredientModel{ID: uint(pwiID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
 		where.OutletID = stdQuery.OutletID
 	}
@@ -175,7 +174,7 @@ func (s *ProductsWithIngredientsService) UpdateFields(c *gin.Context) {
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
-	where := &repository.ProductWithIngredientModel{Model: gorm.Model{ID: uint(pwiID)}, OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	where := &repository.ProductWithIngredientModel{ID: uint(pwiID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
 		where.OutletID = stdQuery.OutletID
 	}

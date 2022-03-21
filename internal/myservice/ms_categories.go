@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"gorm.io/gorm"
 )
 
 type CategoriesService struct {
@@ -117,7 +116,7 @@ func (s *CategoriesService) Delete(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
 	stdQuery := mustGetStdQuery(c)
 
-	where := &repository.CategoryModel{Model: gorm.Model{ID: uint(catID)}, OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	where := &repository.CategoryModel{ID: uint(catID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
 		where.OutletID = stdQuery.OutletID
 	}
@@ -157,7 +156,7 @@ func (s *CategoriesService) UpdateFields(c *gin.Context) {
 	stdQuery := mustGetStdQuery(c)
 
 	where := &repository.CategoryModel{
-		Model:    gorm.Model{ID: uint(catID)},
+		ID:       uint(catID),
 		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}

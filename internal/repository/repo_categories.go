@@ -3,7 +3,8 @@ package repository
 import "gorm.io/gorm"
 
 type CategoryModel struct {
-	gorm.Model
+	ID uint
+
 	Name string
 
 	OutletID uint

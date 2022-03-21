@@ -69,7 +69,7 @@ func (s *ProductsService) Create(c *gin.Context) {
 		}
 	}
 
-	if !s.repo.Categories.Exists(&repository.CategoryModel{Model: gorm.Model{ID: newProduct.CategoryID}, OutletID: newProduct.OutletID}) {
+	if !s.repo.Categories.Exists(&repository.CategoryModel{ID: newProduct.CategoryID, OutletID: newProduct.OutletID}) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("undefined `category` with this id"))
 		return
 	}
@@ -140,7 +140,7 @@ func (s *ProductsService) GetOneForOutlet(c *gin.Context) {
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	where := &repository.ProductModel{
-		Model:    gorm.Model{ID: uint(productID)},
+		ID:       uint(productID),
 		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}
@@ -203,7 +203,7 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	where := &repository.ProductModel{
-		Model:    gorm.Model{ID: uint(productID)},
+		ID:       uint(productID),
 		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}
@@ -222,7 +222,7 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 		}
 	}
 
-	if upadtedFields.CategoryID != 0 && !s.repo.Categories.Exists(&repository.CategoryModel{Model: gorm.Model{ID: upadtedFields.CategoryID}, OutletID: claims.OutletID}) {
+	if upadtedFields.CategoryID != 0 && !s.repo.Categories.Exists(&repository.CategoryModel{ID: upadtedFields.CategoryID, OutletID: claims.OutletID}) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
 		return
 	}
@@ -251,7 +251,7 @@ func (s *ProductsService) Delete(c *gin.Context) {
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
-	where := &repository.ProductModel{Model: gorm.Model{ID: uint(productID)}, OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	where := &repository.ProductModel{ID: uint(productID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
 		where.OutletID = stdQuery.OutletID
 	}

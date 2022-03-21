@@ -5,7 +5,8 @@ import (
 )
 
 type ProductWithIngredientModel struct {
-	gorm.Model
+	ID uint
+
 	CountTakeForSell float64
 
 	ProductID    uint
@@ -63,7 +64,7 @@ func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID uint, count 
 		}
 
 		ingredient.Count -= pwi.CountTakeForSell * float64(count)
-		if err = r.db.Model(&IngredientModel{}).Where(&IngredientModel{Model: gorm.Model{ID: ingredient.ID}}).UpdateColumn("count", ingredient.Count).Error; err != nil {
+		if err = r.db.Model(&IngredientModel{}).Where(&IngredientModel{ID: ingredient.ID}).UpdateColumn("count", ingredient.Count).Error; err != nil {
 			return err
 		}
 	}
@@ -83,7 +84,7 @@ func (r *ProductsWithIngredientsRepo) ReturnIngredients(productID uint, count in
 		}
 
 		ingredient.Count += pwi.CountTakeForSell * float64(count)
-		if err = r.db.Model(&IngredientModel{}).Where(&IngredientModel{Model: gorm.Model{ID: ingredient.ID}}).UpdateColumn("count", ingredient.Count).Error; err != nil {
+		if err = r.db.Model(&IngredientModel{}).Where(&IngredientModel{ID: ingredient.ID}).UpdateColumn("count", ingredient.Count).Error; err != nil {
 			return err
 		}
 	}

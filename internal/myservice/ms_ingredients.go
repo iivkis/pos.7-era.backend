@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"gorm.io/gorm"
 )
 
 type IngredientOutputModel struct {
@@ -150,7 +149,7 @@ func (s *IngredientsService) UpdateFields(c *gin.Context) {
 	stdQuery := mustGetStdQuery(c)
 
 	where := &repository.IngredientModel{
-		Model:    gorm.Model{ID: uint(ingrID)},
+		ID:       uint(ingrID),
 		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}
@@ -191,7 +190,7 @@ func (s *IngredientsService) Delete(c *gin.Context) {
 	}
 
 	where := &repository.IngredientModel{
-		Model:    gorm.Model{ID: uint(ingrID)},
+		ID:       uint(ingrID),
 		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}

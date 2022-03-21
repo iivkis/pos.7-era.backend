@@ -51,7 +51,7 @@ func (s *InventoryListService) Create(c *gin.Context) {
 
 	claims := mustGetEmployeeClaims(c)
 
-	if !s.repo.Ingredients.Exists(&repository.IngredientModel{Model: gorm.Model{ID: input.IngredientID}, OutletID: claims.OutletID}) {
+	if !s.repo.Ingredients.Exists(&repository.IngredientModel{ID: input.IngredientID, OutletID: claims.OutletID}) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("undefined `ingredient` with this `id in outlet`"))
 		return
 	}
@@ -61,7 +61,7 @@ func (s *InventoryListService) Create(c *gin.Context) {
 		return
 	}
 
-	ingredient, err := s.repo.Ingredients.FindFirts(&repository.IngredientModel{Model: gorm.Model{ID: input.IngredientID}})
+	ingredient, err := s.repo.Ingredients.FindFirts(&repository.IngredientModel{ID: input.IngredientID})
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 		return
@@ -81,7 +81,7 @@ func (s *InventoryListService) Create(c *gin.Context) {
 		model.LossPrice = (model.OldCount - model.NewCount) * ingredient.PurchasePrice
 
 		if err := s.repo.Ingredients.Updates(
-			&repository.IngredientModel{Model: gorm.Model{ID: ingredient.ID}},
+			&repository.IngredientModel{ID: ingredient.ID},
 			&repository.IngredientModel{Count: model.NewCount},
 		); err != nil {
 			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))

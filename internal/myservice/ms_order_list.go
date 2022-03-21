@@ -70,7 +70,7 @@ func (s *OrdersListService) Create(c *gin.Context) {
 		return
 	}
 
-	if model.ProductID == 0 || !s.repo.Products.Exists(&repository.ProductModel{Model: gorm.Model{ID: model.ProductID}, OutletID: model.OutletID}) {
+	if model.ProductID == 0 || !s.repo.Products.Exists(&repository.ProductModel{ID: model.ProductID, OutletID: model.OutletID}) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("undefined `product_id` with this `id`"))
 		return
 	}
