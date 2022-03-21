@@ -43,6 +43,7 @@ var (
 	errRecordNotFound      = newServiceError(203, "record not found")
 	errIncorrectPassword   = newServiceError(204, "invalid password")
 	errRecordAlreadyExists = newServiceError(206, "the record already exists")
+	errForeignKey          = newServiceError(207, "foreign key error")
 )
 
 //300-399 - ошибки связанные с токеном и доступом

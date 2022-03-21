@@ -122,6 +122,13 @@ func (s *CategoriesService) Delete(c *gin.Context) {
 	}
 
 	if err := s.repo.Categories.Delete(where); err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			switch dberr.Number {
+			case 1451:
+				NewResponse(c, http.StatusBadRequest, errForeignKey("the category has not deleted products"))
+				return
+			}
+		}
 		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 		return
 	}

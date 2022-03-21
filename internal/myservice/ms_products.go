@@ -257,8 +257,13 @@ func (s *ProductsService) Delete(c *gin.Context) {
 	}
 
 	if err := s.repo.Products.Delete(where); err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
-		return
+		if dberr, ok := isDatabaseError(err); ok {
+			switch dberr.Number {
+			case 1451:
+				NewResponse(c, http.StatusBadRequest, errForeignKey("the product has not deleted communications"))
+				return
+			}
+		}
 	}
 
 	NewResponse(c, http.StatusOK, nil)

@@ -200,7 +200,14 @@ func (s *IngredientsService) Delete(c *gin.Context) {
 	}
 
 	if err := s.repo.Ingredients.Delete(where); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		if dberr, ok := isDatabaseError(err); ok {
+			switch dberr.Number {
+			case 1451:
+				NewResponse(c, http.StatusBadRequest, errForeignKey("the ingredient has not deleted communications"))
+				return
+			}
+		}
+		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusOK, nil)
