@@ -17,7 +17,7 @@ type AutoReport struct {
 }
 
 func NewAutoReport(repo *repository.Repository) *AutoReport {
-	errlogFile, err := os.OpenFile("./log/autoreport.log", os.O_APPEND|os.O_CREATE, os.ModePerm)
+	errlogFile, err := os.OpenFile("./autoreport.log", os.O_APPEND|os.O_CREATE, os.ModePerm)
 	if err != nil {
 		panic(err)
 	}
