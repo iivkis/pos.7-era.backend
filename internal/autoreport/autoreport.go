@@ -65,17 +65,27 @@ func (a *AutoReport) createReport() {
 
 		newReport := &repository.ReportRevenueModel{OutletID: outletID}
 		for i, sess := range *sessions {
+
+			//ищем кол-во чеков за сессию
+			orderInfoCount, err := a.repo.OrdersInfo.Count(&repository.OrderInfoModel{SessionID: sess.ID})
+			if err != nil {
+				a.errlog.Println(err)
+				continue
+			}
+
 			sessionIDs[i] = sess.ID
 
 			newReport.BankEarned += sess.BankEarned
 			newReport.CashEarned += sess.CashEarned
+			newReport.NumberOfReceipts += int(orderInfoCount)
 
 			newReport.Date = sess.DateClose
 			newReport.OrgID = sess.OrgID
 		}
 
-		//общая сумама
+		//общая сумама и средняя сумма чека
 		newReport.TotalAmount = newReport.BankEarned + newReport.CashEarned
+		newReport.AverageReceipt = newReport.TotalAmount / float64(newReport.NumberOfReceipts)
 
 		//округляем дату до дня
 		date := time.UnixMilli(newReport.Date)
@@ -96,6 +106,9 @@ func (a *AutoReport) createReport() {
 			report.BankEarned += newReport.BankEarned
 			report.CashEarned += newReport.CashEarned
 			report.TotalAmount = report.BankEarned + report.CashEarned
+
+			report.NumberOfReceipts += newReport.NumberOfReceipts
+			report.AverageReceipt = report.TotalAmount / float64(report.NumberOfReceipts)
 
 			if err := a.repo.ReportRevenue.Updates(&repository.ReportRevenueModel{Model: gorm.Model{ID: report.ID}}, report); err != nil {
 				a.errlog.Println(err.Error())

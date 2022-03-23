@@ -126,7 +126,7 @@ type SessionsGetAllOutput []SessionOutputModel
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /sessions [get]
-func (s *SessionsService) GetAllForOutlet(c *gin.Context) {
+func (s *SessionsService) GetAll(c *gin.Context) {
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	where := &repository.SessionModel{
@@ -152,6 +152,8 @@ func (s *SessionsService) GetAllForOutlet(c *gin.Context) {
 			OutletID:   sess.OutletID,
 			CashOpen:   sess.CashSessionOpen,
 			CashClose:  sess.CashSessionClose,
+			СashEarned: sess.CashEarned,
+			BankEarned: sess.BankEarned,
 			DateOpen:   sess.DateOpen,
 			DateClose:  sess.DateClose,
 		}

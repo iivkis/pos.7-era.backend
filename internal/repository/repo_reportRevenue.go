@@ -6,9 +6,12 @@ import "gorm.io/gorm"
 type ReportRevenueModel struct {
 	gorm.Model
 
-	BankEarned  float64
-	CashEarned  float64
-	TotalAmount float64
+	BankEarned  float64 //заработано в вирт. валюте
+	CashEarned  float64 //заработано наличными
+	TotalAmount float64 // общая выручка
+
+	NumberOfReceipts int     //кол-во чеков
+	AverageReceipt   float64 //средняя сумма чека
 
 	Date int64 // (in unixmilli) за какое число отчёт
 

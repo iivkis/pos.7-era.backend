@@ -2,6 +2,7 @@ package myservice
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -77,21 +78,34 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
+type OrderInfoGetAllQuery struct {
+	SessionID uint `form:"session_id"`
+}
+
 type OrdersInfoGetAllOutput []OrderInfoOutputModel
 
 //@Summary Получить список завершенных заказов (orderInfo)
+//Param type query OrdersInfoGetAllOutput false "Принимаемый объект"
 //@Accept json
 //@Produce json
 //@Success 200 {object} OrdersInfoGetAllOutput "список завершенных заказов"
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /orderInfo [get]
-func (s *OrdersInfoService) GetAllForOutlet(c *gin.Context) {
+func (s *OrdersInfoService) GetAll(c *gin.Context) {
+	var query OrderInfoGetAllQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+	}
+
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
+	fmt.Println(query)
+
 	where := &repository.OrderInfoModel{
-		OrgID:    claims.OrganizationID,
-		OutletID: claims.OutletID,
+		OrgID:     claims.OrganizationID,
+		OutletID:  claims.OutletID,
+		SessionID: query.SessionID,
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {

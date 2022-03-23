@@ -11,12 +11,14 @@ type OrderListModel struct {
 
 	ProductID   uint
 	OrderInfoID uint
+	SessionID   uint
 
 	OutletID uint
 	OrgID    uint
 
 	ProductModel   ProductModel   `gorm:"foreignKey:ProductID"`
 	OrderInfoModel OrderInfoModel `gorm:"foreignKey:OrderInfoID"`
+	SessionModel   SessionModel   `gorm:"foreignKey:SessionID"`
 
 	OutletModel       OutletModel       `gorm:"foreignKey:OutletID"`
 	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`

@@ -14,6 +14,9 @@ type ReportRevenueOutputModel struct {
 	CashEarned  float64 `json:"cash_earned"`
 	TotalAmount float64 `json:"total_amount"`
 
+	NumberOfReceipts int     `json:"number_of_receipts"`
+	AverageReceipt   float64 `json:"average_receipt"`
+
 	Date int64 `json:"date"` // (in unixmilli) за какое число отчёт
 
 	OutletID uint

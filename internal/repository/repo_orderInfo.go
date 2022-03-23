@@ -65,3 +65,8 @@ func (r *OrderInfoRepo) Recovery(where *OrderInfoModel) (err error) {
 	err = r.db.Model(&OrderInfoModel{}).Unscoped().Where(where).UpdateColumn("deleted_at", nil).Error
 	return
 }
+
+func (r *OrderInfoRepo) Count(where *OrderInfoModel) (n int64, err error) {
+	err = r.db.Model(where).Where(where).Count(&n).Error
+	return
+}

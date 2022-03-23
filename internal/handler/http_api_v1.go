@@ -47,7 +47,7 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	//api для сессий
 	{
 		r.POST("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Sessions.OpenOrClose)
-		r.GET("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Sessions.GetAllForOutlet)
+		r.GET("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Sessions.GetAll)
 		r.GET("/sessions.Last", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Sessions.GetLastForOutlet)
 		r.GET("/sessions.Last.Closed", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Sessions.GetLastClosedForOutlet)
 	}
@@ -92,7 +92,7 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 	//order info
 	{
-		r.GET("/orderInfo", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.GetAllForOutlet)
+		r.GET("/orderInfo", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.GetAll)
 		r.POST("/orderInfo", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.Create)
 		r.DELETE("/orderInfo/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.Delete)
 		r.POST("/orderInfo/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.OrdersInfo.Recovery)
