@@ -142,8 +142,9 @@ func (s *CashChangesService) GetAllForCurrentSession(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusOK, CashChangesGetAllForCurrentSessionOutput{})
+		} else {
+			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		}
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
@@ -151,8 +152,9 @@ func (s *CashChangesService) GetAllForCurrentSession(c *gin.Context) {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusOK, CashChangesGetAllForCurrentSessionOutput{})
+		} else {
+			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		}
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
