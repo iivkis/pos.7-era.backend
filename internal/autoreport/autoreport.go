@@ -28,14 +28,12 @@ func NewAutoReport(repo *repository.Repository) *AutoReport {
 	}
 }
 
-//1) Каждый день в 00:00 по МСК запускаем отчет по выручке (cashEarn и bankEarn записываем в соотвествующие поля).
-//2) Ищем id точек, в которых есть новые зыкрытые сессии (added_to_report = false AND date_close != 0)
-//3) запрашиваем новые закрытые сессии для каждой точки. Суммируем соответсвующие поля, задаем дату отчёта прошлым днём.
 func (a *AutoReport) Run() {
 	var lastDay int
 	go func() {
 		for {
-			if time.Now().UTC().Hour() >= 3 && time.Now().UTC().Day() != lastDay {
+			// МСК +3 GTM.
+			if time.Now().UTC().Day() != lastDay {
 				lastDay = time.Now().UTC().Day()
 				a.createReport()
 				time.Sleep(time.Hour * 23)
@@ -46,6 +44,7 @@ func (a *AutoReport) Run() {
 }
 
 func (a *AutoReport) createReport() {
+	//поиск точек, где есть новые сессии
 	outletIDs, err := a.repo.Sessions.FindOutletIDForReport(&repository.SessionModel{})
 
 	fmt.Println("Create report for outlets (", len(*outletIDs), ")")
@@ -54,6 +53,7 @@ func (a *AutoReport) createReport() {
 		a.errlog.Println(err)
 	}
 
+	//для каждой точки берем новые сессии
 	for _, outletID := range *outletIDs {
 		sessions, err := a.repo.Sessions.FindSessionsForReport(&repository.SessionModel{OutletID: outletID})
 		if err != nil {
@@ -63,24 +63,28 @@ func (a *AutoReport) createReport() {
 
 		sessionIDs := make([]uint, len(*sessions))
 
-		newRreport := &repository.ReportRevenueModel{OutletID: outletID}
+		newReport := &repository.ReportRevenueModel{OutletID: outletID}
 		for i, sess := range *sessions {
 			sessionIDs[i] = sess.ID
 
-			newRreport.BankEarned += sess.BankEarned
-			newRreport.CashEarned += sess.CashEarned
-			newRreport.Date = sess.DateClose
+			newReport.BankEarned += sess.BankEarned
+			newReport.CashEarned += sess.CashEarned
 
-			newRreport.OrgID = sess.OrgID
+			newReport.Date = sess.DateClose
+			newReport.OrgID = sess.OrgID
 		}
 
-		date := time.UnixMilli(newRreport.Date)
-		newRreport.Date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC).UnixMilli()
+		//общая сумама
+		newReport.TotalAmount = newReport.BankEarned + newReport.CashEarned
 
-		report, err := a.repo.ReportRevenue.FindFirts(&repository.ReportRevenueModel{Date: newRreport.Date, OutletID: outletID})
+		//округляем дату до дня
+		date := time.UnixMilli(newReport.Date)
+		newReport.Date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.UTC).UnixMilli()
+
+		report, err := a.repo.ReportRevenue.FindFirts(&repository.ReportRevenueModel{Date: newReport.Date, OutletID: outletID})
 		if err != nil {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
-				if err := a.repo.ReportRevenue.Create(newRreport); err != nil {
+				if err := a.repo.ReportRevenue.Create(newReport); err != nil {
 					a.errlog.Println(err.Error())
 					continue
 				}
@@ -89,8 +93,8 @@ func (a *AutoReport) createReport() {
 				continue
 			}
 		} else {
-			report.BankEarned += newRreport.BankEarned
-			report.CashEarned += newRreport.CashEarned
+			report.BankEarned += newReport.BankEarned
+			report.CashEarned += newReport.CashEarned
 
 			if err := a.repo.ReportRevenue.Updates(&repository.ReportRevenueModel{Model: gorm.Model{ID: report.ID}}, report); err != nil {
 				a.errlog.Println(err.Error())

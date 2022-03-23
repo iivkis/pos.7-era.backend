@@ -10,8 +10,9 @@ import (
 type ReportRevenueOutputModel struct {
 	ID uint `json:"id"`
 
-	BankEarned float64 `json:"bank_earned"`
-	CashEarned float64 `json:"cash_earned"`
+	BankEarned  float64 `json:"bank_earned"`
+	CashEarned  float64 `json:"cash_earned"`
+	TotalAmount float64 `json:"total_amount"`
 
 	Date int64 `json:"date"` // (in unixmilli) за какое число отчёт
 
@@ -69,11 +70,12 @@ func (s *ReportRevenueService) GetAll(c *gin.Context) {
 	var output = make(ReportRevenueGetAllOutput, len(*reports))
 	for i, item := range *reports {
 		output[i] = ReportRevenueOutputModel{
-			ID:         item.ID,
-			BankEarned: item.BankEarned,
-			CashEarned: item.CashEarned,
-			Date:       item.Date,
-			OutletID:   item.OutletID,
+			ID:          item.ID,
+			BankEarned:  item.BankEarned,
+			CashEarned:  item.CashEarned,
+			TotalAmount: item.TotalAmount,
+			Date:        item.Date,
+			OutletID:    item.OutletID,
 		}
 	}
 	NewResponse(c, http.StatusOK, output)
