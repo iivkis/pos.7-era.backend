@@ -210,6 +210,8 @@ definitions:
         type: string
       product_price:
         type: number
+      session_id:
+        type: integer
     type: object
   myservice.OrderListOutputModel:
     properties:
@@ -227,6 +229,8 @@ definitions:
         type: string
       product_price:
         type: number
+      session_id:
+        type: integer
     type: object
   myservice.OrdersInfoCreateInput:
     properties:
@@ -320,6 +324,8 @@ definitions:
     type: object
   myservice.ReportRevenueOutputModel:
     properties:
+      average_receipt:
+        type: number
       bank_earned:
         type: number
       cash_earned:
@@ -329,8 +335,12 @@ definitions:
         type: integer
       id:
         type: integer
+      number_of_receipts:
+        type: integer
       outletID:
         type: integer
+      total_amount:
+        type: number
     type: object
   myservice.SessionOpenOrCloseOutput:
     properties:
@@ -1083,10 +1093,6 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/myservice.serviceError'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/myservice.serviceError'
       summary: Получить список orderList точки (список продутктов из которых состоит
         заказ)
     post:
@@ -1107,10 +1113,6 @@ paths:
             $ref: '#/definitions/myservice.DefaultOutputModel'
         "400":
           description: Bad Request
-          schema:
-            $ref: '#/definitions/myservice.serviceError'
-        "500":
-          description: Internal Server Error
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Добавить orderList (список продутктов из которых состоит заказ)

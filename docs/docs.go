@@ -999,12 +999,6 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/myservice.serviceError"
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/myservice.serviceError"
-                        }
                     }
                 }
             },
@@ -1035,12 +1029,6 @@ var doc = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/myservice.serviceError"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
                         "schema": {
                             "$ref": "#/definitions/myservice.serviceError"
                         }
@@ -1949,6 +1937,9 @@ var doc = `{
                 },
                 "product_price": {
                     "type": "number"
+                },
+                "session_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -1975,6 +1966,9 @@ var doc = `{
                 },
                 "product_price": {
                     "type": "number"
+                },
+                "session_id": {
+                    "type": "integer"
                 }
             }
         },
@@ -2120,6 +2114,9 @@ var doc = `{
         "myservice.ReportRevenueOutputModel": {
             "type": "object",
             "properties": {
+                "average_receipt": {
+                    "type": "number"
+                },
                 "bank_earned": {
                     "type": "number"
                 },
@@ -2133,8 +2130,14 @@ var doc = `{
                 "id": {
                     "type": "integer"
                 },
+                "number_of_receipts": {
+                    "type": "integer"
+                },
                 "outletID": {
                     "type": "integer"
+                },
+                "total_amount": {
+                    "type": "number"
                 }
             }
         },
