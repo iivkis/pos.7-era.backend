@@ -1614,6 +1614,37 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/sessions.Last.Me": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Последняя сессия текущего юзера (к которой привязан jwt токен)",
+                "responses": {
+                    "200": {
+                        "description": "Возвращает последнюю сессию текущего юзера",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.SessionOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

@@ -1494,4 +1494,24 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Последняя закрытая сессия торговой точки (к которой привязан jwt токен)
+  /sessions.Last.Me:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Возвращает последнюю сессию текущего юзера
+          schema:
+            $ref: '#/definitions/myservice.SessionOutputModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Последняя сессия текущего юзера (к которой привязан jwt токен)
 swagger: "2.0"

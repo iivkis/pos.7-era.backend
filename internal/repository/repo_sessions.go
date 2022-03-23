@@ -86,6 +86,15 @@ func (r *SessionsRepo) GetLastClosedForOutlet(outletID uint) (model SessionModel
 }
 
 //Возвращает последнюю сессию для точки продаж
+func (r *SessionsRepo) GetLastForMe(employeeID uint) (model SessionModel, err error) {
+	err = r.db.Where("employee_id = ?", employeeID).Last(&model).Error
+	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
+		err = nil
+	}
+	return
+}
+
+//Возвращает последнюю сессию для точки продаж
 func (r *SessionsRepo) GetLastForOutlet(outletID uint) (model SessionModel, err error) {
 	err = r.db.Where("outlet_id = ?", outletID).Last(&model).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {

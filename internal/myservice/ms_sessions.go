@@ -235,3 +235,32 @@ func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
 
 	NewResponse(c, http.StatusOK, output)
 }
+
+//@Summary Последняя сессия текущего юзера (к которой привязан jwt токен)
+//@Success 200 {object} SessionOutputModel "Возвращает последнюю сессию текущего юзера"
+//@Accept json
+//@Produce json
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
+//@Router /sessions.Last.Me [get]
+func (s *SessionsService) GetLastForMe(c *gin.Context) {
+	claims := mustGetEmployeeClaims(c)
+
+	sess, err := s.repo.Sessions.GetLastForMe(claims.EmployeeID)
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
+	}
+
+	output := SessionOutputModel{
+		ID:         sess.ID,
+		EmployeeID: sess.EmployeeID,
+		OutletID:   sess.OutletID,
+		CashOpen:   sess.CashSessionOpen,
+		CashClose:  sess.CashSessionClose,
+		DateOpen:   sess.DateOpen,
+		DateClose:  sess.DateClose,
+	}
+
+	NewResponse(c, http.StatusOK, output)
+}

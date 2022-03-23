@@ -6,7 +6,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
 	"gorm.io/gorm"
 )
 
@@ -137,7 +136,7 @@ type CashChangesGetAllForCurrentSessionOutput []CashChangesOutputModel
 //@Failure 400 {object} serviceError
 //@Router /cashChanges.CurrentSession [get]
 func (s *CashChangesService) GetAllForCurrentSession(c *gin.Context) {
-	claims := c.MustGet("claims").(*authjwt.EmployeeClaims)
+	claims := mustGetEmployeeClaims(c)
 	sess, err := s.repo.Sessions.GetLastOpenByEmployeeID(claims.EmployeeID)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

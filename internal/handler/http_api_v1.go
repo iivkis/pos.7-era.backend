@@ -49,6 +49,7 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		r.POST("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Sessions.OpenOrClose)
 		r.GET("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Sessions.GetAll)
 		r.GET("/sessions.Last", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Sessions.GetLastForOutlet)
+		r.GET("/sessions.Last.Me", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Sessions.GetLastForMe)
 		r.GET("/sessions.Last.Closed", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Sessions.GetLastClosedForOutlet)
 	}
 
