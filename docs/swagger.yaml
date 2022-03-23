@@ -86,6 +86,17 @@ definitions:
       role_id:
         type: integer
     type: object
+  myservice.IngredientArrivalInput:
+    properties:
+      count:
+        type: number
+      ingredient_id:
+        type: integer
+      price:
+        type: number
+      write_off:
+        type: boolean
+    type: object
   myservice.IngredientCreateInput:
     properties:
       count:
@@ -832,6 +843,34 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Обновить ингредиент
+  /ingredients.Arrival:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          items:
+            $ref: '#/definitions/myservice.IngredientArrivalInput'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: возвращает пустой объект
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Поступление ингредиентов в точку
   /ingredients/:id:
     delete:
       consumes:

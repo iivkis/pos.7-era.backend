@@ -627,6 +627,50 @@ var doc = `{
                 }
             }
         },
+        "/ingredients.Arrival": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Поступление ингредиентов в точку",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.IngredientArrivalInput"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/ingredients/:id": {
             "delete": {
                 "consumes": [
@@ -1714,6 +1758,23 @@ var doc = `{
                 },
                 "role_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "myservice.IngredientArrivalInput": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "type": "number"
+                },
+                "ingredient_id": {
+                    "type": "integer"
+                },
+                "price": {
+                    "type": "number"
+                },
+                "write_off": {
+                    "type": "boolean"
                 }
             }
         },

@@ -12,7 +12,7 @@ type CashChangesModel struct {
 	Reason  string  //причина сняти\внесения
 	Comment string  //комментарий к операции
 
-	SessionID  uint
+	SessionID  uint `gorm:"default:NULL"`
 	EmployeeID uint
 	OutletID   uint
 	OrgID      uint

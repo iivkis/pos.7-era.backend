@@ -218,12 +218,20 @@ func (s *IngredientsService) Delete(c *gin.Context) {
 }
 
 type IngredientArrivalInput struct {
-	IngredientID uint    `json:"id"`
-	Count        float64 `json:"count"`
+	IngredientID uint    `json:"ingredient_id" binding:"min=1"`
+	Count        float64 `json:"count" binding:"min=0"`
 	WriteOff     bool    `json:"write_off"`
-	Price        float64 `json:"price"`
+	Price        float64 `json:"price" binding:"min=0"`
 }
 
+//@Summary Поступление ингредиентов в точку
+//@param type body []IngredientArrivalInput false "Принимаемый объект"
+//@Accept json
+//@Produce json
+//@Success 201 {object} object "возвращает пустой объект
+//@Failure 400 {object} serviceError
+//@Failure 500 {object} serviceError
+//@Router /ingredients.Arrival [post]
 func (s *IngredientsService) Arrival(c *gin.Context) {
 	var input []IngredientArrivalInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -236,14 +244,20 @@ func (s *IngredientsService) Arrival(c *gin.Context) {
 		return
 	}
 
-	claims := mustGetEmployeeClaims(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	ingredients := make([]*repository.IngredientModel, len(input))
 
 	where := &repository.IngredientModel{
 		OutletID: claims.OutletID,
 		OrgID:    claims.OrganizationID,
 	}
 
-	ingredients := make([]*repository.IngredientModel, len(input))
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
+			where.OutletID = claims.OutletID
+		}
+	}
 
 	for i, arrival := range input {
 		where.ID = arrival.IngredientID
@@ -262,25 +276,25 @@ func (s *IngredientsService) Arrival(c *gin.Context) {
 	var writeOffSum float64
 	for i, arrival := range input {
 		if arrival.WriteOff {
-			writeOffSum += arrival.Price
+			writeOffSum += arrival.Price * arrival.Count
 		}
 
 		ingredients[i].Count += arrival.Count
 		s.repo.Ingredients.Updates(&repository.IngredientModel{ID: arrival.IngredientID}, ingredients[i])
 	}
 
-	if writeOffSum != 0 {
-		model := &repository.CashChangesModel{
-			Date:       time.Now().UTC().UnixMilli(),
-			Total:      writeOffSum,
-			Reason:     "receipt of goods",
-			EmployeeID: claims.EmployeeID,
-			OutletID:   claims.OutletID,
-			OrgID:      claims.OrganizationID,
-		}
-
-		if err := s.repo.CashChanges.Create(model); err != nil {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
-		}
+	model := &repository.CashChangesModel{
+		Date:       time.Now().UTC().UnixMilli(),
+		Total:      writeOffSum,
+		Reason:     "receipt of goods",
+		EmployeeID: claims.EmployeeID,
+		OutletID:   claims.OutletID,
+		OrgID:      claims.OrganizationID,
 	}
+
+	if err := s.repo.CashChanges.Create(model); err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+	}
+
+	NewResponse(c, http.StatusCreated, nil)
 }

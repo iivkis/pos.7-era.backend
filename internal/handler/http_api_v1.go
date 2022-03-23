@@ -77,6 +77,9 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		r.GET("/ingredients", h.srv.Mware.AuthEmployee(r_owner, r_admin, r_cashier), h.srv.Ingredients.GetAll)
 		r.PUT("/ingredients/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Ingredients.UpdateFields)
 		r.DELETE("/ingredients/:id", h.srv.Mware.AuthEmployee(r_owner, r_admin), h.srv.Ingredients.Delete)
+
+		//поступление ингредиентов
+		r.POST("/ingredients.Arrival", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Ingredients.Arrival)
 	}
 
 	//products with ingredients
