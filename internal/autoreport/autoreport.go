@@ -95,6 +95,7 @@ func (a *AutoReport) createReport() {
 		} else {
 			report.BankEarned += newReport.BankEarned
 			report.CashEarned += newReport.CashEarned
+			report.TotalAmount = report.BankEarned + report.CashEarned
 
 			if err := a.repo.ReportRevenue.Updates(&repository.ReportRevenueModel{Model: gorm.Model{ID: report.ID}}, report); err != nil {
 				a.errlog.Println(err.Error())
