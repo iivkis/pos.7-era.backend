@@ -1,11 +1,15 @@
 package myservice
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 type IngredientOutputModel struct {
@@ -211,4 +215,72 @@ func (s *IngredientsService) Delete(c *gin.Context) {
 		return
 	}
 	NewResponse(c, http.StatusOK, nil)
+}
+
+type IngredientArrivalInput struct {
+	IngredientID uint    `json:"id"`
+	Count        float64 `json:"count"`
+	WriteOff     bool    `json:"write_off"`
+	Price        float64 `json:"price"`
+}
+
+func (s *IngredientsService) Arrival(c *gin.Context) {
+	var input []IngredientArrivalInput
+	if err := c.ShouldBindJSON(&input); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	if len(input) > 100 {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("you can't transfer more than 100 objects"))
+		return
+	}
+
+	claims := mustGetEmployeeClaims(c)
+
+	where := &repository.IngredientModel{
+		OutletID: claims.OutletID,
+		OrgID:    claims.OrganizationID,
+	}
+
+	ingredients := make([]*repository.IngredientModel, len(input))
+
+	for i, arrival := range input {
+		where.ID = arrival.IngredientID
+		ingredient, err := s.repo.Ingredients.FindFirts(where)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				NewResponse(c, http.StatusBadRequest, errRecordNotFound(fmt.Sprintf("undefined ingredent with id `%d`", where.ID)))
+			} else {
+				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			}
+			return
+		}
+		ingredients[i] = ingredient
+	}
+
+	var writeOffSum float64
+	for i, arrival := range input {
+		if arrival.WriteOff {
+			writeOffSum += arrival.Price
+		}
+
+		ingredients[i].Count += arrival.Count
+		s.repo.Ingredients.Updates(&repository.IngredientModel{ID: arrival.IngredientID}, ingredients[i])
+	}
+
+	if writeOffSum != 0 {
+		model := &repository.CashChangesModel{
+			Date:       time.Now().UTC().UnixMilli(),
+			Total:      writeOffSum,
+			Reason:     "receipt of goods",
+			EmployeeID: claims.EmployeeID,
+			OutletID:   claims.OutletID,
+			OrgID:      claims.OrganizationID,
+		}
+
+		if err := s.repo.CashChanges.Create(model); err != nil {
+			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		}
+	}
 }

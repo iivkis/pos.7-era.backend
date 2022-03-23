@@ -261,8 +261,6 @@ definitions:
     properties:
       count_take_for_sell:
         type: number
-      ingredient_id:
-        type: integer
       product_id:
         type: integer
     type: object
@@ -308,6 +306,20 @@ definitions:
         type: string
       price:
         type: number
+    type: object
+  myservice.ReportRevenueOutputModel:
+    properties:
+      bank_earned:
+        type: number
+      cash_earned:
+        type: number
+      date:
+        description: (in unixmilli) за какое число отчёт
+        type: integer
+      id:
+        type: integer
+      outletID:
+        type: integer
     type: object
   myservice.SessionOpenOrCloseOutput:
     properties:
@@ -844,6 +856,15 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - description: in unixmilli
+        in: query
+        name: end
+        type: integer
+      - description: in unixmilli
+        in: query
+        name: start
+        type: integer
       produces:
       - application/json
       responses:
@@ -987,6 +1008,25 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Удалить orderInfo в точке по его id
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращает пустой объект
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Восстановить orderInfo в точке по его id
   /orderList:
     get:
       consumes:
@@ -1305,6 +1345,31 @@ paths:
           schema:
             type: object
       summary: Обновить связь
+  /report.Revenue:
+    get:
+      consumes:
+      - application/json
+      parameters:
+      - description: in unixmilli
+        in: query
+        name: end
+        type: integer
+      - description: in unixmilli
+        in: query
+        name: start
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращаемый объект
+          schema:
+            $ref: '#/definitions/myservice.ReportRevenueOutputModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Отчёты по дневной выручке всех точек
   /sessions:
     get:
       consumes:

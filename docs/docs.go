@@ -667,6 +667,20 @@ var doc = `{
                     "application/json"
                 ],
                 "summary": "Получить всю историю инвернтаризации",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "in unixmilli",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "in unixmilli",
+                        "name": "start",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "возвращаемый объект",
@@ -858,6 +872,35 @@ var doc = `{
             }
         },
         "/orderInfo/:id": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Восстановить orderInfo в точке по его id",
+                "responses": {
+                    "200": {
+                        "description": "возвращает пустой объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
             "delete": {
                 "consumes": [
                     "application/json"
@@ -1373,6 +1416,45 @@ var doc = `{
                     },
                     "500": {
                         "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/report.Revenue": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Отчёты по дневной выручке всех точек",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "in unixmilli",
+                        "name": "end",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "in unixmilli",
+                        "name": "start",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "возвращаемый объект",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.ReportRevenueOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
                         "schema": {
                             "$ref": "#/definitions/myservice.serviceError"
                         }
@@ -1903,9 +1985,6 @@ var doc = `{
                 "count_take_for_sell": {
                     "type": "number"
                 },
-                "ingredient_id": {
-                    "type": "integer"
-                },
                 "product_id": {
                     "type": "integer"
                 }
@@ -1974,6 +2053,27 @@ var doc = `{
                 },
                 "price": {
                     "type": "number"
+                }
+            }
+        },
+        "myservice.ReportRevenueOutputModel": {
+            "type": "object",
+            "properties": {
+                "bank_earned": {
+                    "type": "number"
+                },
+                "cash_earned": {
+                    "type": "number"
+                },
+                "date": {
+                    "description": "(in unixmilli) за какое число отчёт",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "outletID": {
+                    "type": "integer"
                 }
             }
         },
