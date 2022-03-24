@@ -63,8 +63,8 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 	//api для продуктов
 	{
-		r.GET("/products", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Products.GetAllForOutlet)
-		r.GET("/products/:id", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, repository.R_CASHIER), h.srv.Products.GetOneForOutlet)
+		r.GET("/products", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Products.GetAll)
+		r.GET("/products/:id", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, repository.R_CASHIER), h.srv.Products.GetOne)
 		r.POST("/products", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Products.Create)
 		r.PUT("/products/:id", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Products.UpdateFields)
 		r.DELETE("/products/:id", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Products.Delete)

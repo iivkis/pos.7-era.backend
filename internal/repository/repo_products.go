@@ -5,7 +5,10 @@ import "gorm.io/gorm"
 type ProductModel struct {
 	ID uint
 
-	Name   string
+	Name           string
+	ProductNameKKT string
+	Barcode        int
+
 	Amount int
 	Price  float64
 	Photo  string

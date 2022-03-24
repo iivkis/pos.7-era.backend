@@ -11,13 +11,15 @@ import (
 )
 
 type ProductOutputModel struct {
-	ID         uint    `json:"id"`
-	Name       string  `json:"name"`
-	Amount     int     `json:"amount"`
-	Price      float64 `json:"price"`
-	Photo      string  `json:"photo"`
-	CategoryID uint    `json:"category_id"`
-	OutletID   uint    `json:"outlet_id"`
+	ID             uint    `json:"id"`
+	Name           string  `json:"name"`
+	ProductNameKKT string  `json:"product_name_kkt"`
+	Barcode        int     `json:"barcode"`
+	Amount         int     `json:"amount"`
+	Price          float64 `json:"price"`
+	Photo          string  `json:"photo"`
+	CategoryID     uint    `json:"category_id"`
+	OutletID       uint    `json:"outlet_id"`
 }
 
 type ProductsService struct {
@@ -31,11 +33,13 @@ func newProductsService(repo *repository.Repository) *ProductsService {
 }
 
 type ProductCreateInput struct {
-	Name       string  `json:"name" binding:"min=1"`
-	Amount     int     `json:"amount"`
-	Price      float64 `json:"price"`
-	Photo      string  `json:"photo"`
-	CategoryID uint    `json:"category_id" binding:"min=1"`
+	Name           string  `json:"name" binding:"min=1,max=200"`
+	ProductNameKKT string  `json:"product_name_kkt" binding:"max=200"`
+	Barcode        int     `json:"barcode"`
+	Amount         int     `json:"amount"`
+	Price          float64 `json:"price"`
+	Photo          string  `json:"photo"`
+	CategoryID     uint    `json:"category_id" binding:"min=1"`
 }
 
 //@Summary Добавить новый продукт в точку
@@ -54,13 +58,15 @@ func (s *ProductsService) Create(c *gin.Context) {
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 	newProduct := repository.ProductModel{
-		Name:       input.Name,
-		Amount:     input.Amount,
-		Price:      input.Price,
-		Photo:      input.Photo,
-		CategoryID: input.CategoryID,
-		OutletID:   claims.OutletID,
-		OrgID:      claims.OrganizationID,
+		Name:           input.Name,
+		ProductNameKKT: input.ProductNameKKT,
+		Barcode:        input.Barcode,
+		Amount:         input.Amount,
+		Price:          input.Price,
+		Photo:          input.Photo,
+		CategoryID:     input.CategoryID,
+		OutletID:       claims.OutletID,
+		OrgID:          claims.OrganizationID,
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
@@ -90,7 +96,7 @@ type ProductGetAllOutput []ProductOutputModel
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /products [get]
-func (s *ProductsService) GetAllForOutlet(c *gin.Context) {
+func (s *ProductsService) GetAll(c *gin.Context) {
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	where := &repository.ProductModel{
@@ -111,13 +117,15 @@ func (s *ProductsService) GetAllForOutlet(c *gin.Context) {
 	output := make(ProductGetAllOutput, len(*products))
 	for i, product := range *products {
 		output[i] = ProductOutputModel{
-			ID:         product.ID,
-			Name:       product.Name,
-			Amount:     product.Amount,
-			Price:      product.Price,
-			Photo:      product.Photo,
-			CategoryID: product.CategoryID,
-			OutletID:   product.OutletID,
+			ID:             product.ID,
+			Name:           product.Name,
+			ProductNameKKT: product.ProductNameKKT,
+			Barcode:        product.Barcode,
+			Amount:         product.Amount,
+			Price:          product.Price,
+			Photo:          product.Photo,
+			CategoryID:     product.CategoryID,
+			OutletID:       product.OutletID,
 		}
 	}
 	NewResponse(c, http.StatusOK, output)
@@ -130,7 +138,7 @@ func (s *ProductsService) GetAllForOutlet(c *gin.Context) {
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /products/:id [get]
-func (s *ProductsService) GetOneForOutlet(c *gin.Context) {
+func (s *ProductsService) GetOne(c *gin.Context) {
 	productID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -160,23 +168,27 @@ func (s *ProductsService) GetOneForOutlet(c *gin.Context) {
 	}
 
 	output := ProductOutputModel{
-		ID:         product.ID,
-		Name:       product.Name,
-		Amount:     product.Amount,
-		Price:      product.Price,
-		Photo:      product.Photo,
-		CategoryID: product.CategoryID,
-		OutletID:   product.OutletID,
+		ID:             product.ID,
+		Name:           product.Name,
+		ProductNameKKT: product.ProductNameKKT,
+		Barcode:        product.Barcode,
+		Amount:         product.Amount,
+		Price:          product.Price,
+		Photo:          product.Photo,
+		CategoryID:     product.CategoryID,
+		OutletID:       product.OutletID,
 	}
 	NewResponse(c, http.StatusOK, output)
 }
 
 type ProductUpdateInput struct {
-	Name       string  `json:"name"`
-	Amount     int     `json:"amount"`
-	Price      float64 `json:"price"`
-	Photo      string  `json:"photo"`
-	CategoryID uint    `json:"category_id"`
+	Name           string  `json:"name"`
+	ProductNameKKT string  `json:"product_name_kkt"`
+	Barcode        int     `json:"barcode"`
+	Amount         int     `json:"amount"`
+	Price          float64 `json:"price"`
+	Photo          string  `json:"photo"`
+	CategoryID     uint    `json:"category_id"`
 }
 
 //@Summary Обновить продукт в точке
@@ -209,11 +221,13 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 	}
 
 	upadtedFields := &repository.ProductModel{
-		Name:       input.Name,
-		Amount:     input.Amount,
-		Price:      input.Price,
-		Photo:      input.Photo,
-		CategoryID: input.CategoryID,
+		Name:           input.Name,
+		ProductNameKKT: input.ProductNameKKT,
+		Barcode:        input.Barcode,
+		Amount:         input.Amount,
+		Price:          input.Price,
+		Photo:          input.Photo,
+		CategoryID:     input.CategoryID,
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
