@@ -127,7 +127,7 @@ func (s *OrdersListService) GetAll(c *gin.Context) {
 		where.OutletID = stdQuery.OutletID
 	}
 
-	models, err := s.repo.OrdersList.Find(where)
+	models, err := s.repo.OrdersList.FindUnscoped(where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 	}
