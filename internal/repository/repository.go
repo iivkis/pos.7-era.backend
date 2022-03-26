@@ -28,7 +28,7 @@ type Repository struct {
 }
 
 func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
-	url := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=True", config.Env.DatabaseLogin, config.Env.DatabasePassword, config.Env.DatabaseIP, config.Env.DatabaseLogin)
+	url := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=True", config.Env.DatabaseLogin, config.Env.DatabasePassword, config.Env.DatabaseIP, config.Env.DatabaseName)
 
 	db, err := gorm.Open(mysql.Open(url), &gorm.Config{})
 	if err != nil {

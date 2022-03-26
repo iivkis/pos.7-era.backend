@@ -15,18 +15,18 @@ var File struct {
 var Env struct {
 	ServerName string
 
-	Protocol string
-	Host     string
-	Port     string
-	Secret   string
+	OutProtocol string
+	OutHost     string
+	OutPort     string
+	Secret      string
 
-	EmailLogin     string
-	EmailPwd       string
-	EmailForNotify string
+	EmailLogin string
+	EmailPwd   string
 
+	DatabaseIP       string
+	DatabaseName     string
 	DatabaseLogin    string
 	DatabasePassword string
-	DatabaseIP       string
 }
 
 var Flags struct {
@@ -82,32 +82,28 @@ func loadEnv() {
 	}
 
 	//secret key & server data
-	Env.Protocol = getEnv("POSN_PROTOCOL")
-	Env.Host = getEnv("POSN_HOST")
-	Env.Port = getEnv("POSN_PORT")
+	Env.OutProtocol = getEnv("POSN_OUT_PROTOCOL")
+	Env.OutHost = getEnv("POSN_OUT_HOST")
+	Env.OutPort = getEnv("POSN_OUT_PORT")
 	Env.ServerName = getEnv("POSN_SERVER_NAME")
 	Env.Secret = getEnv("POSN_SECRET")
 
 	//env for email
 	Env.EmailLogin = getEnv("POSN_EMAIL_LOGIN")
 	Env.EmailPwd = getEnv("POSN_EMAIL_PWD")
-	Env.EmailForNotify = getEnv("POSN_EMAIL_TEST_RCP")
 
 	//database
-	Env.DatabaseLogin = getEnv("POSN_DATABASE_LOGIN")
-	Env.DatabasePassword = getEnv("POSN_DATABASE_PASSWORD")
 	Env.DatabaseIP = getEnv("POSN_DATABASE_IP")
+	Env.DatabaseName = getEnv("POSN_DATABASE_NAME")
+	Env.DatabaseLogin = getEnv("POSN_DATABASE_LOGIN")
+	Env.DatabasePassword = getEnv("POSN_DATABASE_PWD")
 }
 
 func loadFlags() {
-	var port string
-	port, ok := os.LookupEnv("PORT")
-	if !ok {
-		port = "80"
-	}
+	port, _ := os.LookupEnv("PORT")
 
-	Flags.Port = flag.String("port", port, "server port")
-	Flags.Autoreport = flag.Bool("autoreport", false, "enable autoreport about organizations revenue")
+	Flags.Port = flag.String("port", port, "server port (default from env `PORT`)")
+	// Flags.Autoreport = flag.Bool("autoreport", false, "enable autoreport about organizations revenue")
 	Flags.Migration = flag.Bool("migration", false, "use database migrations")
 	flag.Parse()
 }

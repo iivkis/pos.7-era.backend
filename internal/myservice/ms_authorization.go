@@ -342,9 +342,9 @@ func (s *AuthorizationService) SendCode(c *gin.Context) {
 			//отправка письма с ссылкой для подтверждения
 			if err := s.mailagent.SendTemplate(inputQ.Email, "confirm_code.html", mailagent.Value{
 				"code":     s.strcode.Encode(inputQ.Email),
-				"host":     config.Env.Host,
-				"port":     config.Env.Port,
-				"protocol": config.Env.Protocol,
+				"host":     config.Env.OutHost,
+				"port":     config.Env.OutPort,
+				"protocol": config.Env.OutProtocol,
 				"type":     "org",
 			}); err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownServer("error on send email"))
