@@ -118,6 +118,15 @@ func (r *SessionsRepo) Find(where *SessionModel) (result *[]SessionModel, err er
 	return
 }
 
+func (r *SessionsRepo) FindWithPeriod(dateStart uint64, dateEnd uint64, where *SessionModel) (result *[]SessionModel, err error) {
+	if dateEnd <= 0 {
+		err = r.db.Where("date_open >= ?", dateStart).Find(&result, where).Error
+		return
+	}
+	err = r.db.Where("date_open >= ? AND date_open <= ?", dateStart, dateEnd).Find(&result, where).Error
+	return
+}
+
 //поиск outlet_id, где есть новые сессии
 // func (r *SessionsRepo) FindOutletIDForReport(where *SessionModel) (result *[]uint, err error) {
 // 	err = r.db.Table("session_models").Select("outlet_id").

@@ -137,10 +137,16 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 	}
 }
 
+type SessionsGetAllInput struct {
+	Start uint64 `form:"start"` //in unixmilli
+	End   uint64 `form:"end"`   //in unixmilli
+}
+
 type SessionsGetAllOutput []SessionOutputModel
 
 //@Summary Список всех сессий точки
 //@Description Метод позволяет получить список всех сессий точки
+//@Param type query SessionsGetAllInput false "принимаемые поля"
 //@Success 200 {object} SessionsGetAllOutput "Возвращает массив сессий точки"
 //@Accept json
 //@Produce json
@@ -148,6 +154,11 @@ type SessionsGetAllOutput []SessionOutputModel
 //@Failure 500 {object} serviceError
 //@Router /sessions [get]
 func (s *SessionsService) GetAll(c *gin.Context) {
+	var query SessionsGetAllInput
+	if err := c.ShouldBindQuery(&query); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	where := &repository.SessionModel{
@@ -159,7 +170,7 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 		where.OutletID = stdQuery.OutletID
 	}
 
-	sessions, err := s.repo.Sessions.Find(where)
+	sessions, err := s.repo.Sessions.FindWithPeriod(query.Start, query.End, where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
