@@ -103,7 +103,7 @@ func loadFlags() {
 	port, _ := os.LookupEnv("PORT")
 
 	Flags.Port = flag.String("port", port, "server port (default from env `PORT`)")
-	// Flags.Autoreport = flag.Bool("autoreport", false, "enable autoreport about organizations revenue")
 	Flags.Migration = flag.Bool("migration", false, "use database migrations")
+
 	flag.Parse()
 }

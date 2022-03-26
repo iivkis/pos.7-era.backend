@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 type SessionsService struct {
@@ -17,6 +18,8 @@ type SessionOutputModel struct {
 
 	СashEarned float64 `json:"cash_earned"`
 	BankEarned float64 `json:"bank_earned"`
+
+	NumberOfReceipts int `json:"number_of_receipts"`
 
 	CashOpen  float64 `json:"cash_open"`
 	CashClose float64 `json:"cash_close"`
@@ -90,16 +93,34 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 
 			NewResponse(c, http.StatusOK, SessionOpenOrCloseOutput{ID: sess.ID, EmployeeID: sess.EmployeeID})
 		}
+
 	case "close":
 		{
+			lastOpenEmployeeSession, err := s.repo.Sessions.GetLastOpenByEmployeeID(claims.EmployeeID)
+			if err != nil {
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined open session"))
+					return
+				}
+				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+				return
+			}
+
+			NumberOfReceipts, err := s.repo.OrdersInfo.Count(&repository.OrderInfoModel{SessionID: lastOpenEmployeeSession.ID})
+			if err != nil {
+				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+				return
+			}
+
 			sess := repository.SessionModel{
 				DateClose:        input.Date,
 				CashSessionClose: input.Cash,
 				BankEarned:       input.BankEarned,
 				CashEarned:       input.CashEarned,
+				NumberOfReceipts: int(NumberOfReceipts),
 			}
-			err := s.repo.Sessions.Close(claims.EmployeeID, &sess)
-			if err != nil {
+
+			if err := s.repo.Sessions.Close(claims.EmployeeID, &sess); err != nil {
 				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 				return
 			}
@@ -150,12 +171,16 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 			ID:         sess.ID,
 			EmployeeID: sess.EmployeeID,
 			OutletID:   sess.OutletID,
-			CashOpen:   sess.CashSessionOpen,
-			CashClose:  sess.CashSessionClose,
-			СashEarned: sess.CashEarned,
-			BankEarned: sess.BankEarned,
-			DateOpen:   sess.DateOpen,
-			DateClose:  sess.DateClose,
+
+			CashOpen:  sess.CashSessionOpen,
+			CashClose: sess.CashSessionClose,
+
+			СashEarned:       sess.CashEarned,
+			BankEarned:       sess.BankEarned,
+			NumberOfReceipts: sess.NumberOfReceipts,
+
+			DateOpen:  sess.DateOpen,
+			DateClose: sess.DateClose,
 		}
 	}
 
@@ -190,10 +215,16 @@ func (s *SessionsService) GetLastClosedForOutlet(c *gin.Context) {
 		ID:         sess.ID,
 		EmployeeID: sess.EmployeeID,
 		OutletID:   sess.OutletID,
-		CashOpen:   sess.CashSessionOpen,
-		CashClose:  sess.CashSessionClose,
-		DateOpen:   sess.DateOpen,
-		DateClose:  sess.DateClose,
+
+		CashOpen:  sess.CashSessionOpen,
+		CashClose: sess.CashSessionClose,
+
+		СashEarned:       sess.CashEarned,
+		BankEarned:       sess.BankEarned,
+		NumberOfReceipts: sess.NumberOfReceipts,
+
+		DateOpen:  sess.DateOpen,
+		DateClose: sess.DateClose,
 	}
 
 	NewResponse(c, http.StatusOK, output)
@@ -227,10 +258,16 @@ func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
 		ID:         sess.ID,
 		EmployeeID: sess.EmployeeID,
 		OutletID:   sess.OutletID,
-		CashOpen:   sess.CashSessionOpen,
-		CashClose:  sess.CashSessionClose,
-		DateOpen:   sess.DateOpen,
-		DateClose:  sess.DateClose,
+
+		CashOpen:  sess.CashSessionOpen,
+		CashClose: sess.CashSessionClose,
+
+		СashEarned:       sess.CashEarned,
+		BankEarned:       sess.BankEarned,
+		NumberOfReceipts: sess.NumberOfReceipts,
+
+		DateOpen:  sess.DateOpen,
+		DateClose: sess.DateClose,
 	}
 
 	NewResponse(c, http.StatusOK, output)
@@ -246,7 +283,7 @@ func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
 func (s *SessionsService) GetLastForMe(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
 
-	sess, err := s.repo.Sessions.GetLastForMe(claims.EmployeeID)
+	sess, err := s.repo.Sessions.GetLastForEmployeeByID(claims.EmployeeID)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
@@ -256,10 +293,16 @@ func (s *SessionsService) GetLastForMe(c *gin.Context) {
 		ID:         sess.ID,
 		EmployeeID: sess.EmployeeID,
 		OutletID:   sess.OutletID,
-		CashOpen:   sess.CashSessionOpen,
-		CashClose:  sess.CashSessionClose,
-		DateOpen:   sess.DateOpen,
-		DateClose:  sess.DateClose,
+
+		CashOpen:  sess.CashSessionOpen,
+		CashClose: sess.CashSessionClose,
+
+		СashEarned:       sess.CashEarned,
+		BankEarned:       sess.BankEarned,
+		NumberOfReceipts: sess.NumberOfReceipts,
+
+		DateOpen:  sess.DateOpen,
+		DateClose: sess.DateClose,
 	}
 
 	NewResponse(c, http.StatusOK, output)
