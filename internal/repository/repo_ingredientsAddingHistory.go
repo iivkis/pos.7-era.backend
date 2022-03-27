@@ -3,7 +3,7 @@ package repository
 import "gorm.io/gorm"
 
 type IngredientsAddingHistoryModel struct {
-	gorm.Model
+	ID uint
 
 	Count  int     //кол-во продукта, который не сходится
 	Total  float64 //сумма, на которую не сходится

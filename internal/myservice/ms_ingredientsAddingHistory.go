@@ -8,12 +8,17 @@ import (
 )
 
 type IngredientsAddingHistoryOutputModel struct {
-	ID            uint    `json:"id"`
-	Name          string  `json:"name"`
-	Count         float64 `json:"count"`
-	MeasureUnit   int     `json:"measure_unit"`
-	PurchasePrice float64 `json:"purchase_price"`
-	OutletID      uint    `json:"outlet_id"`
+	ID uint
+
+	Count  int     `json:"count"`  //кол-во продукта, который не сходится
+	Total  float64 `json:"total"`  //сумма, на которую не сходится
+	Status int     `json:"status"` // 1 - инвенторизация
+
+	Date int64 `json:"date"` //unixmilli
+
+	IngredientID uint `json:"ingredient_id"`
+	EmployeeID   uint `json:"employee_id"` //сотрудник, который делал инветаризацию
+	OutletID     uint `json:"outlet_id"`
 }
 
 type IngredientsAddingHistoryService struct {
@@ -27,22 +32,25 @@ func newIngredientsAddingHistoryService(repo *repository.Repository) *Ingredient
 }
 
 type IngredientsAddingHistoryCreateInput struct {
-	Name          string  `json:"name" binding:"required"`
-	Count         float64 `json:"count" binding:"min=0"`
-	PurchasePrice float64 `json:"purchase_price" binding:"min=0"`
-	MeasureUnit   int     `json:"measure_unit" binding:"min=1,max=3"`
+	Count  int     `json:"count"`                        //кол-во продукта, который не сходится
+	Total  float64 `json:"total"`                        //сумма, на которую не сходится
+	Status int     `json:"status" binding:"min=0,max=1"` // 1 - инвенторизация
+
+	Date int64 `json:"date"` //unixmilli
+
+	IngredientID uint `json:"ingredient_id" binding:"min=1"`
 }
 
-//@Summary Добавить новый ингредиент в точку
-//@param type body IngredientCreateInput false "Принимаемый объект"
+//@Summary Добавить новый отчёт об ингредиентах
+//@param type body IngredientsAddingHistoryCreateInput false "Принимаемый объект"
 //@Accept json
 //@Produce json
 //@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
-//@Router /ingredients [post]
+//@Router /ingredients.History [post]
 func (s *IngredientsAddingHistoryService) Create(c *gin.Context) {
-	var input IngredientCreateInput
+	var input IngredientsAddingHistoryCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
@@ -50,13 +58,15 @@ func (s *IngredientsAddingHistoryService) Create(c *gin.Context) {
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
-	model := repository.IngredientModel{
-		Name:          input.Name,
-		Count:         input.Count,
-		PurchasePrice: input.PurchasePrice,
-		MeasureUnit:   input.MeasureUnit,
-		OutletID:      claims.OutletID,
-		OrgID:         claims.OrganizationID,
+	model := repository.IngredientsAddingHistoryModel{
+		Count:        input.Count,
+		Total:        input.Total,
+		Status:       input.Status,
+		IngredientID: input.IngredientID,
+		Date:         input.Date,
+		EmployeeID:   claims.EmployeeID,
+		OutletID:     claims.OutletID,
+		OrgID:        claims.OrganizationID,
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
@@ -65,7 +75,12 @@ func (s *IngredientsAddingHistoryService) Create(c *gin.Context) {
 		}
 	}
 
-	if err := s.repo.Ingredients.Create(&model); err != nil {
+	if !s.repo.Ingredients.Exists(&repository.IngredientModel{ID: model.IngredientID, OutletID: model.OutletID}) {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("undefined `ingredient_id` in outlet with this id"))
+		return
+	}
+
+	if err := s.repo.IngredientsAddingHistory.Create(&model); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -73,20 +88,27 @@ func (s *IngredientsAddingHistoryService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
-type IngredientsAddingHistorytGetAllOutput []IngredientOutputModel
+type IngredientsAddingHistorytGetAllInput struct {
+	Start uint64 `form:"start"` //in unixmilli
+	End   uint64 `form:"end"`   //in unixmilli
+}
+type IngredientsAddingHistorytGetAllOutput []IngredientsAddingHistoryOutputModel
 
-//@Summary Получить все ингредиенты точки
+//@Summary Получить историю добавления ингредиентов
 //@Accept json
 //@Produce json
-//@Success 200 {object} IngredientGetAllOutput "возвращает все ингредиенты текущей точки"
+//@Success 200 {object} IngredientsAddingHistorytGetAllOutput "возвращает все ингредиенты текущей точки"
 //@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /ingredients [get]
+//@Router /ingredients.History [get]
 func (s *IngredientsAddingHistoryService) GetAll(c *gin.Context) {
-	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	var query IngredientsAddingHistorytGetAllInput
+	if err := c.ShouldBindQuery(&query); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
-	where := &repository.IngredientModel{
+	where := &repository.IngredientsAddingHistoryModel{
 		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}
@@ -95,21 +117,23 @@ func (s *IngredientsAddingHistoryService) GetAll(c *gin.Context) {
 		where.OutletID = stdQuery.OutletID
 	}
 
-	ingredients, err := s.repo.Ingredients.Find(where)
+	histories, err := s.repo.IngredientsAddingHistory.FindWithPeriod(where, query.Start, query.End)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
-	var output IngredientGetAllOutput = make(IngredientGetAllOutput, len(*ingredients))
-	for i, ingredient := range *ingredients {
-		output[i] = IngredientOutputModel{
-			ID:            ingredient.ID,
-			Name:          ingredient.Name,
-			Count:         ingredient.Count,
-			MeasureUnit:   ingredient.MeasureUnit,
-			PurchasePrice: ingredient.PurchasePrice,
-			OutletID:      ingredient.OutletID,
+	var output = make(IngredientsAddingHistorytGetAllOutput, len(*histories))
+	for i, item := range *histories {
+		output[i] = IngredientsAddingHistoryOutputModel{
+			ID:           item.ID,
+			Count:        item.Count,
+			Total:        item.Total,
+			Status:       item.Status,
+			Date:         item.Date,
+			IngredientID: item.IngredientID,
+			EmployeeID:   item.EmployeeID,
+			OutletID:     item.OutletID,
 		}
 	}
 	NewResponse(c, http.StatusOK, output)

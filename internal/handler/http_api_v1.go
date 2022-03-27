@@ -68,8 +68,6 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		r.POST("/products", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Products.Create)
 		r.PUT("/products/:id", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Products.UpdateFields)
 		r.DELETE("/products/:id", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Products.Delete)
-
-		// r.GET("/products.Outlet", h.srv.Mware.AuthEmployee(r_cashier), h.srv.Products.GetAllForOutlet)
 	}
 
 	//ingredients api
@@ -81,6 +79,10 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 
 		//поступление ингредиентов
 		r.POST("/ingredients.Arrival", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Ingredients.Arrival)
+
+		//история добавления ингредиентов
+		r.POST("/ingredients.History", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.IngredientsAddingHistory.Create)
+		r.GET("/ingredients.History", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.IngredientsAddingHistory.GetAll)
 	}
 
 	//products with ingredients

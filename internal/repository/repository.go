@@ -11,20 +11,20 @@ import (
 )
 
 type Repository struct {
-	Organizations           *OrganizationsRepo
-	Employees               *EmployeesRepo
-	Outlets                 *OutletsRepo
-	Sessions                *SessionsRepo
-	Categories              *CategoriesRepo
-	Products                *ProductsRepo
-	Ingredients             *IngredientsRepo
-	OrdersList              *OrderListRepo
-	OrdersInfo              *OrderInfoRepo
-	ProductsWithIngredients *ProductsWithIngredientsRepo
-	CashChanges             *CashChangesRepo
-	InventoryHistory        *InventoryHistoryRepo
-	InventoryList           *InventoryListRepo
-	ReportRevenue           *ReportRevenueRepo
+	Organizations            *OrganizationsRepo
+	Employees                *EmployeesRepo
+	Outlets                  *OutletsRepo
+	Sessions                 *SessionsRepo
+	Categories               *CategoriesRepo
+	Products                 *ProductsRepo
+	Ingredients              *IngredientsRepo
+	OrdersList               *OrderListRepo
+	OrdersInfo               *OrderInfoRepo
+	ProductsWithIngredients  *ProductsWithIngredientsRepo
+	CashChanges              *CashChangesRepo
+	InventoryHistory         *InventoryHistoryRepo
+	InventoryList            *InventoryListRepo
+	IngredientsAddingHistory *IngredientsAddingHistoryRepo
 }
 
 func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
@@ -50,7 +50,7 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 			&CashChangesModel{},
 			&InventoryHistoryModel{},
 			&InventoryListModel{},
-			&ReportRevenueModel{},
+			&IngredientsAddingHistoryModel{},
 		); err != nil {
 			panic(err)
 		}
@@ -58,19 +58,19 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 	}
 
 	return &Repository{
-		Organizations:           newOrganizationsRepo(db),
-		Employees:               newEmployeesRepo(db),
-		Outlets:                 newOutletsRepo(db),
-		Sessions:                newSessionsRepo(db),
-		Categories:              newCategoriesRepo(db),
-		Products:                newProductsRepo(db),
-		Ingredients:             newIngredientsRepo(db),
-		OrdersList:              newOrderListRepo(db),
-		OrdersInfo:              newOrderInfoRepo(db),
-		ProductsWithIngredients: newProductsWithIngredientsRepo(db),
-		CashChanges:             newCashChangesRepo(db),
-		InventoryHistory:        newInventoryHistoryRepo(db),
-		InventoryList:           newInventoryListRepo(db),
-		ReportRevenue:           newReportRevenueRepo(db),
+		Organizations:            newOrganizationsRepo(db),
+		Employees:                newEmployeesRepo(db),
+		Outlets:                  newOutletsRepo(db),
+		Sessions:                 newSessionsRepo(db),
+		Categories:               newCategoriesRepo(db),
+		Products:                 newProductsRepo(db),
+		Ingredients:              newIngredientsRepo(db),
+		OrdersList:               newOrderListRepo(db),
+		OrdersInfo:               newOrderInfoRepo(db),
+		ProductsWithIngredients:  newProductsWithIngredientsRepo(db),
+		CashChanges:              newCashChangesRepo(db),
+		InventoryHistory:         newInventoryHistoryRepo(db),
+		InventoryList:            newInventoryListRepo(db),
+		IngredientsAddingHistory: newIngredientsAddingHistoryRepo(db),
 	}
 }

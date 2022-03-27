@@ -127,25 +127,6 @@ func (r *SessionsRepo) FindWithPeriod(dateStart uint64, dateEnd uint64, where *S
 	return
 }
 
-//поиск outlet_id, где есть новые сессии
-// func (r *SessionsRepo) FindOutletIDForReport(where *SessionModel) (result *[]uint, err error) {
-// 	err = r.db.Table("session_models").Select("outlet_id").
-// 		Where("(added_to_report = 0 OR added_to_report IS NULL) AND date_close <> 0").
-// 		Distinct("outlet_id").Find(&result, where).Error
-// 	return
-// }
-
-// //поиск новых сесстий для отчёта
-// func (r *SessionsRepo) FindSessionsForReport(where *SessionModel) (result *[]SessionModel, err error) {
-// 	err = r.db.Where("(added_to_report = 0 OR added_to_report IS NULL) AND date_close <> 0").Order("date_close").Find(&result, where).Error
-// 	return
-// }
-
-// func (r *SessionsRepo) SetFieldAddedToReport(val bool, sessionID []uint) (err error) {
-// 	err = r.db.Model(&SessionModel{}).Where("id IN ?", sessionID).UpdateColumn("added_to_report", val).Error
-// 	return
-// }
-
 func (r *SessionsRepo) Exists(where *SessionModel) bool {
 	return r.db.Where(where).First(&SessionModel{}).Error == nil
 }
