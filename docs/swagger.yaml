@@ -136,6 +136,47 @@ definitions:
       purchase_price:
         type: number
     type: object
+  myservice.IngredientsAddingHistoryCreateInput:
+    properties:
+      count:
+        description: кол-во продукта, который не сходится
+        type: integer
+      date:
+        description: unixmilli
+        type: integer
+      ingredient_id:
+        type: integer
+      status:
+        description: 1 - инвенторизация
+        type: integer
+      total:
+        description: сумма, на которую не сходится
+        type: number
+    type: object
+  myservice.IngredientsAddingHistoryOutputModel:
+    properties:
+      count:
+        description: кол-во продукта, который не сходится
+        type: integer
+      date:
+        description: unixmilli
+        type: integer
+      employee_id:
+        description: сотрудник, который делал инветаризацию
+        type: integer
+      id:
+        type: integer
+      ingredient_id:
+        type: integer
+      outlet_id:
+        type: integer
+      status:
+        description: 1 - инвенторизация
+        type: integer
+      total:
+        description: сумма, на которую не сходится
+        type: number
+    type: object
   myservice.InventoryHistoryCreateInput:
     properties:
       date:
@@ -283,6 +324,8 @@ definitions:
     properties:
       amount:
         type: integer
+      barcode:
+        type: integer
       category_id:
         type: integer
       name:
@@ -291,10 +334,14 @@ definitions:
         type: string
       price:
         type: number
+      product_name_kkt:
+        type: string
     type: object
   myservice.ProductOutputModel:
     properties:
       amount:
+        type: integer
+      barcode:
         type: integer
       category_id:
         type: integer
@@ -308,10 +355,14 @@ definitions:
         type: string
       price:
         type: number
+      product_name_kkt:
+        type: string
     type: object
   myservice.ProductUpdateInput:
     properties:
       amount:
+        type: integer
+      barcode:
         type: integer
       category_id:
         type: integer
@@ -321,26 +372,8 @@ definitions:
         type: string
       price:
         type: number
-    type: object
-  myservice.ReportRevenueOutputModel:
-    properties:
-      average_receipt:
-        type: number
-      bank_earned:
-        type: number
-      cash_earned:
-        type: number
-      date:
-        description: (in unixmilli) за какое число отчёт
-        type: integer
-      id:
-        type: integer
-      number_of_receipts:
-        type: integer
-      outletID:
-        type: integer
-      total_amount:
-        type: number
+      product_name_kkt:
+        type: string
     type: object
   myservice.SessionOpenOrCloseOutput:
     properties:
@@ -368,6 +401,8 @@ definitions:
       employee_id:
         type: integer
       id:
+        type: integer
+      number_of_receipts:
         type: integer
       outlet_id:
         type: integer
@@ -881,6 +916,49 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Поступление ингредиентов в точку
+  /ingredients.History:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращаемый объект
+          schema:
+            items:
+              $ref: '#/definitions/myservice.IngredientsAddingHistoryOutputModel'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить историю добавления ингредиентов
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Принимаемый объект
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.IngredientsAddingHistoryCreateInput'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: возвращает id созданной записи
+          schema:
+            $ref: '#/definitions/myservice.DefaultOutputModel'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Добавить новый отчёт об ингредиентах
   /ingredients/:id:
     delete:
       consumes:
@@ -1386,10 +1464,11 @@ paths:
           schema:
             type: object
       summary: Обновить связь
-  /report.Revenue:
+  /sessions:
     get:
       consumes:
       - application/json
+      description: Метод позволяет получить список всех сессий точки
       parameters:
       - description: in unixmilli
         in: query
@@ -1399,23 +1478,6 @@ paths:
         in: query
         name: start
         type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: возвращаемый объект
-          schema:
-            $ref: '#/definitions/myservice.ReportRevenueOutputModel'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/myservice.serviceError'
-      summary: Отчёты по дневной выручке всех точек
-  /sessions:
-    get:
-      consumes:
-      - application/json
-      description: Метод позволяет получить список всех сессий точки
       produces:
       - application/json
       responses:

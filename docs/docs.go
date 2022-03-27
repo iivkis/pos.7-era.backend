@@ -671,6 +671,73 @@ var doc = `{
                 }
             }
         },
+        "/ingredients.History": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить историю добавления ингредиентов",
+                "responses": {
+                    "200": {
+                        "description": "возвращаемый объект",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.IngredientsAddingHistoryOutputModel"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Добавить новый отчёт об ингредиентах",
+                "parameters": [
+                    {
+                        "description": "Принимаемый объект",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.IngredientsAddingHistoryCreateInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает id созданной записи",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.DefaultOutputModel"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/ingredients/:id": {
             "delete": {
                 "consumes": [
@@ -1455,15 +1522,16 @@ var doc = `{
                 }
             }
         },
-        "/report.Revenue": {
+        "/sessions": {
             "get": {
+                "description": "Метод позволяет получить список всех сессий точки",
                 "consumes": [
                     "application/json"
                 ],
                 "produces": [
                     "application/json"
                 ],
-                "summary": "Отчёты по дневной выручке всех точек",
+                "summary": "Список всех сессий точки",
                 "parameters": [
                     {
                         "type": "integer",
@@ -1478,32 +1546,6 @@ var doc = `{
                         "in": "query"
                     }
                 ],
-                "responses": {
-                    "200": {
-                        "description": "возвращаемый объект",
-                        "schema": {
-                            "$ref": "#/definitions/myservice.ReportRevenueOutputModel"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/myservice.serviceError"
-                        }
-                    }
-                }
-            }
-        },
-        "/sessions": {
-            "get": {
-                "description": "Метод позволяет получить список всех сессий точки",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "summary": "Список всех сессий точки",
                 "responses": {
                     "200": {
                         "description": "Возвращает массив сессий точки",
@@ -1857,6 +1899,64 @@ var doc = `{
                 }
             }
         },
+        "myservice.IngredientsAddingHistoryCreateInput": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "кол-во продукта, который не сходится",
+                    "type": "integer"
+                },
+                "date": {
+                    "description": "unixmilli",
+                    "type": "integer"
+                },
+                "ingredient_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "1 - инвенторизация",
+                    "type": "integer"
+                },
+                "total": {
+                    "description": "сумма, на которую не сходится",
+                    "type": "number"
+                }
+            }
+        },
+        "myservice.IngredientsAddingHistoryOutputModel": {
+            "type": "object",
+            "properties": {
+                "count": {
+                    "description": "кол-во продукта, который не сходится",
+                    "type": "integer"
+                },
+                "date": {
+                    "description": "unixmilli",
+                    "type": "integer"
+                },
+                "employee_id": {
+                    "description": "сотрудник, который делал инветаризацию",
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "ingredient_id": {
+                    "type": "integer"
+                },
+                "outlet_id": {
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "1 - инвенторизация",
+                    "type": "integer"
+                },
+                "total": {
+                    "description": "сумма, на которую не сходится",
+                    "type": "number"
+                }
+            }
+        },
         "myservice.InventoryHistoryCreateInput": {
             "type": "object",
             "properties": {
@@ -2082,6 +2182,9 @@ var doc = `{
                 "amount": {
                     "type": "integer"
                 },
+                "barcode": {
+                    "type": "integer"
+                },
                 "category_id": {
                     "type": "integer"
                 },
@@ -2093,6 +2196,9 @@ var doc = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "product_name_kkt": {
+                    "type": "string"
                 }
             }
         },
@@ -2100,6 +2206,9 @@ var doc = `{
             "type": "object",
             "properties": {
                 "amount": {
+                    "type": "integer"
+                },
+                "barcode": {
                     "type": "integer"
                 },
                 "category_id": {
@@ -2119,6 +2228,9 @@ var doc = `{
                 },
                 "price": {
                     "type": "number"
+                },
+                "product_name_kkt": {
+                    "type": "string"
                 }
             }
         },
@@ -2126,6 +2238,9 @@ var doc = `{
             "type": "object",
             "properties": {
                 "amount": {
+                    "type": "integer"
+                },
+                "barcode": {
                     "type": "integer"
                 },
                 "category_id": {
@@ -2139,36 +2254,9 @@ var doc = `{
                 },
                 "price": {
                     "type": "number"
-                }
-            }
-        },
-        "myservice.ReportRevenueOutputModel": {
-            "type": "object",
-            "properties": {
-                "average_receipt": {
-                    "type": "number"
                 },
-                "bank_earned": {
-                    "type": "number"
-                },
-                "cash_earned": {
-                    "type": "number"
-                },
-                "date": {
-                    "description": "(in unixmilli) за какое число отчёт",
-                    "type": "integer"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "number_of_receipts": {
-                    "type": "integer"
-                },
-                "outletID": {
-                    "type": "integer"
-                },
-                "total_amount": {
-                    "type": "number"
+                "product_name_kkt": {
+                    "type": "string"
                 }
             }
         },
@@ -2210,6 +2298,9 @@ var doc = `{
                     "type": "integer"
                 },
                 "id": {
+                    "type": "integer"
+                },
+                "number_of_receipts": {
                     "type": "integer"
                 },
                 "outlet_id": {

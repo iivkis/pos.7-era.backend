@@ -97,7 +97,7 @@ type IngredientsAddingHistorytGetAllOutput []IngredientsAddingHistoryOutputModel
 //@Summary Получить историю добавления ингредиентов
 //@Accept json
 //@Produce json
-//@Success 200 {object} IngredientsAddingHistorytGetAllOutput "возвращает все ингредиенты текущей точки"
+//@Success 200 {object} IngredientsAddingHistorytGetAllOutput "возвращаемый объект"
 //@Failure 400 {object} serviceError
 //@Router /ingredients.History [get]
 func (s *IngredientsAddingHistoryService) GetAll(c *gin.Context) {
