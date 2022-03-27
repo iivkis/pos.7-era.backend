@@ -222,6 +222,7 @@ type IngredientArrivalInput struct {
 	Count        float64 `json:"count" binding:"min=0"`
 	WriteOff     bool    `json:"write_off"`
 	Price        float64 `json:"price" binding:"min=0"`
+	Date         int64   `json:"date" binding:"min=1"`
 }
 
 //@Summary Поступление ингредиентов в точку
@@ -259,6 +260,7 @@ func (s *IngredientsService) Arrival(c *gin.Context) {
 		}
 	}
 
+	//получение инфы об ингредиентах
 	for i, arrival := range input {
 		where.ID = arrival.IngredientID
 		ingredient, err := s.repo.Ingredients.FindFirts(where)
@@ -273,6 +275,7 @@ func (s *IngredientsService) Arrival(c *gin.Context) {
 		ingredients[i] = ingredient
 	}
 
+	//обновление и добавление в историю (ingredientsAddingHistory)
 	var writeOffSum float64
 	for i, arrival := range input {
 		if arrival.WriteOff {
@@ -281,8 +284,24 @@ func (s *IngredientsService) Arrival(c *gin.Context) {
 
 		ingredients[i].Count += arrival.Count
 		s.repo.Ingredients.Updates(&repository.IngredientModel{ID: arrival.IngredientID}, ingredients[i])
+
+		//добавление в историю
+		if err := s.repo.IngredientsAddingHistory.Create(&repository.IngredientsAddingHistoryModel{
+			Count:  arrival.Count,
+			Total:  arrival.Count * arrival.Price,
+			Status: 3,
+			Date:   arrival.Date,
+
+			IngredientID: arrival.IngredientID,
+			EmployeeID:   claims.EmployeeID,
+			OutletID:     claims.OutletID,
+			OrgID:        claims.OrganizationID,
+		}); err != nil {
+			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		}
 	}
 
+	//добавление инфы в кассу
 	model := &repository.CashChangesModel{
 		Date:       time.Now().UTC().UnixMilli(),
 		Total:      writeOffSum,
@@ -294,6 +313,7 @@ func (s *IngredientsService) Arrival(c *gin.Context) {
 
 	if err := s.repo.CashChanges.Create(model); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
 	}
 
 	NewResponse(c, http.StatusCreated, nil)

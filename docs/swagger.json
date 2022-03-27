@@ -1812,6 +1812,9 @@
                 "count": {
                     "type": "number"
                 },
+                "date": {
+                    "type": "integer"
+                },
                 "ingredient_id": {
                     "type": "integer"
                 },
@@ -1888,7 +1891,7 @@
             "properties": {
                 "count": {
                     "description": "кол-во продукта, который не сходится",
-                    "type": "integer"
+                    "type": "number"
                 },
                 "date": {
                     "description": "unixmilli",
@@ -1912,7 +1915,7 @@
             "properties": {
                 "count": {
                     "description": "кол-во продукта, который не сходится",
-                    "type": "integer"
+                    "type": "number"
                 },
                 "date": {
                     "description": "unixmilli",

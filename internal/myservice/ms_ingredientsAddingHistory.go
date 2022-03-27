@@ -10,7 +10,7 @@ import (
 type IngredientsAddingHistoryOutputModel struct {
 	ID uint
 
-	Count  int     `json:"count"`  //кол-во продукта, который не сходится
+	Count  float64 `json:"count"`  //кол-во продукта, который не сходится
 	Total  float64 `json:"total"`  //сумма, на которую не сходится
 	Status int     `json:"status"` // 1 - инвенторизация
 
@@ -32,9 +32,9 @@ func newIngredientsAddingHistoryService(repo *repository.Repository) *Ingredient
 }
 
 type IngredientsAddingHistoryCreateInput struct {
-	Count  int     `json:"count"`                        //кол-во продукта, который не сходится
+	Count  float64 `json:"count"`                        //кол-во продукта, который не сходится
 	Total  float64 `json:"total"`                        //сумма, на которую не сходится
-	Status int     `json:"status" binding:"min=0,max=1"` // 1 - инвенторизация
+	Status int     `json:"status" binding:"min=1,max=2"` // 1 - инвенторизация
 
 	Date int64 `json:"date"` //unixmilli
 

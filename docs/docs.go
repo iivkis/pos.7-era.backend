@@ -1828,6 +1828,9 @@ var doc = `{
                 "count": {
                     "type": "number"
                 },
+                "date": {
+                    "type": "integer"
+                },
                 "ingredient_id": {
                     "type": "integer"
                 },
@@ -1904,7 +1907,7 @@ var doc = `{
             "properties": {
                 "count": {
                     "description": "кол-во продукта, который не сходится",
-                    "type": "integer"
+                    "type": "number"
                 },
                 "date": {
                     "description": "unixmilli",
@@ -1928,7 +1931,7 @@ var doc = `{
             "properties": {
                 "count": {
                     "description": "кол-во продукта, который не сходится",
-                    "type": "integer"
+                    "type": "number"
                 },
                 "date": {
                     "description": "unixmilli",

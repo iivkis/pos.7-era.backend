@@ -5,9 +5,9 @@ import "gorm.io/gorm"
 type IngredientsAddingHistoryModel struct {
 	ID uint
 
-	Count  int     //кол-во продукта, который не сходится
+	Count  float64 //кол-во продукта, который не сходится
 	Total  float64 //сумма, на которую не сходится
-	Status int     // 1 - инвенторизация
+	Status int     // 1 - инвенторизация, 2 -
 
 	Date int64 //unixmilli
 

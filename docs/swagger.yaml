@@ -90,6 +90,8 @@ definitions:
     properties:
       count:
         type: number
+      date:
+        type: integer
       ingredient_id:
         type: integer
       price:
@@ -140,7 +142,7 @@ definitions:
     properties:
       count:
         description: кол-во продукта, который не сходится
-        type: integer
+        type: number
       date:
         description: unixmilli
         type: integer
@@ -157,7 +159,7 @@ definitions:
     properties:
       count:
         description: кол-во продукта, который не сходится
-        type: integer
+        type: number
       date:
         description: unixmilli
         type: integer
