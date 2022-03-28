@@ -53,8 +53,7 @@ func (s *IngredientsService) Create(c *gin.Context) {
 		return
 	}
 
-	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	ingredient := repository.IngredientModel{
 		Name:          input.Name,

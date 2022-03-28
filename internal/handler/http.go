@@ -27,7 +27,7 @@ func NewHttpHandler(service myservice.MyService, authjwt *authjwt.AuthJWT) HttpH
 	engine := gin.Default()
 
 	//set up recovery and logger
-	engine.Use(gin.Recovery(), gin.Logger())
+	engine.Use(gin.Recovery())
 
 	//use CORS
 	engine.Use(cors.New(cors.Config{

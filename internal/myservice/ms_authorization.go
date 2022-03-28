@@ -277,7 +277,7 @@ type SignInEmployeeInput struct {
 
 type SignInEmployeeOutput struct {
 	Token     string `json:"token"`
-	Affiliate bool   `json:"affiliate"` // является ли компания филиалом
+	Affiliate bool   `json:"affiliate"` // является ли организация филиалом
 }
 
 //@Summary Вход для сотрудника

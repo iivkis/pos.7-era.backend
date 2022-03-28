@@ -99,6 +99,7 @@ type OrderListGetAllQuery struct {
 	SessionID   uint `form:"session_id"`
 	OrderInfoID uint `form:"order_info_id"`
 }
+
 type OrderListGetAllOutput []OrderListOutputModel
 
 //@Summary Получить список orderList точки (список продутктов из которых состоит заказ)
