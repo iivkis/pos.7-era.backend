@@ -172,15 +172,15 @@ func (s *OrdersInfoService) Delete(c *gin.Context) {
 	}
 
 	for _, orderList := range *orderLists {
-		if err := s.repo.ProductsWithIngredients.ReturnIngredients(orderList.ProductID, orderList.Count); err != nil {
+		if err := s.repo.ProductsWithIngredients.AddIngredients(orderList.ProductID, orderList.Count); err != nil {
 			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 			return
 		}
+	}
 
-		if err := s.repo.OrdersList.Delete(&repository.OrderListModel{Model: gorm.Model{ID: orderList.ID}}); err != nil {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
-			return
-		}
+	if err := s.repo.OrdersList.Delete(&repository.OrderListModel{OrderInfoID: uint(orderInfoID)}); err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
 	}
 
 	if err := s.repo.OrdersInfo.Delete(where); err != nil {
@@ -237,16 +237,17 @@ func (s *OrdersInfoService) Recovery(c *gin.Context) {
 			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 			return
 		}
+	}
 
-		if err := s.repo.OrdersList.Recovery(&repository.OrderListModel{Model: gorm.Model{ID: orderList.ID}}); err != nil {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
-			return
-		}
+	if err := s.repo.OrdersList.Recovery(&repository.OrderListModel{OrderInfoID: uint(orderInfoID)}); err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		return
 	}
 
 	if err := s.repo.OrdersInfo.Recovery(where); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
+
 	NewResponse(c, http.StatusOK, nil)
 }

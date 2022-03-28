@@ -71,7 +71,7 @@ func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID uint, count 
 	return
 }
 
-func (r *ProductsWithIngredientsRepo) ReturnIngredients(productID uint, count int) (err error) {
+func (r *ProductsWithIngredientsRepo) AddIngredients(productID uint, count int) (err error) {
 	//находим связи с ингредиентами, для продукта
 	var pwiList []ProductWithIngredientModel
 	if err = r.db.Where(&ProductWithIngredientModel{ProductID: productID}).Find(&pwiList).Error; err != nil {
