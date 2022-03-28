@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"gorm.io/gorm"
 )
 
 type OutletsService struct {
@@ -131,7 +132,7 @@ func (s *OutletsService) UpdateFields(c *gin.Context) {
 		return
 	}
 
-	if err := s.repo.Outlets.Updates(&repository.OutletModel{ID: uint(outletID), OrgID: claims.OrganizationID}, updatedFields); err != nil {
+	if err := s.repo.Outlets.Updates(&repository.OutletModel{Model: gorm.Model{ID: uint(outletID)}, OrgID: claims.OrganizationID}, updatedFields); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
@@ -153,12 +154,19 @@ func (s *OutletsService) Delete(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
+
 	if !s.repo.Outlets.ExistsInOrg(uint(outletID), claims.OrganizationID) {
 		NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined outlet with this `id` in your organization"))
 		return
 	}
 
-	if err := s.repo.Outlets.Delete(&repository.OutletModel{ID: uint(outletID), OrgID: claims.OrganizationID}); err != nil {
+	// ошибка, если владелец привязан к точке
+	if s.repo.Employees.Exists(&repository.EmployeeModel{Role: "owner", OutletID: uint(outletID)}) {
+		NewResponse(c, http.StatusBadRequest, errPermissionDenided("you don't can delete main outlet"))
+		return
+	}
+
+	if err := s.repo.Outlets.Delete(&repository.OutletModel{Model: gorm.Model{ID: uint(outletID)}, OrgID: claims.OrganizationID}); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

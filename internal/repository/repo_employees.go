@@ -88,6 +88,10 @@ func (r *EmployeesRepo) Delete(where *EmployeeModel) (err error) {
 	return
 }
 
+func (r *EmployeesRepo) Exists(where *EmployeeModel) bool {
+	return r.db.Where(where).First(&EmployeeModel{}).Error == nil
+}
+
 func (r *EmployeesRepo) Count(where *EmployeeModel) (n int64, err error) {
 	err = r.db.Model(&EmployeeModel{}).Where(where).Count(&n).Error
 	return

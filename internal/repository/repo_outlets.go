@@ -3,7 +3,7 @@ package repository
 import "gorm.io/gorm"
 
 type OutletModel struct {
-	ID uint
+	gorm.Model
 
 	Name  string
 	OrgID uint
