@@ -125,4 +125,11 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		r.GET("/inventoryList", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.InventoryList.GetAll)
 		r.POST("/inventoryList", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.InventoryList.Create)
 	}
+
+	//invites
+	{
+		r.POST("/invites", h.srv.Mware.AuthEmployee(r_owner, r_director), h.srv.Invitation.Create)
+		r.GET("/invites", h.srv.Mware.AuthEmployee(r_owner, r_director), h.srv.Invitation.GetAll)
+		r.DELETE("/invites/:id", h.srv.Mware.AuthEmployee(r_owner, r_director), h.srv.Invitation.Delete)
+	}
 }

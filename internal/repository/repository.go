@@ -25,6 +25,7 @@ type Repository struct {
 	InventoryHistory         *InventoryHistoryRepo
 	InventoryList            *InventoryListRepo
 	IngredientsAddingHistory *IngredientsAddingHistoryRepo
+	Invitation               *InvitationRepo
 }
 
 func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
@@ -35,7 +36,7 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 		panic(err)
 	}
 
-	if *config.Flags.Migration {
+	if *config.Flags.Main {
 		if err := db.AutoMigrate(
 			&OrganizationModel{},
 			&EmployeeModel{},
@@ -51,6 +52,7 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 			&InventoryHistoryModel{},
 			&InventoryListModel{},
 			&IngredientsAddingHistoryModel{},
+			&InvitationModel{},
 		); err != nil {
 			panic(err)
 		}
@@ -72,5 +74,6 @@ func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
 		InventoryHistory:         newInventoryHistoryRepo(db),
 		InventoryList:            newInventoryListRepo(db),
 		IngredientsAddingHistory: newIngredientsAddingHistoryRepo(db),
+		Invitation:               newInvitationRepo(db),
 	}
 }

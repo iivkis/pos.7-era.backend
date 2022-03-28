@@ -32,9 +32,10 @@ func newAuthorizationService(repo *repository.Repository, strcode *strcode.Strco
 }
 
 type SignUpOrgInput struct {
-	Name     string `json:"name" binding:"required,min=3,max=50"`
-	Email    string `json:"email" binding:"required,min=3,max=50"`
-	Password string `json:"password" binding:"required,min=6,max=45"`
+	Name       string `json:"name" binding:"required,min=3,max=50"`
+	Email      string `json:"email" binding:"required,min=3,max=50"`
+	Password   string `json:"password" binding:"required,min=6,max=45"`
+	InviteCode string `json:"invite_code" binding:"max=9"`
 }
 
 //@Summary Регистрация организации
@@ -46,7 +47,6 @@ type SignUpOrgInput struct {
 //@Failure 401 {object} serviceError
 //@Router /auth/signUp.Org [post]
 func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
-	//parse body
 	var input SignUpOrgInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -56,6 +56,12 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 	//validate email
 	if _, err := mail.ParseAddress(input.Email); err != nil {
 		NewResponse(c, http.StatusUnauthorized, errIncorrectEmail(err.Error()))
+		return
+	}
+
+	//chek invite
+	if input.InviteCode != "" && !s.repo.Invitation.Exists(&repository.InvitationModel{Code: input.InviteCode}) {
+		NewResponse(c, http.StatusBadRequest, "unknown invite")
 		return
 	}
 
@@ -79,6 +85,14 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 		}
 		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
 		return
+	}
+
+	//активация инвайта
+	if input.InviteCode != "" {
+		if err := s.repo.Invitation.Activate(input.InviteCode, orgModel.ID); err != nil {
+			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			return
+		}
 	}
 
 	//Создание главной торговой точки

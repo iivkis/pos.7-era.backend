@@ -924,6 +924,82 @@ var doc = `{
                 }
             }
         },
+        "/invites": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить все приглашения организации",
+                "responses": {
+                    "200": {
+                        "description": "возвращамый объект",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.InvitationOutputModel"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Создать код приглашения",
+                "responses": {
+                    "201": {
+                        "description": "возвращает id созданной записи и код приглашения",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.InvitationCreateOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
+        "/invites/:id": {
+            "delete": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Удалить приглашение",
+                "responses": {
+                    "200": {
+                        "description": "возвращамый объект",
+                        "schema": {
+                            "type": "object"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/orderInfo": {
             "get": {
                 "consumes": [
@@ -2028,6 +2104,38 @@ var doc = `{
                 }
             }
         },
+        "myservice.InvitationCreateOutput": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.InvitationOutputModel": {
+            "type": "object",
+            "properties": {
+                "affiliateOrgID": {
+                    "description": "приглашенная организация",
+                    "type": "integer"
+                },
+                "code": {
+                    "description": "рандомный код (равен \"\", если активирован)",
+                    "type": "string"
+                },
+                "expires_in": {
+                    "description": "во сколько истекает инвайт(равен 0, если активирован)",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "id инвайта",
+                    "type": "integer"
+                }
+            }
+        },
         "myservice.OrderInfoOutputModel": {
             "type": "object",
             "properties": {
@@ -2407,6 +2515,9 @@ var doc = `{
             ],
             "properties": {
                 "email": {
+                    "type": "string"
+                },
+                "invite_code": {
                     "type": "string"
                 },
                 "name": {

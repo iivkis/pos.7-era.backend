@@ -224,6 +224,28 @@ definitions:
       price:
         type: number
     type: object
+  myservice.InvitationCreateOutput:
+    properties:
+      code:
+        type: string
+      id:
+        type: integer
+    type: object
+  myservice.InvitationOutputModel:
+    properties:
+      affiliateOrgID:
+        description: приглашенная организация
+        type: integer
+      code:
+        description: рандомный код (равен "", если активирован)
+        type: string
+      expires_in:
+        description: во сколько истекает инвайт(равен 0, если активирован)
+        type: integer
+      id:
+        description: id инвайта
+        type: integer
+    type: object
   myservice.OrderInfoOutputModel:
     properties:
       date:
@@ -469,6 +491,8 @@ definitions:
   myservice.SignUpOrgInput:
     properties:
       email:
+        type: string
+      invite_code:
         type: string
       name:
         type: string
@@ -1080,6 +1104,55 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Добавить InventoryList
+  /invites:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращамый объект
+          schema:
+            items:
+              $ref: '#/definitions/myservice.InvitationOutputModel'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить все приглашения организации
+    post:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: возвращает id созданной записи и код приглашения
+          schema:
+            $ref: '#/definitions/myservice.InvitationCreateOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Создать код приглашения
+  /invites/:id:
+    delete:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращамый объект
+          schema:
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Удалить приглашение
   /orderInfo:
     get:
       consumes:

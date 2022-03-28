@@ -30,9 +30,8 @@ var Env struct {
 }
 
 var Flags struct {
-	Port       *string
-	Autoreport *bool
-	Migration  *bool
+	Port *string
+	Main *bool
 }
 
 func init() {
@@ -103,7 +102,7 @@ func loadFlags() {
 	port, _ := os.LookupEnv("PORT")
 
 	Flags.Port = flag.String("port", port, "server port (default from env `PORT`)")
-	Flags.Migration = flag.Bool("migration", false, "use database migrations")
+	Flags.Main = flag.Bool("main", false, "main server make db migration, invites cleaning and other functions")
 
 	flag.Parse()
 }

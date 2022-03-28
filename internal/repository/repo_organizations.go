@@ -23,6 +23,10 @@ type OrganizationModel struct {
 	EmailConfirmed bool
 }
 
+func (r *OrganizationsRepo) generatePasswordHash(pwd string) ([]byte, error) {
+	return bcrypt.GenerateFromPassword([]byte(pwd), 7)
+}
+
 func newOrganizationsRepo(db *gorm.DB) *OrganizationsRepo {
 	return &OrganizationsRepo{
 		db: db,
@@ -30,27 +34,21 @@ func newOrganizationsRepo(db *gorm.DB) *OrganizationsRepo {
 }
 
 func (r *OrganizationsRepo) Create(m *OrganizationModel) error {
-	if err := r.db.Create(m).Error; err != nil {
-		return err
-	}
-
-	if err := r.SetPassword(m.ID, m.Password); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (r *OrganizationsRepo) SetPassword(orgID interface{}, pwd string) error {
-	cpwd, err := bcrypt.GenerateFromPassword([]byte(pwd), 7)
+	pwd, err := r.generatePasswordHash(m.Password)
 	if err != nil {
 		return err
 	}
+	m.Password = string(pwd)
 
-	if err := r.db.Model(&OrganizationModel{}).Where("id = ?", orgID).Update("password", string(cpwd)).Error; err != nil {
+	return r.db.Create(m).Error
+}
+
+func (r *OrganizationsRepo) SetPassword(orgID interface{}, password string) error {
+	pwd, err := r.generatePasswordHash(password)
+	if err != nil {
 		return err
 	}
-	return nil
+	return r.db.Model(&OrganizationModel{}).Where("id = ?", orgID).UpdateColumn("password", string(pwd)).Error
 }
 
 func (r *OrganizationsRepo) ConfirmEmailTrue(email string) error {
