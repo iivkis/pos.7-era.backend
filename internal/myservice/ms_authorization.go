@@ -61,7 +61,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 
 	//chek invite
 	if input.InviteCode != "" && !s.repo.Invitation.Exists(&repository.InvitationModel{Code: input.InviteCode}) {
-		NewResponse(c, http.StatusBadRequest, "unknown invite")
+		NewResponse(c, http.StatusBadRequest, errRecordNotFound("unknown invite"))
 		return
 	}
 
@@ -276,7 +276,8 @@ type SignInEmployeeInput struct {
 }
 
 type SignInEmployeeOutput struct {
-	Token string `json:"token"`
+	Token     string `json:"token"`
+	Affiliate bool   `json:"affiliate"` // является ли компания филиалом
 }
 
 //@Summary Вход для сотрудника
@@ -320,7 +321,11 @@ func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 		return
 	}
 
-	output := SignInEmployeeOutput{Token: token}
+	output := SignInEmployeeOutput{
+		Token:     token,
+		Affiliate: s.repo.Invitation.Exists(&repository.InvitationModel{AffiliateOrgID: claims.OrganizationID}),
+	}
+
 	NewResponse(c, http.StatusOK, output)
 }
 

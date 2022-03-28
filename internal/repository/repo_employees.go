@@ -88,6 +88,11 @@ func (r *EmployeesRepo) Delete(where *EmployeeModel) (err error) {
 	return
 }
 
+func (r *EmployeesRepo) Count(where *EmployeeModel) (n int64, err error) {
+	err = r.db.Model(&EmployeeModel{}).Where(where).Count(&n).Error
+	return
+}
+
 func (r *EmployeesRepo) SetOnline(employeeID interface{}) error {
 	return r.db.Model(&EmployeeModel{}).Where("id = ?", employeeID).UpdateColumn("online", true).Error
 }

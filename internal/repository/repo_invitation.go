@@ -74,12 +74,22 @@ func (r *InvitationRepo) Create(m *InvitationModel) error {
 }
 
 func (r *InvitationRepo) Find(where *InvitationModel) (result *[]InvitationModel, err error) {
-	err = r.db.Where("expires_in > ? OR expires_in = 0", time.Now().UTC().UnixMilli()).Find(&result, where).Error
+	err = r.db.Where("expires_in > ? OR expires_in is NULL", time.Now().UTC().UnixMilli()).Find(&result, where).Error
+	return
+}
+
+func (r *InvitationRepo) FindActivated(where *InvitationModel) (result *[]InvitationModel, err error) {
+	err = r.db.Where("affiliate_org_id IS NOT NULL").Find(&result, where).Error
+	return
+}
+
+func (r *InvitationRepo) FindNotActivated(where *InvitationModel) (result *[]InvitationModel, err error) {
+	err = r.db.Where("expires_in > ? AND affiliate_org_id is NULL", time.Now().UTC().UnixMilli()).Find(&result, where).Error
 	return
 }
 
 func (r *InvitationRepo) FindFirts(where *InvitationModel) (result *InvitationModel, err error) {
-	err = r.db.Where("expires_in > ? OR expires_in = 0", time.Now().UTC().UnixMilli()).First(&result, where).Error
+	err = r.db.Where("expires_in > ? OR expires_in is NULL", time.Now().UTC().UnixMilli()).First(&result, where).Error
 	return
 }
 
@@ -93,12 +103,12 @@ func (r *InvitationRepo) Delete(where *InvitationModel) (err error) {
 }
 
 func (r *InvitationRepo) DeleteExpired() (err error) {
-	err = r.db.Where("expires_in <= ? AND expires_in <> 0", time.Now().UTC().UnixMilli()).Delete(&InvitationModel{}).Error
+	err = r.db.Where("expires_in <= ? AND expires_in IS NOT NULL", time.Now().UTC().UnixMilli()).Delete(&InvitationModel{}).Error
 	return
 }
 
 func (r *InvitationRepo) Exists(where *InvitationModel) bool {
-	return r.db.Where("expires_in > ?", time.Now().UTC().UnixMilli()).First(&InvitationModel{}, where).Error == nil
+	return r.db.Where("expires_in > ? OR expires_in IS NULL", time.Now().UTC().UnixMilli()).First(&InvitationModel{}, where).Error == nil
 }
 
 func (r *InvitationRepo) Activate(code string, AffiliateOrgID uint) error {
@@ -110,15 +120,15 @@ func (r *InvitationRepo) Activate(code string, AffiliateOrgID uint) error {
 	fmt.Println(invite)
 
 	r.db.Model(&InvitationModel{}).Where(invite.ID).Updates(map[string]interface{}{
-		"code":             "",
-		"expires_in":       0,
+		"code":             nil,
+		"expires_in":       nil,
 		"affiliate_org_id": AffiliateOrgID,
 	})
 
 	return nil
 }
 
-func (r *InvitationRepo) CountNotActived(ordID interface{}) (n int64, err error) {
-	err = r.db.Model(&InvitationModel{}).Where("expires_in <> 0 AND org_id = ?", ordID).Count(&n).Error
+func (r *InvitationRepo) CountNotActivated(ordID interface{}) (n int64, err error) {
+	err = r.db.Model(&InvitationModel{}).Where("expires_in IS NOT NULL AND org_id = ?", ordID).Count(&n).Error
 	return
 }

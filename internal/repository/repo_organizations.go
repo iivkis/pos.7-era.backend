@@ -43,6 +43,11 @@ func (r *OrganizationsRepo) Create(m *OrganizationModel) error {
 	return r.db.Create(m).Error
 }
 
+func (r *OrganizationsRepo) FindFirts(where *OrganizationModel) (result *OrganizationModel, err error) {
+	err = r.db.Where(where).First(&result).Error
+	return
+}
+
 func (r *OrganizationsRepo) SetPassword(orgID interface{}, password string) error {
 	pwd, err := r.generatePasswordHash(password)
 	if err != nil {

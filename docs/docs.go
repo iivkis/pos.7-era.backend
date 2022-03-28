@@ -975,6 +975,34 @@ var doc = `{
                 }
             }
         },
+        "/invites.NotActivated": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Получить активированные приглашения организации",
+                "responses": {
+                    "200": {
+                        "description": "возвращамый объект",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/myservice.InvitationGetActivatedOutput"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/invites/:id": {
             "delete": {
                 "consumes": [
@@ -2115,10 +2143,67 @@ var doc = `{
                 }
             }
         },
+        "myservice.InvitationGetActivatedFieldAffiliateOrg": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "outlets": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/myservice.InvitationGetActivatedFieldOutlets"
+                    }
+                }
+            }
+        },
+        "myservice.InvitationGetActivatedFieldOutlets": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.InvitationGetActivatedOutput": {
+            "type": "object",
+            "properties": {
+                "affiliate_org": {
+                    "$ref": "#/definitions/myservice.InvitationGetActivatedFieldAffiliateOrg"
+                },
+                "id": {
+                    "description": "id инвайта",
+                    "type": "integer"
+                }
+            }
+        },
+        "myservice.InvitationGetNotActivatedOutput": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "рандомный код (равен \"\", если активирован)",
+                    "type": "string"
+                },
+                "expires_in": {
+                    "description": "во сколько истекает инвайт(равен 0, если активирован)",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "id инвайта",
+                    "type": "integer"
+                }
+            }
+        },
         "myservice.InvitationOutputModel": {
             "type": "object",
             "properties": {
-                "affiliateOrgID": {
+                "affiliate_org_id": {
                     "description": "приглашенная организация",
                     "type": "integer"
                 },
@@ -2460,6 +2545,10 @@ var doc = `{
         "myservice.SignInEmployeeOutput": {
             "type": "object",
             "properties": {
+                "affiliate": {
+                    "description": "является ли компания филиалом",
+                    "type": "boolean"
+                },
                 "token": {
                     "type": "string"
                 }

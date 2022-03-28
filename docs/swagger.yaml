@@ -231,9 +231,47 @@ definitions:
       id:
         type: integer
     type: object
+  myservice.InvitationGetActivatedFieldAffiliateOrg:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      outlets:
+        items:
+          $ref: '#/definitions/myservice.InvitationGetActivatedFieldOutlets'
+        type: array
+    type: object
+  myservice.InvitationGetActivatedFieldOutlets:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  myservice.InvitationGetActivatedOutput:
+    properties:
+      affiliate_org:
+        $ref: '#/definitions/myservice.InvitationGetActivatedFieldAffiliateOrg'
+      id:
+        description: id инвайта
+        type: integer
+    type: object
+  myservice.InvitationGetNotActivatedOutput:
+    properties:
+      code:
+        description: рандомный код (равен "", если активирован)
+        type: string
+      expires_in:
+        description: во сколько истекает инвайт(равен 0, если активирован)
+        type: integer
+      id:
+        description: id инвайта
+        type: integer
+    type: object
   myservice.InvitationOutputModel:
     properties:
-      affiliateOrgID:
+      affiliate_org_id:
         description: приглашенная организация
         type: integer
       code:
@@ -458,6 +496,9 @@ definitions:
     type: object
   myservice.SignInEmployeeOutput:
     properties:
+      affiliate:
+        description: является ли компания филиалом
+        type: boolean
       token:
         type: string
     type: object
@@ -1137,6 +1178,24 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Создать код приглашения
+  /invites.NotActivated:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: возвращамый объект
+          schema:
+            items:
+              $ref: '#/definitions/myservice.InvitationGetActivatedOutput'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Получить активированные приглашения организации
   /invites/:id:
     delete:
       consumes:
