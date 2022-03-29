@@ -13,7 +13,7 @@ type ProductModel struct {
 	Price  float64
 	Photo  string
 
-	CategoryID uint
+	CategoryID uint `gorm:"default:NULL"`
 	OutletID   uint
 	OrgID      uint
 

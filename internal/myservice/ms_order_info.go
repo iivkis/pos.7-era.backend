@@ -35,6 +35,7 @@ type OrdersInfoCreateInput struct {
 	PayType      int    `json:"pay_type" binding:"min=0,max=2"`
 	EmployeeName string `json:"employee_name" binding:"required"`
 	Date         int64  `json:"date" binding:"min=1"`
+	SessionID    uint   `json:"session_id" binding:"min=1"`
 }
 
 //@Summary Добавить orderInfo (список завершенных заказов)
@@ -51,21 +52,29 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 
 	claims := mustGetEmployeeClaims(c)
 
-	sess, err := s.repo.Sessions.GetLastOpenByEmployeeID(claims.EmployeeID)
+	//check session
+	sess, err := s.repo.Sessions.FindFirts(&repository.SessionModel{Model: gorm.Model{ID: input.SessionID}, OutletID: claims.OutletID})
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			NewResponse(c, http.StatusBadRequest, errRecordNotFound("you should open new session"))
+			NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined session"))
 			return
 		}
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}
 
+	if sess.DateClose != 0 {
+		NewResponse(c, http.StatusInternalServerError, errIncorrectInputData("session already closed"))
+		return
+	}
+
+	//create model
+
 	model := repository.OrderInfoModel{
 		PayType:      input.PayType,
 		Date:         input.Date,
 		EmployeeName: input.EmployeeName,
-		SessionID:    sess.ID,
+		SessionID:    input.SessionID,
 		OrgID:        claims.OrganizationID,
 		OutletID:     claims.OutletID,
 	}

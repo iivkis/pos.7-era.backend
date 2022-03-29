@@ -39,7 +39,7 @@ type ProductCreateInput struct {
 	Amount         int     `json:"amount"`
 	Price          float64 `json:"price"`
 	Photo          string  `json:"photo"`
-	CategoryID     uint    `json:"category_id" binding:"min=1"`
+	CategoryID     uint    `json:"category_id"`
 }
 
 //@Summary Добавить новый продукт в точку
@@ -54,6 +54,7 @@ func (s *ProductsService) Create(c *gin.Context) {
 	var input ProductCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
 	}
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)

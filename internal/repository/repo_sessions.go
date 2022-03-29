@@ -118,6 +118,11 @@ func (r *SessionsRepo) Find(where *SessionModel) (result *[]SessionModel, err er
 	return
 }
 
+func (r *SessionsRepo) FindFirts(where *SessionModel) (result SessionModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
+	return
+}
+
 func (r *SessionsRepo) FindWithPeriod(dateStart uint64, dateEnd uint64, where *SessionModel) (result *[]SessionModel, err error) {
 	if dateEnd <= 0 {
 		err = r.db.Where("date_open >= ?", dateStart).Find(&result, where).Error
