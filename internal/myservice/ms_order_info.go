@@ -222,14 +222,27 @@ func (s *OrdersInfoService) Recovery(c *gin.Context) {
 		where.OutletID = stdQuery.OutletID
 	}
 
-	if s.repo.OrdersInfo.Exists(where) {
-		NewResponse(c, http.StatusBadRequest, errRecordNotFound("`order_info` with this `id` already recovery"))
-		return
-	}
+	// if s.repo.OrdersInfo.Exists(where) {
+	// 	NewResponse(c, http.StatusBadRequest, errRecordNotFound("`order_info` with this `id` already recovery"))
+	// 	return
+	// }
 
-	if !s.repo.OrdersInfo.ExistsUnscoped(where) {
-		NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined `order_info` with this `id`"))
-		return
+	//check orderInfo
+	{
+		orderInfo, err := s.repo.OrdersInfo.FindFirstUnscoped(where)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined `order_info` with this `id`"))
+			} else {
+				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			}
+			return
+		}
+
+		if orderInfo.DeletedAt.Time.IsZero() {
+			NewResponse(c, http.StatusBadRequest, errRecordNotFound("record already recovered"))
+			return
+		}
 	}
 
 	orderLists, err := s.repo.OrdersList.FindUnscoped(&repository.OrderListModel{OrderInfoID: where.ID, OutletID: where.OutletID, OrgID: where.OrgID})

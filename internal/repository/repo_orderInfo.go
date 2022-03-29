@@ -44,6 +44,16 @@ func (r OrderInfoRepo) FindUnscoped(where *OrderInfoModel) (result *[]OrderInfoM
 	return
 }
 
+func (r OrderInfoRepo) FindFirst(where *OrderInfoModel) (result *OrderInfoModel, err error) {
+	err = r.db.Where(where).Find(&result).Error
+	return
+}
+
+func (r OrderInfoRepo) FindFirstUnscoped(where *OrderInfoModel) (result *OrderInfoModel, err error) {
+	err = r.db.Unscoped().Where(where).Find(&result).Error
+	return
+}
+
 func (r *OrderInfoRepo) Updates(where *OrderInfoModel, updatedFields *OrderInfoModel) error {
 	return r.db.Where(where).Updates(updatedFields).Error
 }

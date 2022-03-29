@@ -167,7 +167,7 @@ func (s *InvitationService) GetNotActivated(c *gin.Context) {
 		}
 	}
 
-	NewResponse(c, http.StatusCreated, output)
+	NewResponse(c, http.StatusOK, output)
 }
 
 type InvitationGetActivatedFieldOutlets struct {
@@ -213,23 +213,23 @@ func (s *InvitationService) GetActivated(c *gin.Context) {
 			return
 		}
 
-		affiliateOrg := InvitationGetActivatedFieldAffiliateOrg{
-			ID:      org.ID,
-			Name:    org.Name,
-			Outlets: make([]InvitationGetActivatedFieldOutlets, 0),
-		}
-
 		outlets, err := s.repo.Outlets.Find(&repository.OutletModel{OrgID: invite.OrgID})
 		if err != nil {
 			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
 			return
 		}
 
-		for _, outlet := range *outlets {
-			affiliateOrg.Outlets = append(affiliateOrg.Outlets, InvitationGetActivatedFieldOutlets{
+		affiliateOrg := InvitationGetActivatedFieldAffiliateOrg{
+			ID:      org.ID,
+			Name:    org.Name,
+			Outlets: make([]InvitationGetActivatedFieldOutlets, len(*outlets)),
+		}
+
+		for i, outlet := range *outlets {
+			affiliateOrg.Outlets[i] = InvitationGetActivatedFieldOutlets{
 				ID:   outlet.ID,
 				Name: outlet.Name,
-			})
+			}
 		}
 
 		output[i] = InvitationGetActivatedOutput{
@@ -238,5 +238,5 @@ func (s *InvitationService) GetActivated(c *gin.Context) {
 		}
 	}
 
-	NewResponse(c, http.StatusCreated, output)
+	NewResponse(c, http.StatusOK, output)
 }
