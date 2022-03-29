@@ -79,7 +79,7 @@ func (s *CashChangesService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusOK, DefaultOutputModel{ID: model.ID})
 }
 
-type CashChangesGetAllInput struct {
+type CashChangesGetAllQuery struct {
 	Start uint64 `form:"start"` //in unixmilli
 	End   uint64 `form:"end"`   //in unixmilli
 }
@@ -87,23 +87,33 @@ type CashChangesGetAllInput struct {
 type CashChangesGetAllOutput []CashChangesOutputModel
 
 //@Summary Получить всю информацию о снятии\вкладе денежных средств (в точке)
-//@param type query CashChangesGetAllInput false "Принимаемый объект"
+//@param type query CashChangesGetAllQuery false "Принимаемый объект"
 //@Success 201 {object} CashChangesGetAllOutput "список изменений баланса кассы"
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
 //@Router /cashChanges [get]
 func (s *CashChangesService) GetAll(c *gin.Context) {
-	var query CashChangesGetAllInput
+	var query CashChangesGetAllQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	stdQuery := mustGetStdQuery(c)
-	claims := mustGetEmployeeClaims(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
-	items, err := s.repo.CashChanges.FindWithPeriod(query.Start, query.End, &repository.CashChangesModel{OrgID: claims.OrganizationID, OutletID: stdQuery.OutletID})
+	where := &repository.CashChangesModel{
+		OrgID:    claims.OrganizationID,
+		OutletID: stdQuery.OutletID,
+	}
+
+	if claims.HasRole(repository.R_OWNER) {
+		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{OrgID: claims.OrganizationID, AffiliateOrgID: stdQuery.OrgID}) {
+			where.OrgID = stdQuery.OrgID
+		}
+	}
+
+	items, err := s.repo.CashChanges.FindWithPeriod(query.Start, query.End, where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return

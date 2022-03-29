@@ -218,14 +218,15 @@ func (s *OrdersInfoService) Recovery(c *gin.Context) {
 		OrgID:    claims.OrganizationID,
 	}
 
+	if claims.HasRole(repository.R_OWNER) {
+		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{OrgID: claims.OrganizationID, AffiliateOrgID: stdQuery.OrgID}) {
+			where.OrgID = stdQuery.OrgID
+		}
+	}
+
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
 		where.OutletID = stdQuery.OutletID
 	}
-
-	// if s.repo.OrdersInfo.Exists(where) {
-	// 	NewResponse(c, http.StatusBadRequest, errRecordNotFound("`order_info` with this `id` already recovery"))
-	// 	return
-	// }
 
 	//check orderInfo
 	{

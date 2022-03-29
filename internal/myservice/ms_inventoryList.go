@@ -1,7 +1,6 @@
 package myservice
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -125,7 +124,11 @@ func (s *InventoryListService) GetAll(c *gin.Context) {
 		InventoryHistoryID: query.InventoryHistoryID,
 	}
 
-	fmt.Println(query)
+	if claims.HasRole(repository.R_OWNER) {
+		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{OrgID: claims.OrganizationID, AffiliateOrgID: stdQuery.OrgID}) {
+			where.OrgID = stdQuery.OrgID
+		}
+	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
 		where.OutletID = stdQuery.OutletID

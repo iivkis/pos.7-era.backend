@@ -80,10 +80,11 @@ func (s *MiddlewareService) AuthEmployee(allowedRoles ...string) func(*gin.Conte
 }
 
 type MiddlewareStdQueryInput struct {
-	OutletID  uint `form:"outlet_id"`
-	ProductID uint `form:"product_id"`
-	Offset    int  `form:"offset"`
-	Limit     int  `form:"limit"`
+	OutletID uint `form:"outlet_id"`
+	OrgID    uint `form:"org_id"`
+
+	Offset int `form:"offset"`
+	Limit  int `form:"limit"`
 }
 
 //Standart Query

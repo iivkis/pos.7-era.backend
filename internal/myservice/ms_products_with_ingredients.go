@@ -78,23 +78,39 @@ func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: pwiModel.ID})
 }
 
-type PWIGetAllForOutletOutput []PWIOutputModel
+type PWIGetAllQuery struct {
+	ProductID uint `json:"product_id"`
+}
+
+type PWIGetAllOutput []PWIOutputModel
 
 //@Summary Получить список связей продуктов и ингредиентов в точке
-//@Success 200 {object} PWIGetAllForOutletOutput "Список связей продуктов и ингредиентов точки"
+//@param type query PWIGetAllQuery false "Принимаемый объект"
+//@Success 200 {object} PWIGetAllOutput "Список связей продуктов и ингредиентов точки"
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
 //@Failure 500 {object} serviceError
 //@Router /pwis [get]
 func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
-	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	var query PWIGetAllQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	where := &repository.ProductWithIngredientModel{
-		ProductID: stdQuery.ProductID,
+		ProductID: query.ProductID,
 		OutletID:  claims.OutletID,
 		OrgID:     claims.OrganizationID,
+	}
+
+	if claims.HasRole(repository.R_OWNER) {
+		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{OrgID: claims.OrganizationID, AffiliateOrgID: stdQuery.OrgID}) {
+			where.OrgID = stdQuery.OrgID
+		}
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
@@ -107,7 +123,7 @@ func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
 		return
 	}
 
-	output := make(PWIGetAllForOutletOutput, len(*pwis))
+	output := make(PWIGetAllOutput, len(*pwis))
 	for i, pwi := range *pwis {
 		output[i] = PWIOutputModel{
 			ID:               pwi.ID,

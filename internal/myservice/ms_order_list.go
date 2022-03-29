@@ -98,6 +98,7 @@ func (s *OrdersListService) Create(c *gin.Context) {
 type OrderListGetAllQuery struct {
 	SessionID   uint `form:"session_id"`
 	OrderInfoID uint `form:"order_info_id"`
+	ProductID   uint `form:"product_id"`
 }
 
 type OrderListGetAllOutput []OrderListOutputModel
@@ -122,6 +123,13 @@ func (s *OrdersListService) GetAll(c *gin.Context) {
 		OutletID:    claims.OutletID,
 		OrderInfoID: query.OrderInfoID,
 		SessionID:   query.SessionID,
+		ProductID:   query.ProductID,
+	}
+
+	if claims.HasRole(repository.R_OWNER) {
+		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{OrgID: claims.OrganizationID, AffiliateOrgID: stdQuery.OrgID}) {
+			where.OrgID = stdQuery.OrgID
+		}
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
