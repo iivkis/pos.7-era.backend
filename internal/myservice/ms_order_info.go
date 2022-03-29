@@ -2,7 +2,6 @@ package myservice
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -108,8 +107,6 @@ func (s *OrdersInfoService) GetAll(c *gin.Context) {
 	}
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
-
-	fmt.Println(query)
 
 	where := &repository.OrderInfoModel{
 		OrgID:     claims.OrganizationID,
