@@ -82,7 +82,7 @@ func (s *OrdersListService) Create(c *gin.Context) {
 		return
 	}
 
-	if err := s.repo.ProductsWithIngredients.WriteOffIngredients(model.ProductID, model.Count); err != nil {
+	if err := s.repo.ProductsWithIngredients.SubractionIngredients(model.ProductID, model.Count); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 		return
 	}

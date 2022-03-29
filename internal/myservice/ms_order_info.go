@@ -172,7 +172,7 @@ func (s *OrdersInfoService) Delete(c *gin.Context) {
 	}
 
 	for _, orderList := range *orderLists {
-		if err := s.repo.ProductsWithIngredients.AddIngredients(orderList.ProductID, orderList.Count); err != nil {
+		if err := s.repo.ProductsWithIngredients.AdditionIngredients(orderList.ProductID, orderList.Count); err != nil {
 			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 			return
 		}
@@ -233,7 +233,7 @@ func (s *OrdersInfoService) Recovery(c *gin.Context) {
 	}
 
 	for _, orderList := range *orderLists {
-		if err := s.repo.ProductsWithIngredients.WriteOffIngredients(orderList.ProductID, orderList.Count); err != nil {
+		if err := s.repo.ProductsWithIngredients.SubractionIngredients(orderList.ProductID, orderList.Count); err != nil {
 			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
 			return
 		}

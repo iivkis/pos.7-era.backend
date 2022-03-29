@@ -2546,7 +2546,7 @@ var doc = `{
             "type": "object",
             "properties": {
                 "affiliate": {
-                    "description": "является ли компания филиалом",
+                    "description": "является ли организация филиалом",
                     "type": "boolean"
                 },
                 "token": {

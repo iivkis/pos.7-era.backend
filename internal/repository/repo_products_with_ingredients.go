@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+
 	"gorm.io/gorm"
 )
 
@@ -49,7 +51,7 @@ func (r *ProductsWithIngredientsRepo) Delete(where *ProductWithIngredientModel) 
 	return
 }
 
-func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID uint, count int) (err error) {
+func (r *ProductsWithIngredientsRepo) SubractionIngredients(productID uint, count int) (err error) {
 	//находим связи с ингредиентами, для продукта
 	var pwiList []ProductWithIngredientModel
 	if err = r.db.Where(&ProductWithIngredientModel{ProductID: productID}).Find(&pwiList).Error; err != nil {
@@ -58,20 +60,17 @@ func (r *ProductsWithIngredientsRepo) WriteOffIngredients(productID uint, count 
 
 	//для каждой связи ищем ингредиент. Отнимаем нужное кол-во ингредиента
 	for _, pwi := range pwiList {
-		var ingredient IngredientModel
-		if err = r.db.Where(&IngredientModel{ID: pwi.IngredientID}).First(&ingredient).Error; err != nil {
-			return err
-		}
-
-		ingredient.Count -= pwi.CountTakeForSell * float64(count)
-		if err = r.db.Model(&IngredientModel{}).Where(&IngredientModel{ID: ingredient.ID}).UpdateColumn("count", ingredient.Count).Error; err != nil {
+		if err := r.db.Exec("UPDATE `ingredient_models` SET `count` = `count` - @n WHERE `id` = @id",
+			sql.Named("n", pwi.CountTakeForSell*float64(count)),
+			sql.Named("id", pwi.IngredientID),
+		).Error; err != nil {
 			return err
 		}
 	}
 	return
 }
 
-func (r *ProductsWithIngredientsRepo) AddIngredients(productID uint, count int) (err error) {
+func (r *ProductsWithIngredientsRepo) AdditionIngredients(productID uint, count int) (err error) {
 	//находим связи с ингредиентами, для продукта
 	var pwiList []ProductWithIngredientModel
 	if err = r.db.Where(&ProductWithIngredientModel{ProductID: productID}).Find(&pwiList).Error; err != nil {
@@ -80,13 +79,10 @@ func (r *ProductsWithIngredientsRepo) AddIngredients(productID uint, count int) 
 
 	//для каждой связи ищем ингредиент. Отнимаем нужное кол-во ингредиента
 	for _, pwi := range pwiList {
-		var ingredient IngredientModel
-		if err = r.db.Where(&IngredientModel{ID: pwi.IngredientID}).First(&ingredient).Error; err != nil {
-			return err
-		}
-
-		ingredient.Count += pwi.CountTakeForSell * float64(count)
-		if err = r.db.Model(&IngredientModel{}).Where(&IngredientModel{ID: ingredient.ID}).UpdateColumn("count", ingredient.Count).Error; err != nil {
+		if err := r.db.Exec("UPDATE `ingredient_models` SET `count` = `count` + @n WHERE `id` = @id",
+			sql.Named("n", pwi.CountTakeForSell*float64(count)),
+			sql.Named("id", pwi.IngredientID),
+		).Error; err != nil {
 			return err
 		}
 	}
