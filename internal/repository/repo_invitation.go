@@ -2,7 +2,6 @@ package repository
 
 import (
 	"errors"
-	"fmt"
 	"math/rand"
 	"time"
 
@@ -108,7 +107,7 @@ func (r *InvitationRepo) DeleteExpired() (err error) {
 }
 
 func (r *InvitationRepo) Exists(where *InvitationModel) bool {
-	return r.db.Where("expires_in > ? OR expires_in IS NULL", time.Now().UTC().UnixMilli()).First(&InvitationModel{}, where).Error == nil
+	return r.db.Select("id").Where("expires_in > ? OR expires_in IS NULL", time.Now().UTC().UnixMilli()).First(&InvitationModel{}, where).Error == nil
 }
 
 func (r *InvitationRepo) Activate(code string, AffiliateOrgID uint) error {
@@ -116,8 +115,6 @@ func (r *InvitationRepo) Activate(code string, AffiliateOrgID uint) error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println(invite)
 
 	r.db.Model(&InvitationModel{}).Where(invite.ID).Updates(map[string]interface{}{
 		"code":             nil,

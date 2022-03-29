@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -56,27 +55,20 @@ func (r *OrganizationsRepo) SetPassword(orgID interface{}, password string) erro
 	return r.db.Model(&OrganizationModel{}).Where("id = ?", orgID).UpdateColumn("password", string(pwd)).Error
 }
 
-func (r *OrganizationsRepo) ConfirmEmailTrue(email string) error {
-	return r.db.Model(&OrganizationModel{}).Where("email = ?", email).Update("email_confirmed", true).Error
+func (r *OrganizationsRepo) SetConfirmEmail(email string, val bool) error {
+	return r.db.Model(&OrganizationModel{}).Where("email = ?", email).Update("email_confirmed", val).Error
 }
 
-func (r *OrganizationsRepo) EmailExists(email string) (bool, error) {
-	err := r.db.Where("email = ?", email).First(&OrganizationModel{}).Error
+func (r *OrganizationsRepo) EmailExists(email string) bool {
+	return r.db.Select("id").Where(&OrganizationModel{Email: email}).First(&OrganizationModel{}).Error == nil
+}
+
+func (r *OrganizationsRepo) SignIn(email string, password string) (org *OrganizationModel, err error) {
+	err = r.db.Where("email = ?", email).First(&org).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, nil
-		}
-		return false, err
+		return
 	}
-	return true, nil
-}
 
-func (r *OrganizationsRepo) SignIn(email string, password string) (org OrganizationModel, err error) {
-	if err = r.db.Where("email = ?", email).First(&org).Error; err != nil {
-		return OrganizationModel{}, err
-	}
-	if err = bcrypt.CompareHashAndPassword([]byte(org.Password), []byte(password)); err != nil {
-		return OrganizationModel{}, err
-	}
+	err = bcrypt.CompareHashAndPassword([]byte(org.Password), []byte(password))
 	return
 }

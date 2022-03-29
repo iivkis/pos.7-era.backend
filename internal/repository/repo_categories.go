@@ -44,5 +44,5 @@ func (r *CategoriesRepo) Delete(where *CategoryModel) (err error) {
 }
 
 func (r *CategoriesRepo) Exists(where *CategoryModel) bool {
-	return r.db.Where(where).First(&CategoryModel{}).Error == nil
+	return r.db.Select("id").Where(where).First(&CategoryModel{}).Error == nil
 }

@@ -57,5 +57,5 @@ func (r *ProductsRepo) Delete(where *ProductModel) (err error) {
 }
 
 func (r *ProductsRepo) Exists(where *ProductModel) bool {
-	return r.db.Where(where).First(&ProductModel{}).Error == nil
+	return r.db.Select("id").Where(where).First(&ProductModel{}).Error == nil
 }

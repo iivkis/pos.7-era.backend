@@ -60,5 +60,5 @@ func (r *IngredientsAddingHistoryRepo) Delete(where *IngredientsAddingHistoryMod
 }
 
 func (r *IngredientsAddingHistoryRepo) Exists(where *IngredientsAddingHistoryModel) bool {
-	return r.db.Where(where).First(&IngredientsAddingHistoryModel{}).Error == nil
+	return r.db.Select("id").Where(where).First(&IngredientsAddingHistoryModel{}).Error == nil
 }

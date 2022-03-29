@@ -40,10 +40,9 @@ func (r *OutletsRepo) Find(where *OutletModel) (result *[]OutletModel, err error
 }
 
 func (r *OutletsRepo) Exists(where *OutletModel) bool {
-	return r.db.Where(where).First(&OutletModel{}).Error == nil
+	return r.db.Select("id").Where(where).First(&OutletModel{}).Error == nil
 }
 
 func (r *OutletsRepo) ExistsInOrg(outletID uint, orgID uint) bool {
-	err := r.db.Where("id = ? AND org_id = ?", outletID, orgID).First(&OutletModel{}).Error
-	return err == nil
+	return r.db.Select("id").Where("id = ? AND org_id = ?", outletID, orgID).First(&OutletModel{}).Error == nil
 }

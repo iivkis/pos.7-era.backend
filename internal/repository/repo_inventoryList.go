@@ -54,5 +54,5 @@ func (r *InventoryListRepo) Delete(where *InventoryListModel) (err error) {
 }
 
 func (r *InventoryListRepo) Exists(where *InventoryListModel) bool {
-	return r.db.Where(where).First(&InventoryListModel{}).Error == nil
+	return r.db.Select("id").Where(where).First(&InventoryListModel{}).Error == nil
 }

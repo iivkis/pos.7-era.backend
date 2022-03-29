@@ -343,6 +343,8 @@ definitions:
         type: string
       pay_type:
         type: integer
+      session_id:
+        type: integer
     required:
     - employee_name
     type: object
@@ -567,13 +569,9 @@ paths:
   /auth/confirmCode:
     get:
       parameters:
-      - description: '`org` or `employee`'
-        in: query
-        name: type
-        type: string
-      - description: 'адрес на который будет отправлено письмо (например: email@exmp.ru)'
-        in: query
+      - in: query
         name: code
+        required: true
         type: string
       responses:
         "200":
@@ -584,10 +582,6 @@ paths:
   /auth/sendCode:
     get:
       parameters:
-      - description: '`org` or `employee`'
-        in: query
-        name: type
-        type: string
       - description: 'адрес на который будет отправлено письмо (например: email@exmp.ru)'
         in: query
         name: email

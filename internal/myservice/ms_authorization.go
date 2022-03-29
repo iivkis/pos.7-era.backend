@@ -330,12 +330,10 @@ func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 }
 
 type SendCodeInputQuery struct {
-	Type  string `form:"type" binding:"required"`
 	Email string `form:"email" binding:"required"`
 }
 
 //@Summary Отправка кода подтверждения почты
-//@param type query string false "`org` or `employee`"
 //@param email query string false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
 //@Success 200 {object} object "возвращает пустой объект"
 //@Router /auth/sendCode [get]
@@ -346,69 +344,49 @@ func (s *AuthorizationService) SendCode(c *gin.Context) {
 		return
 	}
 
-	switch inputQ.Type {
-	case "org":
-		{
-			//проверка на сущ. email в БД
-			if ok, err := s.repo.Organizations.EmailExists(inputQ.Email); err != nil {
-				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
-				return
-			} else if !ok {
-				NewResponse(c, http.StatusBadRequest, errEmailNotFound())
-				return
-			}
-
-			//отправка письма с ссылкой для подтверждения
-			if err := s.mailagent.SendTemplate(inputQ.Email, "confirm_code.html", mailagent.Value{
-				"code":     s.strcode.Encode(inputQ.Email),
-				"host":     config.Env.OutHost,
-				"port":     config.Env.OutPort,
-				"protocol": config.Env.OutProtocol,
-				"type":     "org",
-			}); err != nil {
-				NewResponse(c, http.StatusInternalServerError, errUnknownServer("error on send email"))
-				return
-			}
-			NewResponse(c, http.StatusOK, nil)
-		}
-	default:
-		NewResponse(c, http.StatusBadRequest, errIncorrectInputData())
+	//проверка на сущ. email в БД
+	if !s.repo.Organizations.EmailExists(inputQ.Email) {
+		NewResponse(c, http.StatusBadRequest, errEmailNotFound())
+		return
 	}
 
+	//отправка письма с ссылкой для подтверждения
+	if err := s.mailagent.SendTemplate(inputQ.Email, "confirm_code.html", mailagent.Value{
+		"code":     s.strcode.Encode(inputQ.Email),
+		"host":     config.Env.OutHost,
+		"port":     config.Env.OutPort,
+		"protocol": config.Env.OutProtocol,
+		"type":     "org",
+	}); err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknownServer("error on send email"))
+		return
+	}
+	NewResponse(c, http.StatusOK, nil)
 }
 
-type ConfirmCodeInputQuery struct {
-	Type string `form:"type" binding:"required"`
+type AuthConfirmCodeQuery struct {
 	Code string `form:"code" binding:"required"`
 }
 
 //@Summary Проверка кода подтверждения
-//@param type query string false "`org` or `employee`"
-//@param code query string false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
+//@param type query AuthConfirmCodeQuery false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
 //@Success 200 {object} object "возвращает пустой объект"
 //@Router /auth/confirmCode [get]
 func (s *AuthorizationService) ConfirmCode(c *gin.Context) {
-	var inputQ ConfirmCodeInputQuery
+	var inputQ AuthConfirmCodeQuery
 	if err := c.ShouldBindQuery(&inputQ); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	switch inputQ.Type {
-	case "org":
-		{
-			email, err := s.strcode.Decode(inputQ.Code)
-			if err != nil {
-				NewResponse(c, http.StatusBadRequest, errIncorrectConfirmCode(err.Error()))
-				return
-			}
+	email, err := s.strcode.Decode(inputQ.Code)
+	if err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectConfirmCode(err.Error()))
+		return
+	}
 
-			if err := s.repo.Organizations.ConfirmEmailTrue(email); err != nil {
-				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
-				return
-			}
-		}
-	default:
-		NewResponse(c, http.StatusBadRequest, errIncorrectInputData())
+	if err := s.repo.Organizations.SetConfirmEmail(email, true); err != nil {
+		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		return
 	}
 }

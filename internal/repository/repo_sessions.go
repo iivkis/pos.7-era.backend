@@ -133,5 +133,5 @@ func (r *SessionsRepo) FindWithPeriod(dateStart uint64, dateEnd uint64, where *S
 }
 
 func (r *SessionsRepo) Exists(where *SessionModel) bool {
-	return r.db.Where(where).First(&SessionModel{}).Error == nil
+	return r.db.Select("id").Where(where).First(&SessionModel{}).Error == nil
 }

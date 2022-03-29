@@ -52,5 +52,5 @@ func (r *IngredientsRepo) Delete(where *IngredientModel) (err error) {
 }
 
 func (r *IngredientsRepo) Exists(where *IngredientModel) bool {
-	return r.db.Where(where).First(&IngredientModel{}).Error == nil
+	return r.db.Select("id").Where(where).First(&IngredientModel{}).Error == nil
 }

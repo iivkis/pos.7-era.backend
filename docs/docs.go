@@ -31,15 +31,9 @@ var doc = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "` + "`" + `org` + "`" + ` or ` + "`" + `employee` + "`" + `",
-                        "name": "type",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "description": "адрес на который будет отправлено письмо (например: email@exmp.ru)",
                         "name": "code",
-                        "in": "query"
+                        "in": "query",
+                        "required": true
                     }
                 ],
                 "responses": {
@@ -56,12 +50,6 @@ var doc = `{
             "get": {
                 "summary": "Отправка кода подтверждения почты",
                 "parameters": [
-                    {
-                        "type": "string",
-                        "description": "` + "`" + `org` + "`" + ` or ` + "`" + `employee` + "`" + `",
-                        "name": "type",
-                        "in": "query"
-                    },
                     {
                         "type": "string",
                         "description": "адрес на который будет отправлено письмо (например: email@exmp.ru)",
@@ -2312,6 +2300,9 @@ var doc = `{
                     "type": "string"
                 },
                 "pay_type": {
+                    "type": "integer"
+                },
+                "session_id": {
                     "type": "integer"
                 }
             }

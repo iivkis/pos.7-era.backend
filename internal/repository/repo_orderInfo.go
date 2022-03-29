@@ -54,11 +54,11 @@ func (r *OrderInfoRepo) Delete(where *OrderInfoModel) (err error) {
 }
 
 func (r *OrderInfoRepo) Exists(where *OrderInfoModel) bool {
-	return r.db.Where(where).First(&OrderInfoModel{}).Error == nil
+	return r.db.Select("id").Where(where).First(&OrderInfoModel{}).Error == nil
 }
 
 func (r *OrderInfoRepo) ExistsUnscoped(where *OrderInfoModel) bool {
-	return r.db.Unscoped().Where(where).First(&OrderInfoModel{}).Error == nil
+	return r.db.Unscoped().Select("id").Where(where).First(&OrderInfoModel{}).Error == nil
 }
 
 func (r *OrderInfoRepo) Recovery(where *OrderInfoModel) (err error) {

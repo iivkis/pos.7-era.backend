@@ -53,5 +53,5 @@ func (r *InventoryHistoryRepo) Delete(where *InventoryHistoryModel) (err error) 
 }
 
 func (r *InventoryHistoryRepo) Exists(where *InventoryHistoryModel) bool {
-	return r.db.Where(where).First(&InventoryHistoryModel{}).Error == nil
+	return r.db.Select("id").Where(where).First(&InventoryHistoryModel{}).Error == nil
 }
