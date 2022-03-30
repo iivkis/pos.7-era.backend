@@ -13,6 +13,8 @@ type ProductModel struct {
 	Price  float64
 	Photo  string
 
+	SellerPercent float64 `gorm:"default:0"` //процент продавца с продажи товара
+
 	CategoryID uint `gorm:"default:NULL"`
 	OutletID   uint
 	OrgID      uint

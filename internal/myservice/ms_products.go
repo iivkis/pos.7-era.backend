@@ -11,15 +11,20 @@ import (
 )
 
 type ProductOutputModel struct {
-	ID             uint    `json:"id"`
-	Name           string  `json:"name"`
-	ProductNameKKT string  `json:"product_name_kkt"`
-	Barcode        int     `json:"barcode"`
-	Amount         int     `json:"amount"`
-	Price          float64 `json:"price"`
-	Photo          string  `json:"photo"`
-	CategoryID     uint    `json:"category_id"`
-	OutletID       uint    `json:"outlet_id"`
+	ID uint `json:"id"`
+
+	Name           string `json:"name"`
+	ProductNameKKT string `json:"product_name_kkt"`
+	Photo          string `json:"photo"`
+
+	Amount  int `json:"amount"`
+	Barcode int `json:"barcode"`
+
+	Price         float64 `json:"price"`
+	SellerPercent float64 `json:"seller_percent"`
+
+	CategoryID uint `json:"category_id"`
+	OutletID   uint `json:"outlet_id"`
 }
 
 type ProductsService struct {
@@ -35,9 +40,10 @@ func newProductsService(repo *repository.Repository) *ProductsService {
 type ProductCreateInput struct {
 	Name           string  `json:"name" binding:"min=1,max=200"`
 	ProductNameKKT string  `json:"product_name_kkt" binding:"max=200"`
-	Barcode        int     `json:"barcode"`
+	Barcode        int     `json:"barcode" binding:"min=0"`
 	Amount         int     `json:"amount"`
-	Price          float64 `json:"price"`
+	Price          float64 `json:"price" binding:"min=0"`
+	SellerPercent  float64 `json:"seller_percent" binding:"min=0,max=100"`
 	Photo          string  `json:"photo"`
 	CategoryID     uint    `json:"category_id"`
 }
@@ -58,12 +64,14 @@ func (s *ProductsService) Create(c *gin.Context) {
 	}
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
 	newProduct := repository.ProductModel{
 		Name:           input.Name,
 		ProductNameKKT: input.ProductNameKKT,
 		Barcode:        input.Barcode,
 		Amount:         input.Amount,
 		Price:          input.Price,
+		SellerPercent:  input.SellerPercent / 100,
 		Photo:          input.Photo,
 		CategoryID:     input.CategoryID,
 		OutletID:       claims.OutletID,
@@ -130,11 +138,13 @@ func (s *ProductsService) GetAll(c *gin.Context) {
 			Barcode:        product.Barcode,
 			Amount:         product.Amount,
 			Price:          product.Price,
+			SellerPercent:  product.SellerPercent * 100,
 			Photo:          product.Photo,
 			CategoryID:     product.CategoryID,
 			OutletID:       product.OutletID,
 		}
 	}
+
 	NewResponse(c, http.StatusOK, output)
 }
 
@@ -181,6 +191,7 @@ func (s *ProductsService) GetOne(c *gin.Context) {
 		Barcode:        product.Barcode,
 		Amount:         product.Amount,
 		Price:          product.Price,
+		SellerPercent:  product.SellerPercent * 100,
 		Photo:          product.Photo,
 		CategoryID:     product.CategoryID,
 		OutletID:       product.OutletID,
@@ -194,6 +205,7 @@ type ProductUpdateInput struct {
 	Barcode        int     `json:"barcode"`
 	Amount         int     `json:"amount"`
 	Price          float64 `json:"price"`
+	SellerPercent  float64 `json:"seller_percent" binding:"min=0,max=100"`
 	Photo          string  `json:"photo"`
 	CategoryID     uint    `json:"category_id"`
 }
@@ -234,6 +246,7 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 		Amount:         input.Amount,
 		Price:          input.Price,
 		Photo:          input.Photo,
+		SellerPercent:  input.SellerPercent,
 		CategoryID:     input.CategoryID,
 	}
 

@@ -400,6 +400,8 @@ definitions:
         type: number
       product_name_kkt:
         type: string
+      seller_percent:
+        type: number
     type: object
   myservice.ProductOutputModel:
     properties:
@@ -421,6 +423,8 @@ definitions:
         type: number
       product_name_kkt:
         type: string
+      seller_percent:
+        type: number
     type: object
   myservice.ProductUpdateInput:
     properties:
@@ -438,6 +442,8 @@ definitions:
         type: number
       product_name_kkt:
         type: string
+      seller_percent:
+        type: number
     type: object
   myservice.SessionOpenOrCloseOutput:
     properties:
@@ -1514,6 +1520,10 @@ paths:
     get:
       consumes:
       - application/json
+      parameters:
+      - in: query
+        name: product_id
+        type: integer
       produces:
       - application/json
       responses:

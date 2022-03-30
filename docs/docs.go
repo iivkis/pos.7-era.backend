@@ -1495,6 +1495,13 @@ var doc = `{
                     "application/json"
                 ],
                 "summary": "Получить список связей продуктов и ингредиентов в точке",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "name": "product_id",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Список связей продуктов и ингредиентов точки",
@@ -2386,6 +2393,9 @@ var doc = `{
                 },
                 "product_name_kkt": {
                     "type": "string"
+                },
+                "seller_percent": {
+                    "type": "number"
                 }
             }
         },
@@ -2418,6 +2428,9 @@ var doc = `{
                 },
                 "product_name_kkt": {
                     "type": "string"
+                },
+                "seller_percent": {
+                    "type": "number"
                 }
             }
         },
@@ -2444,6 +2457,9 @@ var doc = `{
                 },
                 "product_name_kkt": {
                     "type": "string"
+                },
+                "seller_percent": {
+                    "type": "number"
                 }
             }
         },
