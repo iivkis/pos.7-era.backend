@@ -246,7 +246,7 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 		Amount:         input.Amount,
 		Price:          input.Price,
 		Photo:          input.Photo,
-		SellerPercent:  input.SellerPercent,
+		SellerPercent:  input.SellerPercent / 100,
 		CategoryID:     input.CategoryID,
 	}
 
