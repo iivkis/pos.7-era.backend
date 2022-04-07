@@ -10,7 +10,7 @@ import (
 )
 
 type CashChangesOutputModel struct {
-	ID         uint
+	ID         uint    `json:"id"`
 	Date       int64   `json:"date"` //unixmilli
 	Total      float64 `json:"total"`
 	Reason     string  `json:"reason"`

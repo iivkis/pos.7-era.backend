@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/gin-gonic/gin"
+
 	"github.com/iivkis/pos.7-era.backend/internal/config"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
 	"github.com/iivkis/pos.7-era.backend/internal/selectelS3Cloud"
@@ -28,10 +29,11 @@ type UploadService struct {
 
 func newUploadService(repo *repository.Repository, s3cloud *selectelS3Cloud.SelectelS3Cloud) *UploadService {
 	return &UploadService{
-		repo:     repo,
-		s3cloud:  s3cloud,
-		alphabet: []byte("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"),
+		repo:    repo,
+		s3cloud: s3cloud,
+
 		rand:     rand.New(rand.NewSource(time.Now().UnixNano())),
+		alphabet: []byte("qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM1234567890"),
 	}
 }
 
@@ -55,7 +57,7 @@ type UploadPhotoOutput struct {
 //@Summary Загрузить фотографию на сервер
 //@param type body UploadPhotoInput false "фото"
 //@Accept json
-//@Success 201 {object} UploadPhotoOutput "возвращает ссылку на фотографию"
+//@Success 201 {object} UploadPhotoOutput "возвращает id фоторгафии в хранилище и ссылку на фотографию"
 //@Router /upload.Photo [post]
 func (s *UploadService) UploadPhoto(c *gin.Context) {
 	file, header, err := c.Request.FormFile("photo")
@@ -76,14 +78,15 @@ func (s *UploadService) UploadPhoto(c *gin.Context) {
 	uploader := s3manager.NewUploader(s.s3cloud.GetSession())
 
 	//generate photo name
-	fileID := strconv.Itoa(int(claims.OrganizationID)) + "-" + s.genPhotoName(50)
+	photoID := strconv.Itoa(int(claims.OrganizationID)) + "-" + s.genPhotoName(50)
 
 	//create upload input
 	uploadInput := &s3manager.UploadInput{
-		Body:        file,
+		Body: file,
+
 		ACL:         aws.String("public-read"),
+		Key:         aws.String(photoID),
 		Bucket:      aws.String(config.Env.SelecletS3BacketName),
-		Key:         aws.String(fileID),
 		ContentType: aws.String(contentType),
 	}
 
@@ -93,5 +96,5 @@ func (s *UploadService) UploadPhoto(c *gin.Context) {
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, UploadPhotoOutput{PhotoID: fileID, PhotoURI: s.s3cloud.GetURIFromFileID(fileID)})
+	NewResponse(c, http.StatusCreated, UploadPhotoOutput{PhotoID: photoID, PhotoURI: s.s3cloud.GetURIFromFileID(photoID)})
 }

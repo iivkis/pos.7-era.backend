@@ -49,7 +49,6 @@ func isDatabaseError(err error) (dberr *mysql.MySQLError, ok bool) {
 }
 
 // 0-99 - неизвестные ошибки, данные ошибки летят в лог
-//TODO: Сделать полет в лог и сам лог
 var (
 	errUnknown = newServiceErrorLog(1, "unknown server error")
 )

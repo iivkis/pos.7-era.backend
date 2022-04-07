@@ -138,16 +138,20 @@ func (s *ProductsService) GetAll(c *gin.Context) {
 	output := make(ProductGetAllOutput, len(*products))
 	for i, product := range *products {
 		output[i] = ProductOutputModel{
-			ID:             product.ID,
+			ID: product.ID,
+
 			Name:           product.Name,
 			ProductNameKKT: product.ProductNameKKT,
-			Barcode:        product.Barcode,
-			Amount:         product.Amount,
-			Price:          product.Price,
-			SellerPercent:  product.SellerPercent * 100,
-			Photo:          s.s3cloud.GetURIFromFileID(product.PhotoCloudID),
-			CategoryID:     product.CategoryID,
-			OutletID:       product.OutletID,
+
+			Barcode:       product.Barcode,
+			Amount:        product.Amount,
+			Price:         product.Price,
+			SellerPercent: product.SellerPercent * 100,
+
+			Photo: s.s3cloud.GetURIFromFileID(product.PhotoCloudID),
+
+			CategoryID: product.CategoryID,
+			OutletID:   product.OutletID,
 		}
 	}
 
@@ -194,13 +198,16 @@ func (s *ProductsService) GetOne(c *gin.Context) {
 		ID:             product.ID,
 		Name:           product.Name,
 		ProductNameKKT: product.ProductNameKKT,
-		Barcode:        product.Barcode,
-		Amount:         product.Amount,
-		Price:          product.Price,
-		SellerPercent:  product.SellerPercent * 100,
-		Photo:          s.s3cloud.GetURIFromFileID(product.PhotoCloudID),
-		CategoryID:     product.CategoryID,
-		OutletID:       product.OutletID,
+
+		Barcode:       product.Barcode,
+		Amount:        product.Amount,
+		Price:         product.Price,
+		SellerPercent: product.SellerPercent * 100,
+
+		Photo: s.s3cloud.GetURIFromFileID(product.PhotoCloudID),
+
+		CategoryID: product.CategoryID,
+		OutletID:   product.OutletID,
 	}
 	NewResponse(c, http.StatusOK, output)
 }
