@@ -81,7 +81,7 @@ func (s *IngredientsAddingHistoryService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.IngredientsAddingHistory.Create(&model); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -125,7 +125,7 @@ func (s *IngredientsAddingHistoryService) GetAll(c *gin.Context) {
 
 	histories, err := s.repo.IngredientsAddingHistory.FindWithPeriod(where, query.Start, query.End)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 

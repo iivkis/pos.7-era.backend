@@ -58,9 +58,6 @@ type UploadPhotoOutput struct {
 //@Success 201 {object} UploadPhotoOutput "возвращает ссылку на фотографию"
 //@Router /upload.Photo [post]
 func (s *UploadService) UploadPhoto(c *gin.Context) {
-	claims := mustGetEmployeeClaims(c)
-	uploader := s3manager.NewUploader(s.s3cloud.GetSession())
-
 	file, header, err := c.Request.FormFile("photo")
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errUploadFile(err.Error()))
@@ -74,6 +71,9 @@ func (s *UploadService) UploadPhoto(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errUploadFile("invalid type"))
 		return
 	}
+
+	claims := mustGetEmployeeClaims(c)
+	uploader := s3manager.NewUploader(s.s3cloud.GetSession())
 
 	//generate photo name
 	fileID := strconv.Itoa(int(claims.OrganizationID)) + "-" + s.genPhotoName(50)
@@ -89,7 +89,7 @@ func (s *UploadService) UploadPhoto(c *gin.Context) {
 
 	//upload photo
 	if _, err = uploader.Upload(uploadInput); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 

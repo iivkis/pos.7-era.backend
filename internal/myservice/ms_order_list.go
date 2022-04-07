@@ -83,12 +83,12 @@ func (s *OrdersListService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.ProductsWithIngredients.SubractionIngredients(model.ProductID, model.Count); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
 	if err := s.repo.OrdersList.Create(&model); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -138,7 +138,7 @@ func (s *OrdersListService) GetAll(c *gin.Context) {
 
 	models, err := s.repo.OrdersList.FindUnscoped(where)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 	}
 
 	var output OrderListGetAllOutput = make(OrderListGetAllOutput, len(*models))

@@ -55,7 +55,7 @@ func (s *CategoriesService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.Categories.Create(&categoryModel); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -90,7 +90,7 @@ func (s *CategoriesService) GetAll(c *gin.Context) {
 
 	cats, err := s.repo.Categories.Find(where)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -135,7 +135,7 @@ func (s *CategoriesService) Delete(c *gin.Context) {
 				return
 			}
 		}
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 
@@ -183,7 +183,7 @@ func (s *CategoriesService) UpdateFields(c *gin.Context) {
 	}
 
 	if err := s.repo.Categories.Updates(where, updatedFields); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 

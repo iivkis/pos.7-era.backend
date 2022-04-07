@@ -96,7 +96,7 @@ func (s *ProductsService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.Products.Create(&newProduct); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: newProduct.ID})
@@ -131,7 +131,7 @@ func (s *ProductsService) GetAll(c *gin.Context) {
 
 	products, err := s.repo.Products.Find(where)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -268,7 +268,7 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 	}
 
 	if err := s.repo.Products.Updates(where, upadtedFields); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 

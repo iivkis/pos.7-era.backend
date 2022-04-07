@@ -71,7 +71,7 @@ func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.ProductsWithIngredients.Create(pwiModel); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -119,7 +119,7 @@ func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
 
 	pwis, err := s.repo.ProductsWithIngredients.Find(where)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -158,7 +158,7 @@ func (s *ProductsWithIngredientsService) Delete(c *gin.Context) {
 	}
 
 	if err := s.repo.ProductsWithIngredients.Delete(where); err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 
@@ -201,7 +201,7 @@ func (s *ProductsWithIngredientsService) UpdateFields(c *gin.Context) {
 	}
 
 	if err := s.repo.ProductsWithIngredients.Updates(where, updatedFields); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusOK, nil)

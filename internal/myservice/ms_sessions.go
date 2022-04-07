@@ -82,12 +82,12 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 					NewResponse(c, http.StatusBadRequest, errRecordAlreadyExists(err.Error()))
 					return
 				}
-				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 				return
 			}
 
 			if err := s.repo.Employees.SetOnline(claims.EmployeeID); err != nil {
-				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 				return
 			}
 
@@ -102,13 +102,13 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 					NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined open session"))
 					return
 				}
-				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 				return
 			}
 
 			NumberOfReceipts, err := s.repo.OrdersInfo.Count(&repository.OrderInfoModel{SessionID: lastOpenEmployeeSession.ID})
 			if err != nil {
-				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 				return
 			}
 
@@ -121,12 +121,12 @@ func (s *SessionsService) OpenOrClose(c *gin.Context) {
 			}
 
 			if err := s.repo.Sessions.Close(claims.EmployeeID, &sess); err != nil {
-				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 				return
 			}
 
 			if err := s.repo.Employees.SetOffline(claims.EmployeeID); err != nil {
-				NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 				return
 			}
 			NewResponse(c, http.StatusOK, SessionOpenOrCloseOutput{ID: sess.ID, EmployeeID: sess.EmployeeID})
@@ -178,7 +178,7 @@ func (s *SessionsService) GetAll(c *gin.Context) {
 
 	sessions, err := s.repo.Sessions.FindWithPeriod(query.Start, query.End, where)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -224,7 +224,7 @@ func (s *SessionsService) GetLastClosedForOutlet(c *gin.Context) {
 
 	sess, err := s.repo.Sessions.GetLastClosedForOutlet(outletID)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -267,7 +267,7 @@ func (s *SessionsService) GetLastForOutlet(c *gin.Context) {
 
 	sess, err := s.repo.Sessions.GetLastForOutlet(outletID)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -302,7 +302,7 @@ func (s *SessionsService) GetLastForMe(c *gin.Context) {
 
 	sess, err := s.repo.Sessions.GetLastForEmployeeByID(claims.EmployeeID)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 

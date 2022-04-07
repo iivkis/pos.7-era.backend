@@ -78,19 +78,16 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 			case 1062:
 				NewResponse(c, http.StatusUnauthorized, errEmailExists())
 				return
-			default:
-				NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
-				return
 			}
 		}
-		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusUnauthorized, errUnknown(err.Error()))
 		return
 	}
 
 	//активация инвайта
 	if input.InviteCode != "" {
 		if err := s.repo.Invitation.Activate(input.InviteCode, orgModel.ID); err != nil {
-			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 			return
 		}
 	}
@@ -102,11 +99,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 	}
 
 	if err := s.repo.Outlets.Create(&outletModel); err != nil {
-		if dberr, ok := isDatabaseError(err); ok {
-			NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(dberr.Error()))
-			return
-		}
-		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusUnauthorized, errUnknown(err.Error()))
 		return
 	}
 
@@ -120,7 +113,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 	}
 
 	if err := s.repo.Employees.Create(&employeeOwnerModel); err != nil {
-		NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusUnauthorized, errUnknown(err.Error()))
 		return
 	}
 
@@ -134,7 +127,7 @@ func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 	}
 
 	if err := s.repo.Employees.Create(&employeeModelCashier); err != nil {
-		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusUnauthorized, errUnknown(err.Error()))
 		return
 	}
 
@@ -211,7 +204,7 @@ func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 	}
 
 	if err := s.repo.Employees.Create(&employeeModel); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -236,6 +229,7 @@ type SignInOrgOutput struct {
 //@Failure 401 {object} serviceError
 //@Router /auth/signIn.Org [post]
 func (s *AuthorizationService) SignInOrg(c *gin.Context) {
+	errUnknown("блят")
 	var input SignInOrgInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
@@ -252,7 +246,7 @@ func (s *AuthorizationService) SignInOrg(c *gin.Context) {
 			NewResponse(c, http.StatusUnauthorized, errIncorrectPassword())
 			return
 		}
-		NewResponse(c, http.StatusUnauthorized, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusUnauthorized, errUnknown(err.Error()))
 		return
 	}
 
@@ -262,7 +256,7 @@ func (s *AuthorizationService) SignInOrg(c *gin.Context) {
 
 	token, err := s.authjwt.SignInOrganization(&claims)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -303,7 +297,7 @@ func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 			NewResponse(c, http.StatusUnauthorized, errRecordNotFound())
 			return
 		}
-		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusUnauthorized, errUnknown(err.Error()))
 		return
 	}
 
@@ -317,7 +311,7 @@ func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 
 	token, err := s.authjwt.SignInEmployee(&newEmployeeClaims)
 	if err != nil {
-		NewResponse(c, http.StatusUnauthorized, errUnknownServer(err.Error()))
+		NewResponse(c, http.StatusUnauthorized, errUnknown(err.Error()))
 		return
 	}
 
@@ -358,7 +352,7 @@ func (s *AuthorizationService) SendCode(c *gin.Context) {
 		"protocol": config.Env.OutProtocol,
 		"type":     "org",
 	}); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownServer("error on send email"))
+		NewResponse(c, http.StatusInternalServerError, errUnknown("error on send email"))
 		return
 	}
 	NewResponse(c, http.StatusOK, nil)
@@ -386,7 +380,7 @@ func (s *AuthorizationService) ConfirmCode(c *gin.Context) {
 	}
 
 	if err := s.repo.Organizations.SetConfirmEmail(email, true); err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 }

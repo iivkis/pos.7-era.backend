@@ -71,7 +71,7 @@ func (s *IngredientsService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.Ingredients.Create(&ingredient); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -102,7 +102,7 @@ func (s *IngredientsService) GetAll(c *gin.Context) {
 
 	ingredients, err := s.repo.Ingredients.Find(where)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -175,7 +175,7 @@ func (s *IngredientsService) UpdateFields(c *gin.Context) {
 	}
 
 	if err := s.repo.Ingredients.Updates(where, updatedFields); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusOK, nil)
@@ -216,7 +216,7 @@ func (s *IngredientsService) Delete(c *gin.Context) {
 				return
 			}
 		}
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusOK, nil)
@@ -273,7 +273,7 @@ func (s *IngredientsService) Arrival(c *gin.Context) {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				NewResponse(c, http.StatusBadRequest, errRecordNotFound(fmt.Sprintf("undefined ingredent with id `%d`", where.ID)))
 			} else {
-				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 			}
 			return
 		}
@@ -302,7 +302,7 @@ func (s *IngredientsService) Arrival(c *gin.Context) {
 			OutletID:     claims.OutletID,
 			OrgID:        claims.OrganizationID,
 		}); err != nil {
-			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		}
 	}
 
@@ -317,7 +317,7 @@ func (s *IngredientsService) Arrival(c *gin.Context) {
 	}
 
 	if err := s.repo.CashChanges.Create(model); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 

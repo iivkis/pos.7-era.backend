@@ -52,7 +52,7 @@ func (s *InventoryHistoryService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.InventoryHistory.Create(model); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -100,7 +100,7 @@ func (s *InventoryHistoryService) GetAll(c *gin.Context) {
 
 	invetoryHistoryList, err := s.repo.InventoryHistory.FindWithPeriod(where, query.Start, query.End)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 

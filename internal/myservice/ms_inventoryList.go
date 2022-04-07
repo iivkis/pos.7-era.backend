@@ -62,7 +62,7 @@ func (s *InventoryListService) Create(c *gin.Context) {
 
 	ingredient, err := s.repo.Ingredients.FindFirts(&repository.IngredientModel{ID: input.IngredientID})
 	if err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 
@@ -83,13 +83,13 @@ func (s *InventoryListService) Create(c *gin.Context) {
 			&repository.IngredientModel{ID: ingredient.ID},
 			&repository.IngredientModel{Count: model.NewCount},
 		); err != nil {
-			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 			return
 		}
 	}
 
 	if err := s.repo.InventoryList.Create(model); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -136,7 +136,7 @@ func (s *InventoryListService) GetAll(c *gin.Context) {
 
 	invetoryList, err := s.repo.InventoryList.Find(where)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 

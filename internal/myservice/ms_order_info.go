@@ -58,7 +58,7 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 			NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined session"))
 			return
 		}
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -79,7 +79,7 @@ func (s *OrdersInfoService) Create(c *gin.Context) {
 	}
 
 	if err = s.repo.OrdersInfo.Create(&model); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -120,7 +120,7 @@ func (s *OrdersInfoService) GetAll(c *gin.Context) {
 
 	list, err := s.repo.OrdersInfo.FindUnscoped(where)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -173,24 +173,24 @@ func (s *OrdersInfoService) Delete(c *gin.Context) {
 
 	orderLists, err := s.repo.OrdersList.Find(&repository.OrderListModel{OrderInfoID: where.ID})
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
 	for _, orderList := range *orderLists {
 		if err := s.repo.ProductsWithIngredients.AdditionIngredients(orderList.ProductID, orderList.Count); err != nil {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 			return
 		}
 	}
 
 	if err := s.repo.OrdersList.Delete(&repository.OrderListModel{OrderInfoID: uint(orderInfoID)}); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
 	if err := s.repo.OrdersInfo.Delete(where); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusOK, nil)
@@ -235,7 +235,7 @@ func (s *OrdersInfoService) Recovery(c *gin.Context) {
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined `order_info` with this `id`"))
 			} else {
-				NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+				NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 			}
 			return
 		}
@@ -248,24 +248,24 @@ func (s *OrdersInfoService) Recovery(c *gin.Context) {
 
 	orderLists, err := s.repo.OrdersList.FindUnscoped(&repository.OrderListModel{OrderInfoID: where.ID, OutletID: where.OutletID, OrgID: where.OrgID})
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
 	for _, orderList := range *orderLists {
 		if err := s.repo.ProductsWithIngredients.SubractionIngredients(orderList.ProductID, orderList.Count); err != nil {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 			return
 		}
 	}
 
 	if err := s.repo.OrdersList.Recovery(&repository.OrderListModel{OrderInfoID: uint(orderInfoID)}); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
 	if err := s.repo.OrdersInfo.Recovery(where); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 

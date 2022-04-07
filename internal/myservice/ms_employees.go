@@ -47,14 +47,14 @@ func (s *EmployeesService) GetAll(c *gin.Context) {
 	})
 
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
 	output := make(EmployeesGetAllOutput, len(*employees))
 	for i, employee := range *employees {
 		if err != nil {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 			return
 		}
 		output[i] = EmployeeOutputModel{
@@ -108,7 +108,7 @@ func (s *EmployeesService) UpdateFields(c *gin.Context) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusBadRequest, errRecordNotFound())
 		} else {
-			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		}
 		return
 	}
@@ -191,7 +191,7 @@ func (s *EmployeesService) UpdateFields(c *gin.Context) {
 	}
 
 	if err := s.repo.Employees.Updates(updatedFields, &repository.EmployeeModel{Model: gorm.Model{ID: uint(employeeID)}}); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -218,7 +218,7 @@ func (s *EmployeesService) Delete(c *gin.Context) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusBadRequest, errRecordNotFound())
 		} else {
-			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		}
 		return
 	}
@@ -242,7 +242,7 @@ func (s *EmployeesService) Delete(c *gin.Context) {
 	}
 
 	if err := s.repo.Employees.Delete(&repository.EmployeeModel{Model: gorm.Model{ID: uint(employeeID)}, OrgID: claims.OrganizationID}); err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 

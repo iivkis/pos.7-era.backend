@@ -72,7 +72,7 @@ func (s *CashChangesService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.CashChanges.Create(&model); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -115,7 +115,7 @@ func (s *CashChangesService) GetAll(c *gin.Context) {
 
 	items, err := s.repo.CashChanges.FindWithPeriod(query.Start, query.End, where)
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -152,7 +152,7 @@ func (s *CashChangesService) GetAllForCurrentSession(c *gin.Context) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusOK, CashChangesGetAllForCurrentSessionOutput{})
 		} else {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		}
 		return
 	}
@@ -162,7 +162,7 @@ func (s *CashChangesService) GetAllForCurrentSession(c *gin.Context) {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			NewResponse(c, http.StatusOK, CashChangesGetAllForCurrentSessionOutput{})
 		} else {
-			NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		}
 		return
 	}

@@ -70,7 +70,7 @@ func (s *MiddlewareService) AuthEmployee(allowedRoles ...string) func(*gin.Conte
 
 		//проверка прав доступа
 		if !isAllowed(claims.Role) {
-			NewResponse(c, http.StatusUnauthorized, errNoAccessRights())
+			NewResponse(c, http.StatusUnauthorized, errPermissionDenided())
 			c.Abort()
 			return
 		}

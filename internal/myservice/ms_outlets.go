@@ -51,7 +51,7 @@ func (s *OutletsService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.Outlets.Create(&model); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -64,7 +64,7 @@ func (s *OutletsService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.Employees.Create(&employeeModel); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -83,7 +83,7 @@ func (s *OutletsService) GetAllForOrg(c *gin.Context) {
 	claims := mustGetOrganizationClaims(c)
 	outlets, err := s.repo.Outlets.Find(&repository.OutletModel{OrgID: claims.OrganizationID})
 	if err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -133,7 +133,7 @@ func (s *OutletsService) UpdateFields(c *gin.Context) {
 	}
 
 	if err := s.repo.Outlets.Updates(&repository.OutletModel{Model: gorm.Model{ID: uint(outletID)}, OrgID: claims.OrganizationID}, updatedFields); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 
@@ -167,7 +167,7 @@ func (s *OutletsService) Delete(c *gin.Context) {
 	}
 
 	if err := s.repo.Outlets.Delete(&repository.OutletModel{Model: gorm.Model{ID: uint(outletID)}, OrgID: claims.OrganizationID}); err != nil {
-		NewResponse(c, http.StatusInternalServerError, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusOK, nil)

@@ -1,19 +1,45 @@
 package myservice
 
-import "github.com/go-sql-driver/mysql"
+import (
+	"fmt"
+	"log"
+	"os"
+	"time"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/iivkis/pos.7-era.backend/internal/config"
+)
+
+var errlog *log.Logger
+
+func init() {
+	f, err := os.Create("err_unknown.log")
+	if err != nil {
+		panic(err)
+	}
+	errlog = log.New(f, fmt.Sprintf("[port: %s] ", *config.Flags.Port), 0)
+}
 
 type serviceError struct {
 	Code  uint16 `json:"code"`
 	Error string `json:"error"`
 }
 
-func newServiceError(code uint16, err string) func(editErr ...string) *serviceError {
-	return func(editError ...string) *serviceError {
+func newServiceError(code uint16, err string) func(...string) *serviceError {
+	return func(description ...string) *serviceError {
 		e := err
-		if len(editError) != 0 {
-			e = err + ": " + editError[0]
+		if len(description) != 0 {
+			e = err + ": " + description[0]
 		}
 		return &serviceError{Code: code, Error: e}
+	}
+}
+
+func newServiceErrorLog(code uint16, err string) func(...string) *serviceError {
+	return func(description ...string) *serviceError {
+		log.Print(description)
+		errlog.Print(time.Now().String(), description)
+		return &serviceError{Code: code, Error: err}
 	}
 }
 
@@ -25,8 +51,7 @@ func isDatabaseError(err error) (dberr *mysql.MySQLError, ok bool) {
 // 0-99 - неизвестные ошибки, данные ошибки летят в лог
 //TODO: Сделать полет в лог и сам лог
 var (
-	errUnknownDatabase = newServiceError(1, "database error")
-	errUnknownServer   = newServiceError(2, "server error")
+	errUnknown = newServiceErrorLog(1, "unknown server error")
 )
 
 // 100-199 - ошибки связанные с некорректно переданными данными
@@ -51,6 +76,5 @@ var (
 var (
 	errParsingJWT        = newServiceError(300, "jwt token parsing error")
 	errUndefinedJWT      = newServiceError(301, "jwt token undefined in header `Authorization`")
-	errNoAccessRights    = newServiceError(302, "no access rights")
 	errPermissionDenided = newServiceError(303, "permission denided")
 )

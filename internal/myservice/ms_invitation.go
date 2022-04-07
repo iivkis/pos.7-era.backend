@@ -48,7 +48,7 @@ func (s *InvitationService) Create(c *gin.Context) {
 	}
 
 	if n, err := s.repo.Invitation.CountNotActivated(claims.OrganizationID); err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	} else if n >= 10 {
 		NewResponse(c, http.StatusBadRequest, errRecordAlreadyExists("you can create up to 10 inactive invites"))
@@ -60,7 +60,7 @@ func (s *InvitationService) Create(c *gin.Context) {
 	}
 
 	if err := s.repo.Invitation.Create(invite); err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 
@@ -89,7 +89,7 @@ func (s *InvitationService) GetAll(c *gin.Context) {
 
 	invites, err := s.repo.Invitation.Find(where)
 	if err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 
@@ -127,7 +127,7 @@ func (s *InvitationService) Delete(c *gin.Context) {
 	}
 
 	if err := s.repo.Invitation.Delete(where); err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 	NewResponse(c, http.StatusOK, nil)
@@ -154,7 +154,7 @@ func (s *InvitationService) GetNotActivated(c *gin.Context) {
 
 	invites, err := s.repo.Invitation.FindNotActivated(where)
 	if err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 
@@ -201,7 +201,7 @@ func (s *InvitationService) GetActivated(c *gin.Context) {
 
 	invites, err := s.repo.Invitation.FindActivated(where)
 	if err != nil {
-		NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
 
@@ -209,13 +209,13 @@ func (s *InvitationService) GetActivated(c *gin.Context) {
 	for i, invite := range *invites {
 		org, err := s.repo.Organizations.FindFirts(&repository.OrganizationModel{ID: invite.AffiliateOrgID})
 		if err != nil {
-			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 			return
 		}
 
 		outlets, err := s.repo.Outlets.Find(&repository.OutletModel{OrgID: invite.OrgID})
 		if err != nil {
-			NewResponse(c, http.StatusBadRequest, errUnknownDatabase(err.Error()))
+			NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 			return
 		}
 
