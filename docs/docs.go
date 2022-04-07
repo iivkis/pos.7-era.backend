@@ -2411,7 +2411,7 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
-                "photo": {
+                "photo_id": {
                     "type": "string"
                 },
                 "price": {
@@ -2475,7 +2475,7 @@ var doc = `{
                 "name": {
                     "type": "string"
                 },
-                "photo": {
+                "photo_id": {
                     "type": "string"
                 },
                 "price": {
@@ -2661,7 +2661,10 @@ var doc = `{
         "myservice.UploadPhotoOutput": {
             "type": "object",
             "properties": {
-                "uri": {
+                "photo_id": {
+                    "type": "string"
+                },
+                "photo_uri": {
                     "type": "string"
                 }
             }

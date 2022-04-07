@@ -394,7 +394,7 @@ definitions:
         type: integer
       name:
         type: string
-      photo:
+      photo_id:
         type: string
       price:
         type: number
@@ -436,7 +436,7 @@ definitions:
         type: integer
       name:
         type: string
-      photo:
+      photo_id:
         type: string
       price:
         type: number
@@ -559,7 +559,9 @@ definitions:
     type: object
   myservice.UploadPhotoOutput:
     properties:
-      uri:
+      photo_id:
+        type: string
+      photo_uri:
         type: string
     type: object
   myservice.outletOutputModel:

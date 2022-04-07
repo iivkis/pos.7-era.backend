@@ -2395,7 +2395,7 @@
                 "name": {
                     "type": "string"
                 },
-                "photo": {
+                "photo_id": {
                     "type": "string"
                 },
                 "price": {
@@ -2459,7 +2459,7 @@
                 "name": {
                     "type": "string"
                 },
-                "photo": {
+                "photo_id": {
                     "type": "string"
                 },
                 "price": {
@@ -2645,7 +2645,10 @@
         "myservice.UploadPhotoOutput": {
             "type": "object",
             "properties": {
-                "uri": {
+                "photo_id": {
+                    "type": "string"
+                },
+                "photo_uri": {
                     "type": "string"
                 }
             }
