@@ -40,7 +40,7 @@ func NewMyService(repo *repository.Repository, strcode *strcode.Strcode, mailage
 		Outlets:                  newOutletsService(repo),
 		Sessions:                 newSessionsService(repo),
 		Categories:               newCategoriesService(repo),
-		Products:                 newProductsService(repo),
+		Products:                 newProductsService(repo, s3cloud),
 		Ingredients:              newIngredientsService(repo),
 		OrdersList:               newOrderListService(repo),
 		OrdersInfo:               newOrdersInfoService(repo),

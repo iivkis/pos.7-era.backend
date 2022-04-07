@@ -43,8 +43,13 @@ func (s3 *SelectelS3Cloud) GetSession() *session.Session {
 }
 
 func (s3 *SelectelS3Cloud) GetURIFromFileID(fileID string) string {
+	if fileID == "" {
+		return ""
+	}
+
 	if s3.cndURI != "" {
 		return s3.cndURI + "/" + fileID
 	}
+
 	return "https://720408.selcdn.ru/" + config.Env.SelecletS3BacketName + "/" + fileID
 }

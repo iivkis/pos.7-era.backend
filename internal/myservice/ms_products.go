@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/selectelS3Cloud"
 	"gorm.io/gorm"
 )
 
@@ -28,12 +29,14 @@ type ProductOutputModel struct {
 }
 
 type ProductsService struct {
-	repo *repository.Repository
+	repo    *repository.Repository
+	s3cloud *selectelS3Cloud.SelectelS3Cloud
 }
 
-func newProductsService(repo *repository.Repository) *ProductsService {
+func newProductsService(repo *repository.Repository, s3cloud *selectelS3Cloud.SelectelS3Cloud) *ProductsService {
 	return &ProductsService{
-		repo: repo,
+		repo:    repo,
+		s3cloud: s3cloud,
 	}
 }
 
@@ -44,7 +47,7 @@ type ProductCreateInput struct {
 	Amount         int     `json:"amount"`
 	Price          float64 `json:"price" binding:"min=0"`
 	SellerPercent  float64 `json:"seller_percent" binding:"min=0,max=100"`
-	Photo          string  `json:"photo"`
+	PhotoID        string  `json:"photo_id" binding:"max=500"`
 	CategoryID     uint    `json:"category_id"`
 }
 
@@ -66,16 +69,19 @@ func (s *ProductsService) Create(c *gin.Context) {
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	newProduct := repository.ProductModel{
-		Name:           input.Name,
+		Name: input.Name,
+
 		ProductNameKKT: input.ProductNameKKT,
 		Barcode:        input.Barcode,
 		Amount:         input.Amount,
 		Price:          input.Price,
 		SellerPercent:  input.SellerPercent / 100,
-		Photo:          input.Photo,
-		CategoryID:     input.CategoryID,
-		OutletID:       claims.OutletID,
-		OrgID:          claims.OrganizationID,
+
+		PhotoCloudID: input.PhotoID,
+
+		CategoryID: input.CategoryID,
+		OutletID:   claims.OutletID,
+		OrgID:      claims.OrganizationID,
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
@@ -139,7 +145,7 @@ func (s *ProductsService) GetAll(c *gin.Context) {
 			Amount:         product.Amount,
 			Price:          product.Price,
 			SellerPercent:  product.SellerPercent * 100,
-			Photo:          product.Photo,
+			Photo:          s.s3cloud.GetURIFromFileID(product.PhotoCloudID),
 			CategoryID:     product.CategoryID,
 			OutletID:       product.OutletID,
 		}
@@ -192,7 +198,7 @@ func (s *ProductsService) GetOne(c *gin.Context) {
 		Amount:         product.Amount,
 		Price:          product.Price,
 		SellerPercent:  product.SellerPercent * 100,
-		Photo:          product.Photo,
+		Photo:          s.s3cloud.GetURIFromFileID(product.PhotoCloudID),
 		CategoryID:     product.CategoryID,
 		OutletID:       product.OutletID,
 	}
@@ -206,7 +212,7 @@ type ProductUpdateInput struct {
 	Amount         int     `json:"amount"`
 	Price          float64 `json:"price"`
 	SellerPercent  float64 `json:"seller_percent" binding:"min=0,max=100"`
-	Photo          string  `json:"photo"`
+	PhotoID        string  `json:"photo_id" binding:"max=500"`
 	CategoryID     uint    `json:"category_id"`
 }
 
@@ -245,7 +251,7 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 		Barcode:        input.Barcode,
 		Amount:         input.Amount,
 		Price:          input.Price,
-		Photo:          input.Photo,
+		PhotoCloudID:   input.PhotoID,
 		SellerPercent:  input.SellerPercent / 100,
 		CategoryID:     input.CategoryID,
 	}

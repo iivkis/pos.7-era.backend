@@ -48,7 +48,8 @@ type UploadPhotoInput struct {
 }
 
 type UploadPhotoOutput struct {
-	URI string `json:"uri"`
+	PhotoID  string `json:"photo_id"`
+	PhotoURI string `json:"photo_uri"`
 }
 
 //@Summary Загрузить фотографию на сервер
@@ -75,14 +76,14 @@ func (s *UploadService) UploadPhoto(c *gin.Context) {
 	}
 
 	//generate photo name
-	key := strconv.Itoa(int(claims.OrganizationID)) + "-" + s.genPhotoName(50)
+	fileID := strconv.Itoa(int(claims.OrganizationID)) + "-" + s.genPhotoName(50)
 
 	//create upload input
 	uploadInput := &s3manager.UploadInput{
 		Body:        file,
 		ACL:         aws.String("public-read"),
 		Bucket:      aws.String(config.Env.SelecletS3BacketName),
-		Key:         aws.String(key),
+		Key:         aws.String(fileID),
 		ContentType: aws.String(contentType),
 	}
 
@@ -92,5 +93,5 @@ func (s *UploadService) UploadPhoto(c *gin.Context) {
 		return
 	}
 
-	NewResponse(c, http.StatusCreated, UploadPhotoOutput{URI: s.s3cloud.GetURIFromFileID(key)})
+	NewResponse(c, http.StatusCreated, UploadPhotoOutput{PhotoID: fileID, PhotoURI: s.s3cloud.GetURIFromFileID(fileID)})
 }

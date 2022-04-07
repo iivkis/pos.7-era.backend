@@ -9,9 +9,9 @@ type ProductModel struct {
 	ProductNameKKT string
 	Barcode        int
 
-	Amount int
-	Price  float64
-	Photo  string
+	Amount       int
+	Price        float64
+	PhotoCloudID string //key in selectel
 
 	SellerPercent float64 `gorm:"default:0"` //процент продавца с продажи товара
 
