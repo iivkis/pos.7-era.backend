@@ -34,6 +34,7 @@ var (
 	errIncorrectEmail       = newServiceError(101, "incorrect email")
 	errIncorrectInputData   = newServiceError(103, "incorrect input data")
 	errIncorrectConfirmCode = newServiceError(104, "incorrect confirm code")
+	errUploadFile           = newServiceError(105, "upload file error")
 )
 
 // 200-299 - ошибки связанные с базой данных

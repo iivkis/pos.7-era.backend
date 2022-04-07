@@ -27,6 +27,10 @@ var Env struct {
 	DatabaseName     string
 	DatabaseLogin    string
 	DatabasePassword string
+
+	SelectelS3AccessKey  string
+	SelectelS3SecretKey  string
+	SelecletS3BacketName string
 }
 
 var Flags struct {
@@ -85,6 +89,8 @@ func loadEnv() {
 	Env.OutHost = getEnv("POSN_OUT_HOST")
 	Env.OutPort = getEnv("POSN_OUT_PORT")
 	Env.ServerName = getEnv("POSN_SERVER_NAME")
+
+	//secret JWT key
 	Env.Secret = getEnv("POSN_SECRET")
 
 	//env for email
@@ -96,6 +102,11 @@ func loadEnv() {
 	Env.DatabaseName = getEnv("POSN_DATABASE_NAME")
 	Env.DatabaseLogin = getEnv("POSN_DATABASE_LOGIN")
 	Env.DatabasePassword = getEnv("POSN_DATABASE_PWD")
+
+	//selectel s3 cloud
+	Env.SelectelS3AccessKey = getEnv("POSN_SEL_S3_ACCESS_KEY")
+	Env.SelectelS3SecretKey = getEnv("POSN_SEL_S3_SECRET_KEY")
+	Env.SelecletS3BacketName = getEnv("POSN_SEL_S3_BACKET")
 }
 
 func loadFlags() {

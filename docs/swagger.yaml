@@ -552,6 +552,16 @@ definitions:
     - name
     - password
     type: object
+  myservice.UploadPhotoInput:
+    properties:
+      photo:
+        type: string
+    type: object
+  myservice.UploadPhotoOutput:
+    properties:
+      uri:
+        type: string
+    type: object
   myservice.outletOutputModel:
     properties:
       id:
@@ -1714,4 +1724,20 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Последняя сессия текущего юзера (к которой привязан jwt токен)
+  /upload.Photo:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: фото
+        in: body
+        name: type
+        schema:
+          $ref: '#/definitions/myservice.UploadPhotoInput'
+      responses:
+        "201":
+          description: возвращает ссылку на фотографию
+          schema:
+            $ref: '#/definitions/myservice.UploadPhotoOutput'
+      summary: Загрузить фотографию на сервер
 swagger: "2.0"

@@ -1786,6 +1786,32 @@ var doc = `{
                     }
                 }
             }
+        },
+        "/upload.Photo": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "summary": "Загрузить фотографию на сервер",
+                "parameters": [
+                    {
+                        "description": "фото",
+                        "name": "type",
+                        "in": "body",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.UploadPhotoInput"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "возвращает ссылку на фотографию",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.UploadPhotoOutput"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
@@ -2620,6 +2646,22 @@ var doc = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.UploadPhotoInput": {
+            "type": "object",
+            "properties": {
+                "photo": {
+                    "type": "string"
+                }
+            }
+        },
+        "myservice.UploadPhotoOutput": {
+            "type": "object",
+            "properties": {
+                "uri": {
                     "type": "string"
                 }
             }

@@ -134,4 +134,8 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		r.GET("/invites.Activated", h.srv.Mware.AuthEmployee(r_owner, r_director), h.srv.Invitation.GetActivated)
 		r.DELETE("/invites/:id", h.srv.Mware.AuthEmployee(r_owner, r_director), h.srv.Invitation.Delete)
 	}
+
+	{
+		r.POST("/upload.Photo", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Upload.UploadPhoto)
+	}
 }

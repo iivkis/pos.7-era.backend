@@ -11,6 +11,7 @@ import (
 	"github.com/iivkis/pos.7-era.backend/internal/handler"
 	"github.com/iivkis/pos.7-era.backend/internal/myservice"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/selectelS3Cloud"
 	"github.com/iivkis/pos.7-era.backend/internal/server"
 	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
 	"github.com/iivkis/pos.7-era.backend/pkg/mailagent"
@@ -31,9 +32,10 @@ func Launch() {
 	_mailagent := mailagent.NewMailAgent(config.Env.EmailLogin, config.Env.EmailPwd)
 
 	//internal
+	_s3cloud := selectelS3Cloud.NewSelectelS3Cloud(config.Env.SelectelS3AccessKey, config.Env.SelectelS3SecretKey, "https://cb027f6f-0eed-40c8-8f6a-7fbc35d7224b.selcdn.net")
 	_repo := repository.NewRepository(_authjwt)
-	_service := myservice.NewMyService(_repo, _strcode, _mailagent, _authjwt)
-	_handler := handler.NewHttpHandler(_service, _authjwt)
+	_service := myservice.NewMyService(_repo, _strcode, _mailagent, _authjwt, _s3cloud)
+	_handler := handler.NewHttpHandler(_service)
 	_server := server.NewServer(_handler)
 
 	//run server

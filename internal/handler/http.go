@@ -8,19 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/docs"
 	"github.com/iivkis/pos.7-era.backend/internal/myservice"
-	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
 
 	swaggerfiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type HttpHandler struct {
-	engine  *gin.Engine
-	srv     myservice.MyService
-	authjwt *authjwt.AuthJWT
+	engine *gin.Engine
+	srv    myservice.MyService
 }
 
-func NewHttpHandler(service myservice.MyService, authjwt *authjwt.AuthJWT) HttpHandler {
+func NewHttpHandler(service myservice.MyService) HttpHandler {
 	gin.SetMode(gin.ReleaseMode)
 
 	//create engine
@@ -39,9 +37,8 @@ func NewHttpHandler(service myservice.MyService, authjwt *authjwt.AuthJWT) HttpH
 	}))
 
 	return HttpHandler{
-		engine:  engine,
-		srv:     service,
-		authjwt: authjwt,
+		engine: engine,
+		srv:    service,
 	}
 }
 
