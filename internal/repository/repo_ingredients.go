@@ -46,6 +46,10 @@ func (r *IngredientsRepo) Updates(where *IngredientModel, updatedFields *Ingredi
 	return r.db.Where(where).Updates(updatedFields).Error
 }
 
+func (r *IngredientsRepo) UpdatesFull(where *IngredientModel, updatedFields *map[string]interface{}) error {
+	return r.db.Where(where).Updates(updatedFields).Error
+}
+
 func (r *IngredientsRepo) Delete(where *IngredientModel) (err error) {
 	err = r.db.Where(where).Delete(&IngredientModel{}).Error
 	return

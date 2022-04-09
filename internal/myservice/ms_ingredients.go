@@ -121,10 +121,10 @@ func (s *IngredientsService) GetAll(c *gin.Context) {
 }
 
 type IngredientUpdateInput struct {
-	Name          string  `json:"name"`
-	Count         float64 `json:"count" binding:"min=0"`
-	PurchasePrice float64 `json:"purchase_price" binding:"min=0"`
-	MeasureUnit   int     `json:"measure_unit" binding:"min=0,max=3"`
+	Name          *string  `json:"name,omitempty"`
+	Count         *float64 `json:"count,omitempty"`
+	PurchasePrice *float64 `json:"purchase_price,omitempty"`
+	MeasureUnit   *int     `json:"measure_unit,omitempty"`
 }
 
 //@Summary Обновить ингредиент
@@ -137,44 +137,56 @@ type IngredientUpdateInput struct {
 //@Router /ingredients [put]
 func (s *IngredientsService) UpdateFields(c *gin.Context) {
 	var input IngredientUpdateInput
-	if err := c.ShouldBindJSON(&input); err != nil {
+	if err := c.BindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	ingrID, err := strconv.Atoi(c.Param("id"))
+	idx, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	where := &repository.IngredientModel{
-		ID:       uint(ingrID),
-		OrgID:    claims.OrganizationID,
+		ID:       uint(idx),
 		OutletID: claims.OutletID,
-	}
-
-	if claims.HasRole(repository.R_OWNER) {
-		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{OrgID: claims.OrganizationID, AffiliateOrgID: stdQuery.OrgID}) {
-			where.OrgID = stdQuery.OrgID
-		}
+		OrgID:    claims.OrganizationID,
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
 		where.OutletID = stdQuery.OutletID
 	}
 
-	updatedFields := &repository.IngredientModel{
-		Name:          input.Name,
-		PurchasePrice: input.PurchasePrice,
-		Count:         input.Count,
-		MeasureUnit:   input.MeasureUnit,
+	updated := make(map[string]interface{})
+	{
+		if input.Name != nil {
+			if *input.Name != "" {
+				updated["name"] = *input.Name
+			}
+		}
+
+		if input.PurchasePrice != nil {
+			updated["purchase_price"] = *input.PurchasePrice
+		}
+
+		if input.Count != nil {
+			updated["count"] = *input.Count
+		}
+
+		if input.MeasureUnit != nil {
+			if *input.MeasureUnit < 1 || *input.MeasureUnit > 3 {
+				NewResponse(c, http.StatusBadRequest, errIncorrectInputData("1 <= measure_unit <= 3"))
+				return
+			}
+			updated["measure_unit"] = *input.MeasureUnit
+		}
+
 	}
 
-	if err := s.repo.Ingredients.Updates(where, updatedFields); err != nil {
+	if err := s.repo.Ingredients.UpdatesFull(where, &updated); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}

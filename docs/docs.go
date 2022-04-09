@@ -1447,12 +1447,6 @@ var doc = `{
                         "schema": {
                             "$ref": "#/definitions/myservice.serviceError"
                         }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/myservice.serviceError"
-                        }
                     }
                 }
             },
@@ -1805,7 +1799,7 @@ var doc = `{
                 ],
                 "responses": {
                     "201": {
-                        "description": "возвращает ссылку на фотографию",
+                        "description": "возвращает id фоторгафии в хранилище и ссылку на фотографию",
                         "schema": {
                             "$ref": "#/definitions/myservice.UploadPhotoOutput"
                         }
