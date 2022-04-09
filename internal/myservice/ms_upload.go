@@ -67,7 +67,7 @@ func (s *UploadService) UploadPhoto(c *gin.Context) {
 	}
 	defer file.Close()
 
-	//get content type
+	//get content type & validation
 	contentType := header.Header.Get("Content-Type")
 	if !UPLOAD_PHOTO_ALLOWED_CONTENT_TYPE[contentType] {
 		NewResponse(c, http.StatusBadRequest, errUploadFile("invalid type"))

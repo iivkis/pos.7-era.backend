@@ -212,15 +212,85 @@ func (s *ProductsService) GetOne(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
+// type ProductUpdateInput struct {
+// 	Name           string  `json:"name"`
+// 	ProductNameKKT string  `json:"product_name_kkt"`
+// 	Barcode        int     `json:"barcode"`
+// 	Amount         int     `json:"amount"`
+// 	Price          float64 `json:"price"`
+// 	SellerPercent  float64 `json:"seller_percent" binding:"min=0,max=100"`
+// 	PhotoID        string  `json:"photo_id" binding:"max=500"`
+// 	CategoryID     uint    `json:"category_id"`
+// }
+
+// //@Summary Обновить продукт в точке
+// //@param type body ProductUpdateInput false "Обновляемые поля"
+// //@Success 200 {object} object "возвращает пустой объект"
+// //@Accept json
+// //@Produce json
+// //@Failure 400 {object} serviceError
+// //@Failure 500 {object} serviceError
+// //@Router /products/:id [put]
+// func (s *ProductsService) UpdateFields(c *gin.Context) {
+// 	productID, err := strconv.Atoi(c.Param("id"))
+// 	if err != nil {
+// 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+// 		return
+// 	}
+
+// 	var input ProductUpdateInput
+// 	if err := c.ShouldBindJSON(&input); err != nil {
+// 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+// 		return
+// 	}
+
+// 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+// 	where := &repository.ProductModel{
+// 		ID:       uint(productID),
+// 		OrgID:    claims.OrganizationID,
+// 		OutletID: claims.OutletID,
+// 	}
+
+// 	upadtedFields := &repository.ProductModel{
+// 		Name:           input.Name,
+// 		ProductNameKKT: input.ProductNameKKT,
+// 		Barcode:        input.Barcode,
+// 		Amount:         input.Amount,
+// 		Price:          input.Price,
+// 		PhotoCloudID:   input.PhotoID,
+// 		SellerPercent:  input.SellerPercent / 100,
+// 		CategoryID:     input.CategoryID,
+// 	}
+
+// 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+// 		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
+// 			where.OutletID = stdQuery.OutletID
+// 		}
+// 	}
+
+// 	if upadtedFields.CategoryID != 0 && !s.repo.Categories.Exists(&repository.CategoryModel{ID: upadtedFields.CategoryID, OutletID: claims.OutletID}) {
+// 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
+// 		return
+// 	}
+
+// 	if err := s.repo.Products.Updates(where, upadtedFields); err != nil {
+// 		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
+// 		return
+// 	}
+
+// 	NewResponse(c, http.StatusOK, nil)
+// }
+
 type ProductUpdateInput struct {
-	Name           string  `json:"name"`
-	ProductNameKKT string  `json:"product_name_kkt"`
-	Barcode        int     `json:"barcode"`
-	Amount         int     `json:"amount"`
-	Price          float64 `json:"price"`
-	SellerPercent  float64 `json:"seller_percent" binding:"min=0,max=100"`
-	PhotoID        string  `json:"photo_id" binding:"max=500"`
-	CategoryID     uint    `json:"category_id"`
+	Name           *string  `json:"name,omitempty"`
+	ProductNameKKT *string  `json:"product_name_kkt,omitempty"`
+	Barcode        *int     `json:"barcode,omitempty"`
+	Amount         *int     `json:"amount,omitempty"`
+	Price          *float64 `json:"price,omitempty"`
+	SellerPercent  *float64 `json:"seller_percent,omitempty"`
+	PhotoID        *string  `json:"photo_id,omitempty"`
+	CategoryID     *uint    `json:"category_id,omitempty"`
 }
 
 //@Summary Обновить продукт в точке
@@ -229,7 +299,6 @@ type ProductUpdateInput struct {
 //@Accept json
 //@Produce json
 //@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
 //@Router /products/:id [put]
 func (s *ProductsService) UpdateFields(c *gin.Context) {
 	productID, err := strconv.Atoi(c.Param("id"))
@@ -239,7 +308,7 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 	}
 
 	var input ProductUpdateInput
-	if err := c.ShouldBindJSON(&input); err != nil {
+	if err := c.BindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
@@ -248,33 +317,58 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 
 	where := &repository.ProductModel{
 		ID:       uint(productID),
-		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
+		OrgID:    claims.OrganizationID,
 	}
 
-	upadtedFields := &repository.ProductModel{
-		Name:           input.Name,
-		ProductNameKKT: input.ProductNameKKT,
-		Barcode:        input.Barcode,
-		Amount:         input.Amount,
-		Price:          input.Price,
-		PhotoCloudID:   input.PhotoID,
-		SellerPercent:  input.SellerPercent / 100,
-		CategoryID:     input.CategoryID,
-	}
+	updated := make(map[string]interface{})
+	{
+		if input.Name != nil {
+			updated["name"] = *input.Name
+		}
 
-	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
-		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
-			where.OutletID = stdQuery.OutletID
+		if input.ProductNameKKT != nil {
+			updated["product_name_kkt"] = *input.ProductNameKKT
+		}
+
+		if input.Barcode != nil {
+			updated["barcode"] = *input.Barcode
+		}
+
+		if input.Amount != nil {
+			updated["amount"] = *input.Amount
+		}
+
+		if input.Price != nil {
+			updated["price"] = *input.Price
+		}
+
+		if input.PhotoID != nil {
+			updated["photo_cloud_id"] = *input.PhotoID
+		}
+
+		if input.SellerPercent != nil {
+			if *input.SellerPercent < 0 || *input.SellerPercent > 100 {
+				NewResponse(c, http.StatusBadRequest, errIncorrectInputData("0 <= seller_percent <= 100"))
+				return
+			}
+			updated["seller_percent"] = *input.SellerPercent / 100
+		}
+
+		if input.CategoryID != nil {
+			if !s.repo.Categories.Exists(&repository.CategoryModel{ID: *input.CategoryID, OutletID: claims.OutletID}) {
+				NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
+				return
+			}
+			updated["category_id"] = *input.CategoryID
 		}
 	}
 
-	if upadtedFields.CategoryID != 0 && !s.repo.Categories.Exists(&repository.CategoryModel{ID: upadtedFields.CategoryID, OutletID: claims.OutletID}) {
-		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
-		return
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
 	}
 
-	if err := s.repo.Products.Updates(where, upadtedFields); err != nil {
+	if err := s.repo.Products.UpdatesFull(where, &updated); err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
 	}
