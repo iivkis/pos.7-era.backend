@@ -156,3 +156,46 @@ func (s *OrdersListService) GetAll(c *gin.Context) {
 	}
 	NewResponse(c, http.StatusOK, output)
 }
+
+type OrderListCalcOutput struct {
+	Total float64 `json:"total"`
+}
+
+func (s *OrdersListService) Calc(c *gin.Context) {
+	var query OrderListGetAllQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+	}
+
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+
+	where := &repository.OrderListModel{
+		OrgID:       claims.OrganizationID,
+		OutletID:    claims.OutletID,
+		OrderInfoID: query.OrderInfoID,
+		SessionID:   query.SessionID,
+		ProductID:   query.ProductID,
+	}
+
+	if claims.HasRole(repository.R_OWNER) {
+		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{OrgID: claims.OrganizationID, AffiliateOrgID: stdQuery.OrgID}) {
+			where.OrgID = stdQuery.OrgID
+		}
+	}
+
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where.OutletID = stdQuery.OutletID
+	}
+
+	models, err := s.repo.OrdersList.FindForCalculation(where)
+	if err != nil {
+		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
+	}
+
+	output := OrderListCalcOutput{}
+	for _, item := range *models {
+		output.Total += item.ProductPrice * float64(item.Count)
+	}
+
+	NewResponse(c, http.StatusOK, output)
+}

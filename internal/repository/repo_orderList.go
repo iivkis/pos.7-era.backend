@@ -49,6 +49,11 @@ func (r *OrderListRepo) FindUnscoped(where *OrderListModel) (result *[]OrderList
 	return
 }
 
+func (r *OrderListRepo) FindForCalculation(where *OrderListModel) (result *[]OrderListModel, err error) {
+	err = r.db.Select("product_price, count").Where(where).Find(&result).Error
+	return
+}
+
 func (r *OrderListRepo) Updates(where *OrderListModel, updatedFields *OrderListModel) error {
 	return r.db.Where(where).Updates(updatedFields).Error
 }
