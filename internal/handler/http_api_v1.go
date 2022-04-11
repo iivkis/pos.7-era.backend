@@ -104,6 +104,7 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 	//order list
 	{
 		r.GET("/orderList", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.OrdersList.GetAll)
+		r.GET("/orderList.Calc", h.srv.Mware.AuthEmployee(r_owner, r_director), h.srv.OrdersList.Calc)
 		r.POST("/orderList", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.OrdersList.Create)
 	}
 
