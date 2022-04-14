@@ -229,7 +229,6 @@ type SignInOrgOutput struct {
 //@Failure 401 {object} serviceError
 //@Router /auth/signIn.Org [post]
 func (s *AuthorizationService) SignInOrg(c *gin.Context) {
-	errUnknown("блят")
 	var input SignInOrgInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusUnauthorized, errIncorrectInputData(err.Error()))
