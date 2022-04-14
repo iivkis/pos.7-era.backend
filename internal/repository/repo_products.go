@@ -3,7 +3,8 @@ package repository
 import "gorm.io/gorm"
 
 type ProductModel struct {
-	ID uint
+	ID        uint
+	DeletedAt gorm.DeletedAt
 
 	Name           string
 	ProductNameKKT string
