@@ -3,7 +3,8 @@ package repository
 import "gorm.io/gorm"
 
 type IngredientModel struct {
-	ID uint
+	ID        uint
+	DeletedAt gorm.DeletedAt
 
 	Name          string
 	Count         float64

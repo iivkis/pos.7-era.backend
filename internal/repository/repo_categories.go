@@ -3,7 +3,8 @@ package repository
 import "gorm.io/gorm"
 
 type CategoryModel struct {
-	ID uint
+	ID        uint
+	DeletedAt gorm.DeletedAt
 
 	Name string
 

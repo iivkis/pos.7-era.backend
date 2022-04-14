@@ -7,7 +7,8 @@ import (
 )
 
 type ProductWithIngredientModel struct {
-	ID uint
+	ID        uint
+	DeletedAt gorm.DeletedAt
 
 	CountTakeForSell float64
 
