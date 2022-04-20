@@ -1195,6 +1195,31 @@ var doc = `{
                 }
             }
         },
+        "/orderList.Calc": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "Посчитать сумму продаж за определенный период",
+                "responses": {
+                    "200": {
+                        "description": "сумма с продаж",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.OrderListCalcOutput"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/myservice.serviceError"
+                        }
+                    }
+                }
+            }
+        },
         "/outlets": {
             "get": {
                 "description": "Метод позволяет получить список всех торговых точек",
@@ -2259,6 +2284,14 @@ var doc = `{
                 },
                 "session_id": {
                     "type": "integer"
+                }
+            }
+        },
+        "myservice.OrderListCalcOutput": {
+            "type": "object",
+            "properties": {
+                "total": {
+                    "type": "number"
                 }
             }
         },

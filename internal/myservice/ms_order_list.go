@@ -161,6 +161,13 @@ type OrderListCalcOutput struct {
 	Total float64 `json:"total"`
 }
 
+//@Summary  Посчитать сумму продаж за определенный период
+//Param type query OrderListGetAllQuery false "Принимаемый объект"
+//@Accept json
+//@Produce json
+//@Success 200 {object} OrderListCalcOutput "сумма с продаж"
+//@Failure 400 {object} serviceError
+//@Router /orderList.Calc [get]
 func (s *OrdersListService) Calc(c *gin.Context) {
 	var query OrderListGetAllQuery
 	if err := c.ShouldBindQuery(&query); err != nil {

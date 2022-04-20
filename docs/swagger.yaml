@@ -301,6 +301,11 @@ definitions:
       session_id:
         type: integer
     type: object
+  myservice.OrderListCalcOutput:
+    properties:
+      total:
+        type: number
+    type: object
   myservice.OrderListCreateInput:
     properties:
       count:
@@ -1340,6 +1345,22 @@ paths:
           schema:
             $ref: '#/definitions/myservice.serviceError'
       summary: Добавить orderList (список продутктов из которых состоит заказ)
+  /orderList.Calc:
+    get:
+      consumes:
+      - application/json
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: сумма с продаж
+          schema:
+            $ref: '#/definitions/myservice.OrderListCalcOutput'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/myservice.serviceError'
+      summary: Посчитать сумму продаж за определенный период
   /outlets:
     get:
       description: Метод позволяет получить список всех торговых точек
