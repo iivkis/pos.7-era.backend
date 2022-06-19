@@ -79,7 +79,7 @@ func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 }
 
 type PWIGetAllQuery struct {
-	ProductID uint `json:"product_id"`
+	ProductID uint `form:"product_id"`
 }
 
 type PWIGetAllOutput []PWIOutputModel
@@ -133,6 +133,7 @@ func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
 			OutletID:         pwi.OutletID,
 		}
 	}
+
 	NewResponse(c, http.StatusOK, output)
 }
 
