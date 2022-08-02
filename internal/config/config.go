@@ -41,40 +41,6 @@ func loadEnv() {
 	}
 }
 
-// func loadEnv() {
-// 	getEnv := func(envName string) string {
-// 		s, ok := os.LookupEnv(envName)
-// 		if !ok {
-// 			panic(fmt.Sprintf("%s undefined", envName))
-// 		}
-// 		return s
-// 	}
-
-// 	//secret key & server data
-// 	Env.OutProtocol = getEnv("POSN_OUT_PROTOCOL")
-// 	Env.OutHost = getEnv("POSN_OUT_HOST")
-// 	Env.OutPort = getEnv("POSN_OUT_PORT")
-// 	Env.ServerName = getEnv("POSN_SERVER_NAME")
-
-// 	//secret JWT key
-// 	Env.TokenSecretKey = getEnv("POSN_SECRET")
-
-// 	//env for email
-// 	Env.EmailLogin = getEnv("POSN_EMAIL_LOGIN")
-// 	Env.EmailPassword = getEnv("POSN_EMAIL_PWD")
-
-// 	//database
-// 	Env.DatabaseIP = getEnv("POSN_DATABASE_IP")
-// 	Env.DatabaseName = getEnv("POSN_DATABASE_NAME")
-// 	Env.DatabaseLogin = getEnv("POSN_DATABASE_LOGIN")
-// 	Env.DatabasePassword = getEnv("POSN_DATABASE_PWD")
-
-// 	//selectel s3 cloud
-// 	Env.SelectelS3AccessKey = getEnv("POSN_SEL_S3_ACCESS_KEY")
-// 	Env.SelectelS3SecretKey = getEnv("POSN_SEL_S3_SECRET_KEY")
-// 	Env.SelecletS3BacketName = getEnv("POSN_SEL_S3_BACKET")
-// }
-
 func loadJSON(configFilePath string) {
 	f, err := os.OpenFile(configFilePath, os.O_RDONLY, 0o777)
 	if err != nil {
