@@ -4,7 +4,7 @@ package app
 //Created by Ivan Razmolodin (vk.com/ivan.razmolodin)
 
 import (
-	"fmt"
+	"log"
 	"time"
 
 	"github.com/iivkis/pos.7-era.backend/internal/config"
@@ -19,17 +19,17 @@ import (
 )
 
 func Launch() {
-	fmt.Println("Server launching... \\-0.0-/")
+	log.Println("| SERVER LAUNCHING... |")
 
 	//pkg
-	_authjwt := authjwt.NewAuthJWT([]byte(config.Env.Secret))
+	_authjwt := authjwt.NewAuthJWT([]byte(config.Env.TokenSecretKey))
 
-	_strcode, err := strcode.NewStrcode(config.Env.Secret, ":", time.Hour*24)
+	_strcode, err := strcode.NewStrcode(config.Env.TokenSecretKey, ":", time.Hour*24)
 	if err != nil {
 		panic(err)
 	}
 
-	_mailagent := mailagent.NewMailAgent(config.Env.EmailLogin, config.Env.EmailPwd)
+	_mailagent := mailagent.NewMailAgent(config.Env.EmailLogin, config.Env.EmailPassword)
 
 	//internal
 	_s3cloud := selectelS3Cloud.NewSelectelS3Cloud(config.Env.SelectelS3AccessKey, config.Env.SelectelS3SecretKey, "https://cb027f6f-0eed-40c8-8f6a-7fbc35d7224b.selcdn.net")
@@ -46,6 +46,6 @@ func Launch() {
 		}
 	}()
 
-	fmt.Print("Server launched =D\n\n")
+	log.Println("| SERVER UP |")
 	panic(<-done)
 }

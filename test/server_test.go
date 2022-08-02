@@ -36,7 +36,7 @@ var (
 func init() {
 	//load test config
 	{
-		f, err := os.OpenFile("./config.json", os.O_RDONLY, os.ModePerm)
+		f, err := os.OpenFile("./../config.json", os.O_RDONLY, os.ModePerm)
 		checkErr(err)
 
 		b, err := io.ReadAll(f)

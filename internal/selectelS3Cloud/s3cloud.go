@@ -30,6 +30,7 @@ func NewSelectelS3Cloud(accessKeyID string, secretKey string, cdnURI string) *Se
 	if err != nil {
 		panic(err)
 	}
+
 	log.Println("success connection to s3.storage.selcloud.ru")
 
 	return &SelectelS3Cloud{
