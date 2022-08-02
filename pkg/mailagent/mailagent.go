@@ -2,6 +2,7 @@ package mailagent
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"html/template"
 	"io/ioutil"
@@ -55,7 +56,7 @@ func (m *MailAgent) execute(tmpl *template.Template, val Value) (string, error) 
 func (m *MailAgent) SendTemplate(addr string, tmplName string, val Value) error {
 	tmpl, ok := m.templates[tmplName]
 	if !ok {
-		return errTemplateUndefined
+		return errors.New("template undefined")
 	}
 
 	html, err := m.execute(tmpl, val)

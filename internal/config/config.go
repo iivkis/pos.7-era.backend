@@ -1,19 +1,21 @@
 package config
 
 import (
-	"encoding/json"
 	"flag"
-	"fmt"
-	"io/ioutil"
 	"os"
+	"sync"
 
 	"github.com/spf13/viper"
 )
 
-func init() {
-	loadFlags()
-	loadEnv()
-	loadJSON("./config.json")
+var once sync.Once
+
+func Load(rootpath string) {
+	once.Do(func() {
+		loadFlags()
+		loadEnv(rootpath)
+		// loadJSON("./config.json")
+	})
 }
 
 func loadFlags() {
@@ -25,9 +27,9 @@ func loadFlags() {
 	flag.Parse()
 }
 
-func loadEnv() {
+func loadEnv(rootpath string) {
 	viper.SetConfigType("env")
-	viper.AddConfigPath(".")
+	viper.AddConfigPath(rootpath)
 	viper.SetConfigName(".env")
 
 	viper.AutomaticEnv()
@@ -41,32 +43,32 @@ func loadEnv() {
 	}
 }
 
-func loadJSON(configFilePath string) {
-	f, err := os.OpenFile(configFilePath, os.O_RDONLY, 0o777)
-	if err != nil {
-		panic(err)
-	}
+// func loadJSON(configFilePath string) {
+// 	f, err := os.OpenFile(configFilePath, os.O_RDONLY, 0o777)
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	b, err := ioutil.ReadAll(f)
-	if err != nil {
-		panic(err)
-	}
+// 	b, err := ioutil.ReadAll(f)
+// 	if err != nil {
+// 		panic(err)
+// 	}
 
-	var data map[string]string
-	if err := json.Unmarshal(b, &data); err != nil {
-		panic(err)
-	}
+// 	var data map[string]string
+// 	if err := json.Unmarshal(b, &data); err != nil {
+// 		panic(err)
+// 	}
 
-	getField := func(fieldName string) string {
-		d, ok := data[fieldName]
-		if !ok {
-			panic(fmt.Sprintf("%s undefined", fieldName))
-		}
-		return d
-	}
+// 	getField := func(fieldName string) string {
+// 		d, ok := data[fieldName]
+// 		if !ok {
+// 			panic(fmt.Sprintf("%s undefined", fieldName))
+// 		}
+// 		return d
+// 	}
 
-	//require fields
-	{
-		File.EmailTemplatesDir = getField("email_tmpl_dir")
-	}
-}
+// 	//require fields
+// 	{
+// 		File.EmailTemplatesDir = getField("email_tmpl_dir")
+// 	}
+// }

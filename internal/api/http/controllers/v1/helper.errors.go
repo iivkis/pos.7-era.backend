@@ -1,4 +1,4 @@
-package myservice
+package controller
 
 import (
 	"log"

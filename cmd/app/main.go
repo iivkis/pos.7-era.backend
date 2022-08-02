@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/iivkis/pos.7-era.backend/internal/app"
-	_ "github.com/iivkis/pos.7-era.backend/internal/config"
+	"github.com/iivkis/pos.7-era.backend/internal/config"
 )
 
 //@BasePath /api/v1
@@ -11,5 +11,6 @@ import (
 //@Version 0.2.0
 
 func main() {
+	config.Load(".")
 	app.Launch()
 }
