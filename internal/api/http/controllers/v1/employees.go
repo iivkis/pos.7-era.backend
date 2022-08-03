@@ -70,21 +70,21 @@ func (s *employees) GetAll(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-type EmployeeUpdateFieldsInput struct {
+type EmployeeUpdateBody struct {
 	Name     string `json:"name"`
 	Password string `json:"password" binding:"max=6"`
 	RoleID   int    `json:"role_id"`
 }
 
 //@Summary Позволяет обновить поля сотрудника
-//@param type body EmployeeUpdateFieldsInput false "Принимаемый объект"
+//@param type body EmployeeUpdateBody false "Принимаемый объект"
 //@Accept json
 //@Produce json
 //@Success 200 {object} object "возвращает пустой объект"
 //@Failure 400 {object} serviceError
 //@Router /employees/:id [put]
-func (s *employees) UpdateFields(c *gin.Context) {
-	var input EmployeeUpdateFieldsInput
+func (s *employees) Update(c *gin.Context) {
+	var input EmployeeUpdateBody
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return

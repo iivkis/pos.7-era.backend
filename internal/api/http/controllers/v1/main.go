@@ -57,7 +57,7 @@ func (c *Controller) init() {
 	//api для сотрудников
 	{
 		r.GET("/employees", c.Middleware.AuthOrg(), c.Employees.GetAll)
-		r.PUT("/employees/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Employees.UpdateFields)
+		r.PUT("/employees/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Employees.Update)
 		r.DELETE("/employees/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Employees.Delete)
 	}
 
