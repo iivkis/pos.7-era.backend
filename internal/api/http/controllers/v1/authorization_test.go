@@ -7,52 +7,68 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/testutil"
+	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/require"
 )
 
-func newOrgAccount(t *testing.T) gin.H {
+func orgSignUp(t *testing.T, engine *gin.Engine) gin.H {
 	body := gin.H{
 		"name":     "Test",
 		"email":    testutil.RandomString(10) + "@test.test",
 		"password": testutil.RandomString(10),
 	}
 
-	engine := newController(t)
-
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/api/v1/auth/signUp.Org", testutil.Marshal(body))
 
 	engine.ServeHTTP(w, req)
-
 	require.Equal(t, http.StatusCreated, w.Code)
 
 	return body
 }
 
-func TestSignUpOrg(t *testing.T) {
-	newOrgAccount(t)
+func orgSignIn(t *testing.T, engine *gin.Engine, body gin.H) (data authSignInOrgResponse) {
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/api/v1/auth/signIn.Org", testutil.Marshal(body))
+
+	engine.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var response Response
+	testutil.Unmarshal(w.Body, &response)
+	mapstructure.Decode(response.Data, &data)
+
+	require.NotEmpty(t, data.Token)
+	return
 }
 
-func TestSignInOrg(t *testing.T) {
-	account := newOrgAccount(t)
+func orgGetToken(t *testing.T, engine *gin.Engine) string {
+	account := orgSignUp(t, engine)
 
 	body := gin.H{
 		"email":    account["email"],
 		"password": account["password"],
 	}
 
-	engine := newController(t)
+	data := orgSignIn(t, engine, body)
+	require.NotEmpty(t, data.Token)
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/v1/auth/signIn.Org", testutil.Marshal(body))
-
-	engine.ServeHTTP(w, req)
-
-	require.Equal(t, http.StatusOK, w.Code)
+	return data.Token
 }
 
-func TestSignInEmployee(t *testing.T) {
-	t.Run("owner", func(t *testing.T) {
+func TestSignUpOrg(t *testing.T) {
+	engine := newController(t)
+	orgSignUp(t, engine)
+}
 
-	})
+func TestSignInOrg(t *testing.T) {
+	engine := newController(t)
+	account := orgSignUp(t, engine)
+
+	body := gin.H{
+		"email":    account["email"],
+		"password": account["password"],
+	}
+
+	orgSignIn(t, engine, body)
 }

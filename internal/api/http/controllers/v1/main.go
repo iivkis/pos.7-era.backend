@@ -11,6 +11,8 @@ import (
 type combine struct {
 	Authorization *authorization
 	Categories    *categories
+	Employees     *employees
+	Middleware    *middleware
 }
 
 type Controller struct {
@@ -22,8 +24,10 @@ func AddController(engine *gin.Engine, repo *repository.Repository, strcode *str
 	controllers := &Controller{
 		Engine: engine,
 		combine: combine{
-			Categories:    newCategories(&repository.Repository{}),
 			Authorization: newAuthorization(repo, strcode, postman, tokenMaker),
+			Categories:    newCategories(repo),
+			Employees:     newEmployees(repo),
+			Middleware:    newMiddleware(repo, tokenMaker),
 		},
 	}
 
@@ -32,16 +36,33 @@ func AddController(engine *gin.Engine, repo *repository.Repository, strcode *str
 }
 
 func (c *Controller) init() {
-	router := c.Engine.Group("api/v1")
+	r := c.Engine.Group("api/v1")
+	r.Use(c.Middleware.StdQuery())
 
 	//authorization
 	{
-		router.POST("/auth/signUp.Org", c.Authorization.SignUpOrg)
-		router.POST("/auth/signIn.Org", c.Authorization.SignInOrg)
+		//регистрация организации и сотрудника
+		r.POST("/auth/signUp.Org", c.Authorization.SignUpOrg)
+		r.POST("/auth/signUp.Employee", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Authorization.SignUpEmployee)
+
+		//вход в аккаунт организации и сотрудника
+		r.POST("/auth/signIn.Org", c.Authorization.SignInOrg)
+		r.POST("/auth/signIn.Employee", c.Middleware.AuthOrg(), c.Authorization.SignInEmployee)
+
+		//отправка код подтверждения на email и проверка
+		r.GET("/auth/sendCode", c.Middleware.AuthOrg(), c.Authorization.SendCode)
+		r.GET("/auth/confirmCode", c.Authorization.ConfirmCode)
+	}
+
+	//api для сотрудников
+	{
+		r.GET("/employees", c.Middleware.AuthOrg(), c.Employees.GetAll)
+		r.PUT("/employees/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Employees.UpdateFields)
+		r.DELETE("/employees/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Employees.Delete)
 	}
 
 	//categories
 	{
-		router.GET("/categories", c.Categories.GetAll)
+		r.GET("/categories", c.Categories.GetAll)
 	}
 }

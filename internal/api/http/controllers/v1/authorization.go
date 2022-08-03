@@ -216,8 +216,8 @@ type authSignInOrgBody struct {
 	Password string `json:"password" binding:"required,max=45"`
 }
 
-type SignInOrgOutput struct {
-	Token string `json:"token"`
+type authSignInOrgResponse struct {
+	Token string `json:"token" mapstructure:"token"`
 }
 
 //@Summary Вход для организации
@@ -225,7 +225,7 @@ type SignInOrgOutput struct {
 //@Param json body authSignInOrgBody true "Объект для входа в огранизацию."
 //@Accept json
 //@Produce json
-//@Success 200 {object} SignInOrgOutput "Возвращает `jwt токен` при успешной авторизации"
+//@Success 200 {object} authSignInOrgResponse "Возвращает `jwt токен` при успешной авторизации"
 //@Failure 401 {object} serviceError
 //@Router /auth/signIn.Org [post]
 func (s *authorization) SignInOrg(c *gin.Context) {
@@ -259,7 +259,7 @@ func (s *authorization) SignInOrg(c *gin.Context) {
 		return
 	}
 
-	output := SignInOrgOutput{Token: token}
+	output := authSignInOrgResponse{Token: token}
 	NewResponse(c, http.StatusOK, output)
 }
 
