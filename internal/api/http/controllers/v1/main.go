@@ -63,6 +63,9 @@ func (c *Controller) init() {
 
 	//categories
 	{
-		r.GET("/categories", c.Categories.GetAll)
+		r.GET("/categories", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Categories.GetAll)
+		r.POST("/categories", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Categories.Create)
+		r.PUT("/categories/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Categories.UpdateFields)
+		r.DELETE("/categories/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Categories.Delete)
 	}
 }

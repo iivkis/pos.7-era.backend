@@ -24,18 +24,18 @@ func newCategories(repo *repository.Repository) *categories {
 	}
 }
 
-type CategoryCreateInput struct {
+type categoriesCreateBody struct {
 	Name string `json:"name" binding:"required,max=150"`
 }
 
 //@Summary Добавить новую категорию к точке
-//@param type body CategoryCreateInput false "Принимаемый объект"
+//@param type body categoriesCreateBody false "Принимаемый объект"
 //@Accept json
 //@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 //@Router /categories [post]
 func (s *categories) Create(c *gin.Context) {
-	var input CategoryCreateInput
-	if err := c.ShouldBindJSON(&input); err != nil {
+	var body categoriesCreateBody
+	if err := c.ShouldBindJSON(&body); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
@@ -43,7 +43,7 @@ func (s *categories) Create(c *gin.Context) {
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
 	categoryModel := repository.CategoryModel{
-		Name:     input.Name,
+		Name:     body.Name,
 		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}
@@ -62,11 +62,11 @@ func (s *categories) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: categoryModel.ID})
 }
 
-type CategoryGetAll []CategoryOutputModel
+type categoriesGetAllResponse []CategoryOutputModel
 
 //@Summary Список всех категорий организации для владельца и точки для админа/кассира
 //@Produce json
-//@Success 200 {object} CategoryGetAll "Возвращает массив категорий"
+//@Success 200 {object} categoriesGetAllResponse "Возвращает массив категорий"
 //@Failure 500 {object} serviceError
 //@Router /categories [get]
 func (s *categories) GetAll(c *gin.Context) {
@@ -94,7 +94,7 @@ func (s *categories) GetAll(c *gin.Context) {
 		return
 	}
 
-	var output CategoryGetAll = make(CategoryGetAll, len(*cats))
+	var output categoriesGetAllResponse = make(categoriesGetAllResponse, len(*cats))
 	for i, cat := range *cats {
 		output[i] = CategoryOutputModel{
 			ID:       cat.ID,

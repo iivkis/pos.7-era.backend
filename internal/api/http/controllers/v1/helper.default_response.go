@@ -1,5 +1,5 @@
 package controller
 
 type DefaultOutputModel struct {
-	ID uint `json:"id"`
+	ID uint `json:"id" mapstructure:"id"`
 }

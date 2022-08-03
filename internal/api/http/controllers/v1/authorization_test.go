@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"net/http/httptest"
+	"sync"
 	"testing"
 
 	"github.com/gin-gonic/gin"
@@ -58,7 +59,21 @@ func orgGetToken(t *testing.T, engine *gin.Engine) string {
 
 func TestSignUpOrg(t *testing.T) {
 	engine := newController(t)
-	orgSignUp(t, engine)
+
+	var (
+		wg sync.WaitGroup
+		n  = 11
+	)
+
+	wg.Add(n)
+	defer wg.Wait()
+
+	for i := 0; i < n; i++ {
+		go func() {
+			orgSignUp(t, engine)
+			wg.Done()
+		}()
+	}
 }
 
 func TestSignInOrg(t *testing.T) {
@@ -70,5 +85,18 @@ func TestSignInOrg(t *testing.T) {
 		"password": account["password"],
 	}
 
-	orgSignIn(t, engine, body)
+	var (
+		wg sync.WaitGroup
+		n  = 10
+	)
+
+	wg.Add(n)
+	defer wg.Wait()
+
+	for i := 0; i < n; i++ {
+		go func() {
+			orgSignIn(t, engine, body)
+			wg.Done()
+		}()
+	}
 }
