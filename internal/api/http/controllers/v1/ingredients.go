@@ -78,14 +78,10 @@ func (s *ingredients) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: ingredient.ID})
 }
 
-type IngredientGetAllResponse []IngredientOutputModel
+type ingredientGetAllResponse []IngredientOutputModel
 
 // @Summary Получить все ингредиенты точки
-// @Accept json
-// @Produce json
-// @Success 200 {object} IngredientGetAllResponse "возвращает все ингредиенты текущей точки"
-// @Failure 400 {object} serviceError
-// @Failure 500 {object} serviceError
+// @Success 200 {object} ingredientGetAllResponse "возвращает все ингредиенты текущей точки"
 // @Router /ingredients [get]
 func (s *ingredients) GetAll(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
@@ -106,7 +102,7 @@ func (s *ingredients) GetAll(c *gin.Context) {
 		return
 	}
 
-	var output IngredientGetAllResponse = make(IngredientGetAllResponse, len(*ingredients))
+	var output ingredientGetAllResponse = make(ingredientGetAllResponse, len(*ingredients))
 	for i, ingredient := range *ingredients {
 		output[i] = IngredientOutputModel{
 			ID:            ingredient.ID,

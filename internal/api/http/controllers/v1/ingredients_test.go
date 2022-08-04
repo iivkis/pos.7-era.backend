@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func ingredientsGetAll(t *testing.T, engine *gin.Engine, token string) (data IngredientGetAllResponse) {
+func ingredientsGetAll(t *testing.T, engine *gin.Engine, token string) (data ingredientGetAllResponse) {
 	w := httptest.NewRecorder()
 
 	req, _ := http.NewRequest("GET", basepath+"/ingredients", nil)

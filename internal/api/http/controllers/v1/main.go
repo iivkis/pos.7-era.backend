@@ -16,6 +16,7 @@ type combine struct {
 	Employees     *employees
 	Products      *products
 	Ingredients   *ingredients
+	OrdersList    *orderList
 	Middleware    *middleware
 }
 
@@ -34,6 +35,7 @@ func AddController(engine *gin.Engine, repo *repository.Repository, strcode *str
 			Employees:     newEmployees(repo),
 			Products:      newProducts(repo, &selectelS3Cloud.SelectelS3Cloud{}),
 			Ingredients:   newIngredients(repo),
+			OrdersList:    newOrderList(repo),
 			Middleware:    newMiddleware(repo, tokenMaker),
 		},
 	}
@@ -102,5 +104,20 @@ func (c *Controller) init() {
 		r.POST("/products", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Products.Create)
 		r.PUT("/products/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Products.Update)
 		r.DELETE("/products/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Products.Delete)
+	}
+
+	{
+		r.GET("/orderList", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrdersList.GetAll)
+		r.GET("/orderList.Calc", c.Middleware.AuthEmployee(r_owner, r_director), c.OrdersList.Calc)
+		r.POST("/orderList", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrdersList.Create)
+	}
+
+	//api для сессий
+	{
+		r.POST("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Sessions.OpenOrClose)
+		r.GET("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Sessions.GetAll)
+		r.GET("/sessions.Last", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Sessions.GetLastForOutlet)
+		r.GET("/sessions.Last.Me", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Sessions.GetLastForMe)
+		r.GET("/sessions.Last.Closed", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Sessions.GetLastClosedForOutlet)
 	}
 }
