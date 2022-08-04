@@ -1,7 +1,7 @@
 module github.com/iivkis/pos.7-era.backend
 
-// +heroku goVersion go1.19
-go 1.19
+// +heroku goVersion go1.18
+go 1.18
 
 require (
 	github.com/aws/aws-sdk-go v1.44.69
