@@ -60,7 +60,7 @@ func productsCreate(t *testing.T, engine *gin.Engine, token string) (data Defaul
 	return data
 }
 
-func TestProductssCreate(t *testing.T) {
+func TestProductsCreate(t *testing.T) {
 	engine := newController(t)
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
 

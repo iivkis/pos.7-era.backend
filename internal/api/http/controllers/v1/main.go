@@ -11,6 +11,7 @@ import (
 
 type combine struct {
 	Authorization *authorization
+	Outlets       *outlets
 	Categories    *categories
 	Employees     *employees
 	Products      *products
@@ -28,6 +29,7 @@ func AddController(engine *gin.Engine, repo *repository.Repository, strcode *str
 		Engine: engine,
 		combine: combine{
 			Authorization: newAuthorization(repo, strcode, postman, tokenMaker),
+			Outlets:       newOutlets(repo),
 			Categories:    newCategories(repo),
 			Employees:     newEmployees(repo),
 			Products:      newProducts(repo, &selectelS3Cloud.SelectelS3Cloud{}),
@@ -66,6 +68,14 @@ func (c *Controller) init() {
 		r.DELETE("/employees/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Employees.Delete)
 	}
 
+	//api для торговых точек
+	{
+		r.GET("/outlets", c.Middleware.AuthOrg(), c.Outlets.GetAll)
+		r.POST("/outlets", c.Middleware.AuthEmployee(r_owner, r_director), c.Outlets.Create)
+		r.PUT("/outlets/:id", c.Middleware.AuthEmployee(r_owner, r_director), c.Outlets.Update)
+		r.DELETE("/outlets/:id", c.Middleware.AuthEmployee(r_owner, r_director), c.Outlets.Delete)
+	}
+
 	//categories
 	{
 		r.GET("/categories", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Categories.GetAll)
@@ -82,7 +92,7 @@ func (c *Controller) init() {
 		r.DELETE("/ingredients/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Ingredients.Delete)
 
 		//поступление ингредиентов
-		r.POST("/ingredients.Arrival", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Ingredients.Arrival)
+		// r.POST("/ingredients.Arrival", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Ingredients.Arrival)
 	}
 
 	//api для продуктов
