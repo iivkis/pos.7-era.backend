@@ -32,14 +32,14 @@ type PWICreateInput struct {
 	IngredientID     uint    `json:"ingredient_id" binding:"min=1"`
 }
 
-//@Summary Добавить связь продукта и ингридиента в точку
-//@param type body PWICreateInput false "Принимаемый объект"
-//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /pwis [post]
+// @Summary Добавить связь продукта и ингридиента в точку
+// @param type body PWICreateInput false "Принимаемый объект"
+// @Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /pwis [post]
 func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 	var input PWICreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -84,14 +84,14 @@ type PWIGetAllQuery struct {
 
 type PWIGetAllOutput []PWIOutputModel
 
-//@Summary Получить список связей продуктов и ингредиентов в точке
-//@param type query PWIGetAllQuery false "Принимаемый объект"
-//@Success 200 {object} PWIGetAllOutput "Список связей продуктов и ингредиентов точки"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /pwis [get]
+// @Summary Получить список связей продуктов и ингредиентов в точке
+// @param type query PWIGetAllQuery false "Принимаемый объект"
+// @Success 200 {object} PWIGetAllOutput "Список связей продуктов и ингредиентов точки"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /pwis [get]
 func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
 	var query PWIGetAllQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
@@ -137,13 +137,13 @@ func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-//@Summary Удалить связь из точки
-//@Success 200 {object} object "пустой объект"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /pwis/:id [delete]
+// @Summary Удалить связь из точки
+// @Success 200 {object} object "пустой объект"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /pwis/:id [delete]
 func (s *ProductsWithIngredientsService) Delete(c *gin.Context) {
 	pwiID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -171,11 +171,11 @@ type PWIUpdateFields struct {
 	ProductID        uint    `json:"product_id"`
 }
 
-//@Summary Обновить связь
-//@param type body PWIUpdateFields false "Обновляемые поля"
-//@Accept json
-//@Success 200 {object} object "возвращает пустой объект"
-//@Router /pwis/:id [put]
+// @Summary Обновить связь
+// @param type body PWIUpdateFields false "Обновляемые поля"
+// @Accept json
+// @Success 200 {object} object "возвращает пустой объект"
+// @Router /pwis/:id [put]
 func (s *ProductsWithIngredientsService) UpdateFields(c *gin.Context) {
 	var input PWIUpdateFields
 	if err := c.ShouldBindJSON(&input); err != nil {

@@ -51,14 +51,14 @@ type ProductCreateInput struct {
 	CategoryID     uint    `json:"category_id"`
 }
 
-//@Summary Добавить новый продукт в точку
-//@param type body ProductCreateInput false "Принимаемый объект"
-//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /products [post]
+// @Summary Добавить новый продукт в точку
+// @param type body ProductCreateInput false "Принимаемый объект"
+// @Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /products [post]
 func (s *ProductsService) Create(c *gin.Context) {
 	var input ProductCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -104,13 +104,13 @@ func (s *ProductsService) Create(c *gin.Context) {
 
 type ProductGetAllOutput []ProductOutputModel
 
-//@Summary Список продуктов точки
-//@Success 200 {object} ProductGetAllOutput "возвращает список пордуктов точки"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /products [get]
+// @Summary Список продуктов точки
+// @Success 200 {object} ProductGetAllOutput "возвращает список пордуктов точки"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /products [get]
 func (s *ProductsService) GetAll(c *gin.Context) {
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
@@ -158,13 +158,13 @@ func (s *ProductsService) GetAll(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-//@Summary Продукт точки
-//@Success 200 {object} ProductOutputModel "возвращает один продукт из точки"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /products/:id [get]
+// @Summary Продукт точки
+// @Success 200 {object} ProductOutputModel "возвращает один продукт из точки"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /products/:id [get]
 func (s *ProductsService) GetOne(c *gin.Context) {
 	productID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -212,76 +212,6 @@ func (s *ProductsService) GetOne(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-// type ProductUpdateInput struct {
-// 	Name           string  `json:"name"`
-// 	ProductNameKKT string  `json:"product_name_kkt"`
-// 	Barcode        int     `json:"barcode"`
-// 	Amount         int     `json:"amount"`
-// 	Price          float64 `json:"price"`
-// 	SellerPercent  float64 `json:"seller_percent" binding:"min=0,max=100"`
-// 	PhotoID        string  `json:"photo_id" binding:"max=500"`
-// 	CategoryID     uint    `json:"category_id"`
-// }
-
-// //@Summary Обновить продукт в точке
-// //@param type body ProductUpdateInput false "Обновляемые поля"
-// //@Success 200 {object} object "возвращает пустой объект"
-// //@Accept json
-// //@Produce json
-// //@Failure 400 {object} serviceError
-// //@Failure 500 {object} serviceError
-// //@Router /products/:id [put]
-// func (s *ProductsService) UpdateFields(c *gin.Context) {
-// 	productID, err := strconv.Atoi(c.Param("id"))
-// 	if err != nil {
-// 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
-// 		return
-// 	}
-
-// 	var input ProductUpdateInput
-// 	if err := c.ShouldBindJSON(&input); err != nil {
-// 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
-// 		return
-// 	}
-
-// 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
-
-// 	where := &repository.ProductModel{
-// 		ID:       uint(productID),
-// 		OrgID:    claims.OrganizationID,
-// 		OutletID: claims.OutletID,
-// 	}
-
-// 	upadtedFields := &repository.ProductModel{
-// 		Name:           input.Name,
-// 		ProductNameKKT: input.ProductNameKKT,
-// 		Barcode:        input.Barcode,
-// 		Amount:         input.Amount,
-// 		Price:          input.Price,
-// 		PhotoCloudID:   input.PhotoID,
-// 		SellerPercent:  input.SellerPercent / 100,
-// 		CategoryID:     input.CategoryID,
-// 	}
-
-// 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
-// 		if stdQuery.OutletID != 0 && s.repo.Outlets.ExistsInOrg(stdQuery.OutletID, claims.OrganizationID) {
-// 			where.OutletID = stdQuery.OutletID
-// 		}
-// 	}
-
-// 	if upadtedFields.CategoryID != 0 && !s.repo.Categories.Exists(&repository.CategoryModel{ID: upadtedFields.CategoryID, OutletID: claims.OutletID}) {
-// 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
-// 		return
-// 	}
-
-// 	if err := s.repo.Products.Updates(where, upadtedFields); err != nil {
-// 		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
-// 		return
-// 	}
-
-// 	NewResponse(c, http.StatusOK, nil)
-// }
-
 type ProductUpdateInput struct {
 	Name           *string  `json:"name,omitempty"`
 	ProductNameKKT *string  `json:"product_name_kkt,omitempty"`
@@ -293,13 +223,13 @@ type ProductUpdateInput struct {
 	CategoryID     *uint    `json:"category_id,omitempty"`
 }
 
-//@Summary Обновить продукт в точке
-//@param type body ProductUpdateInput false "Обновляемые поля"
-//@Success 200 {object} object "возвращает пустой объект"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Router /products/:id [put]
+// @Summary Обновить продукт в точке
+// @param type body ProductUpdateInput false "Обновляемые поля"
+// @Success 200 {object} object "возвращает пустой объект"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Router /products/:id [put]
 func (s *ProductsService) UpdateFields(c *gin.Context) {
 	productID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -376,13 +306,13 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
-//@Summary Удалить продукт в точке
-//@Success 200 {object} object "возвращает пустой объект"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /products/:id [delete]
+// @Summary Удалить продукт в точке
+// @Success 200 {object} object "возвращает пустой объект"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /products/:id [delete]
 func (s *ProductsService) Delete(c *gin.Context) {
 	productID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -392,12 +322,27 @@ func (s *ProductsService) Delete(c *gin.Context) {
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
-	where := &repository.ProductModel{ID: uint(productID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	where1 := &repository.ProductWithIngredientModel{ProductID: uint(productID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
-		where.OutletID = stdQuery.OutletID
+		where1.OutletID = stdQuery.OutletID
 	}
 
-	if err := s.repo.Products.Delete(where); err != nil {
+	if err := s.repo.ProductsWithIngredients.Delete(where1); err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			switch dberr.Number {
+			case 1451:
+				NewResponse(c, http.StatusBadRequest, errForeignKey("the pwis has not deleted communications"))
+				return
+			}
+		}
+	}
+
+	where2 := &repository.ProductModel{ID: uint(productID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where1.OutletID = stdQuery.OutletID
+	}
+
+	if err := s.repo.Products.Delete(where2); err != nil {
 		if dberr, ok := isDatabaseError(err); ok {
 			switch dberr.Number {
 			case 1451:

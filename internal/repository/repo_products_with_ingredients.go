@@ -7,8 +7,9 @@ import (
 )
 
 type ProductWithIngredientModel struct {
-	ID        uint
 	DeletedAt gorm.DeletedAt
+
+	ID uint
 
 	CountTakeForSell float64
 
@@ -33,7 +34,7 @@ func newProductsWithIngredientsRepo(db *gorm.DB) *ProductsWithIngredientsRepo {
 	}
 }
 
-//actual
+// actual
 func (r *ProductsWithIngredientsRepo) Create(m *ProductWithIngredientModel) error {
 	return r.db.Create(m).Error
 }
@@ -78,7 +79,7 @@ func (r *ProductsWithIngredientsRepo) AdditionIngredients(productID uint, count 
 		return err
 	}
 
-	//для каждой связи ищем ингредиент. Отнимаем нужное кол-во ингредиента
+	//для каждой связи ищем ингредиент. Прибавляем нужное кол-во ингредиента
 	for _, pwi := range pwiList {
 		if err := r.db.Exec("UPDATE `ingredient_models` SET `count` = `count` + @n WHERE `id` = @id",
 			sql.Named("n", pwi.CountTakeForSell*float64(count)),
