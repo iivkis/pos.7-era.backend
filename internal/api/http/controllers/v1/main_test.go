@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const basepath = "/api/v1"
+
 func newController(t *testing.T) *gin.Engine {
 	config.Load("./../../../../../")
 

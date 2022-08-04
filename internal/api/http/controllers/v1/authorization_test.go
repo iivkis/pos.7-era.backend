@@ -13,14 +13,15 @@ import (
 )
 
 func orgSignUp(t *testing.T, engine *gin.Engine) gin.H {
+	w := httptest.NewRecorder()
+
 	body := gin.H{
 		"name":     "Test",
 		"email":    testutil.RandomString(10) + "@test.test",
 		"password": testutil.RandomString(10),
 	}
 
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/v1/auth/signUp.Org", testutil.Marshal(body))
+	req, _ := http.NewRequest("POST", basepath+"/auth/signUp.Org", testutil.Marshal(body))
 
 	engine.ServeHTTP(w, req)
 	require.Equal(t, http.StatusCreated, w.Code)
@@ -30,7 +31,7 @@ func orgSignUp(t *testing.T, engine *gin.Engine) gin.H {
 
 func orgSignIn(t *testing.T, engine *gin.Engine, body gin.H) (data authSignInOrgResponse) {
 	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/api/v1/auth/signIn.Org", testutil.Marshal(body))
+	req, _ := http.NewRequest("POST", basepath+"/auth/signIn.Org", testutil.Marshal(body))
 
 	engine.ServeHTTP(w, req)
 	require.Equal(t, http.StatusOK, w.Code)

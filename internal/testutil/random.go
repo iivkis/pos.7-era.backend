@@ -18,3 +18,8 @@ func RandomString(n int) string {
 	}
 	return string(s)
 }
+
+// число пренадлежит интервалу [min; max]
+func RandomInt(min, max int) int {
+	return min + rand.Intn(max-min)
+}

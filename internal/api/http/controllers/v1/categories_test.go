@@ -16,7 +16,7 @@ import (
 func categoriesGetAll(t *testing.T, engine *gin.Engine, token string) categoriesGetAllResponse {
 	w := httptest.NewRecorder()
 
-	req, _ := http.NewRequest("GET", "/api/v1/categories", nil)
+	req, _ := http.NewRequest("GET", basepath+"/categories", nil)
 	testutil.SetAuthorizationHeader(req, token)
 
 	engine.ServeHTTP(w, req)
@@ -36,14 +36,11 @@ func categoriesGetAll(t *testing.T, engine *gin.Engine, token string) categories
 func categoriesCreate(t *testing.T, engine *gin.Engine, token string) DefaultOutputModel {
 	w := httptest.NewRecorder()
 
-	categories := categoriesGetAll(t, engine, token)
-	require.Equal(t, len(categories), 0)
-
 	body := gin.H{
 		"name": testutil.RandomString(50),
 	}
 
-	req, _ := http.NewRequest("POST", "/api/v1/categories", testutil.Marshal(body))
+	req, _ := http.NewRequest("POST", basepath+"/categories", testutil.Marshal(body))
 	testutil.SetAuthorizationHeader(req, token)
 
 	engine.ServeHTTP(w, req)
@@ -59,7 +56,7 @@ func categoriesCreate(t *testing.T, engine *gin.Engine, token string) DefaultOut
 
 	require.NotEmpty(t, data.ID)
 
-	categories = categoriesGetAll(t, engine, token)
+	categories := categoriesGetAll(t, engine, token)
 	require.NotEqual(t, len(categories), 0)
 
 	return data
@@ -69,19 +66,17 @@ func TestCategoriesCreate(t *testing.T) {
 	engine := newController(t)
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
 
-	var (
-		wg sync.WaitGroup
-		n  = 5
-	)
+	wg, n := new(sync.WaitGroup), 5
 
 	wg.Add(n)
+	defer wg.Wait()
+
 	for i := 0; i < n; i++ {
 		go func() {
 			categoriesCreate(t, engine, tokenOwner)
 			wg.Done()
 		}()
 	}
-	wg.Wait()
 }
 
 func TestCategoriesGetAll(t *testing.T) {
@@ -91,17 +86,18 @@ func TestCategoriesGetAll(t *testing.T) {
 }
 
 func TestCategoriesUpdate(t *testing.T) {
-	engine := newController(t)
-	w := httptest.NewRecorder()
+	engine, w := newController(t), httptest.NewRecorder()
 
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
-	categoryID := strconv.Itoa(int(categoriesCreate(t, engine, tokenOwner).ID))
+
+	newCategory := categoriesCreate(t, engine, tokenOwner)
+	categoryID := strconv.Itoa(int(newCategory.ID))
 
 	body := gin.H{
 		"name": testutil.RandomString(10),
 	}
 
-	req, _ := http.NewRequest("PUT", "/api/v1/categories/"+categoryID, testutil.Marshal(body))
+	req, _ := http.NewRequest("PUT", basepath+"/categories/"+categoryID, testutil.Marshal(body))
 	testutil.SetAuthorizationHeader(req, tokenOwner)
 
 	engine.ServeHTTP(w, req)
@@ -112,21 +108,22 @@ func TestCategoriesUpdate(t *testing.T) {
 }
 
 func TestCategoriesDelete(t *testing.T) {
-	engine := newController(t)
-	w := httptest.NewRecorder()
+	engine, w := newController(t), httptest.NewRecorder()
 
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
-	categoryID := strconv.Itoa(int(categoriesCreate(t, engine, tokenOwner).ID))
 
-	category := categoriesGetAll(t, engine, tokenOwner)
-	require.NotEqual(t, len(category), 0)
+	newCategory := categoriesCreate(t, engine, tokenOwner)
+	categoryID := strconv.Itoa(int(newCategory.ID))
 
-	req, _ := http.NewRequest("DELETE", "/api/v1/categories/"+categoryID, nil)
+	categories := categoriesGetAll(t, engine, tokenOwner)
+	require.NotEqual(t, len(categories), 0)
+
+	req, _ := http.NewRequest("DELETE", basepath+"/categories/"+categoryID, nil)
 	testutil.SetAuthorizationHeader(req, tokenOwner)
 
 	engine.ServeHTTP(w, req)
 	require.Equal(t, http.StatusOK, w.Code)
 
-	category = categoriesGetAll(t, engine, tokenOwner)
-	require.Equal(t, len(category), 0)
+	categories = categoriesGetAll(t, engine, tokenOwner)
+	require.Equal(t, len(categories), 0)
 }

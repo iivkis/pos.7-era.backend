@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
+	"github.com/iivkis/pos.7-era.backend/internal/selectelS3Cloud"
 	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
 	"github.com/iivkis/pos.7-era.backend/pkg/mailagent"
 	"github.com/iivkis/strcode"
@@ -12,6 +13,8 @@ type combine struct {
 	Authorization *authorization
 	Categories    *categories
 	Employees     *employees
+	Products      *products
+	Ingredients   *ingredients
 	Middleware    *middleware
 }
 
@@ -27,6 +30,8 @@ func AddController(engine *gin.Engine, repo *repository.Repository, strcode *str
 			Authorization: newAuthorization(repo, strcode, postman, tokenMaker),
 			Categories:    newCategories(repo),
 			Employees:     newEmployees(repo),
+			Products:      newProducts(repo, &selectelS3Cloud.SelectelS3Cloud{}),
+			Ingredients:   newIngredients(repo),
 			Middleware:    newMiddleware(repo, tokenMaker),
 		},
 	}
@@ -67,5 +72,25 @@ func (c *Controller) init() {
 		r.POST("/categories", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Categories.Create)
 		r.PUT("/categories/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Categories.UpdateFields)
 		r.DELETE("/categories/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Categories.Delete)
+	}
+
+	//ingredients api
+	{
+		r.POST("/ingredients", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Ingredients.Create)
+		r.GET("/ingredients", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Ingredients.GetAll)
+		r.PUT("/ingredients/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Ingredients.UpdateFields)
+		r.DELETE("/ingredients/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Ingredients.Delete)
+
+		//поступление ингредиентов
+		r.POST("/ingredients.Arrival", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Ingredients.Arrival)
+	}
+
+	//api для продуктов
+	{
+		r.GET("/products", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Products.GetAll)
+		r.GET("/products/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, repository.R_CASHIER), c.Products.GetOne)
+		r.POST("/products", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Products.Create)
+		r.PUT("/products/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Products.Update)
+		r.DELETE("/products/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Products.Delete)
 	}
 }
