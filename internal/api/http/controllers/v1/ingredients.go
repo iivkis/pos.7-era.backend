@@ -200,23 +200,38 @@ func (s *ingredients) Delete(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
 	stdQuery := mustGetStdQuery(c)
 
-	ingrID, err := strconv.Atoi(c.Param("id"))
+	ingredientID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	where := &repository.IngredientModel{
-		ID:       uint(ingrID),
+	where1 := &repository.ProductWithIngredientModel{IngredientID: uint(ingredientID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where1.OutletID = stdQuery.OutletID
+	}
+
+	if err := s.repo.ProductsWithIngredients.Delete(where1); err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			switch dberr.Number {
+			case 1451:
+				NewResponse(c, http.StatusBadRequest, errForeignKey("the pwis has not deleted communications"))
+				return
+			}
+		}
+	}
+
+	where2 := &repository.IngredientModel{
+		ID:       uint(ingredientID),
 		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
-		where.OutletID = stdQuery.OutletID
+		where2.OutletID = stdQuery.OutletID
 	}
 
-	if err := s.repo.Ingredients.Delete(where); err != nil {
+	if err := s.repo.Ingredients.Delete(where2); err != nil {
 		if dberr, ok := isDatabaseError(err); ok {
 			switch dberr.Number {
 			case 1451:
@@ -227,6 +242,7 @@ func (s *ingredients) Delete(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
+
 	NewResponse(c, http.StatusOK, nil)
 }
 
