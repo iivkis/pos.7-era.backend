@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -41,6 +42,8 @@ func orgSignIn(t *testing.T, engine *gin.Engine, body gin.H) (data authSignInOrg
 	mapstructure.Decode(response.Data, &data)
 
 	require.NotEmpty(t, data.Token)
+
+	log.Println(data.Token)
 	return
 }
 

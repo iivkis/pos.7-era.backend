@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -52,6 +53,8 @@ func employeeGetOwnerToken(t *testing.T, engine *gin.Engine, tokenOrg string) (t
 
 	testutil.Unmarshal(w.Body, &response)
 	mapstructure.Decode(response.Data, &data)
+
+	log.Println("owner token:", data.Token)
 
 	return data.Token
 }

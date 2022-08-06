@@ -22,10 +22,12 @@ type apihttp struct {
 	s3cloud    *s3cloud.SelectelS3Cloud
 }
 
-func New(repo *repository.Repository,
+func New(
+	repo *repository.Repository,
 	strcode *strcode.Strcode,
 	postman *mailagent.MailAgent,
 	tokenMaker *authjwt.AuthJWT,
+	s3cloud *s3cloud.SelectelS3Cloud,
 
 ) *apihttp {
 	api := &apihttp{

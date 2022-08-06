@@ -179,7 +179,7 @@ func (s *orders) GetAll(c *gin.Context) {
 				EmployeeName: item.EmployeeName,
 				PayType:      item.PayType,
 				Date:         item.Date,
-				IsDelete:     item.DeletedAt.Time.IsZero(),
+				IsDelete:     !item.DeletedAt.Time.IsZero(),
 			},
 
 			List: make([]ordersListResponse, len(*orderList)),

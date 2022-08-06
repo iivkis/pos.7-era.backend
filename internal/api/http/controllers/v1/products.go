@@ -293,10 +293,17 @@ func (s *products) Update(c *gin.Context) {
 		}
 
 		if body.CategoryID != nil {
-			if !s.repo.Categories.Exists(&repository.CategoryModel{ID: *body.CategoryID, OutletID: claims.OutletID}) {
+			outletID := claims.OutletID
+
+			if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+				outletID = stdQuery.OutletID
+			}
+
+			if !s.repo.Categories.Exists(&repository.CategoryModel{ID: *body.CategoryID, OutletID: outletID}) {
 				NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
 				return
 			}
+
 			updated["category_id"] = *body.CategoryID
 		}
 	}
