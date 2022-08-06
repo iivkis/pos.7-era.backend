@@ -15,7 +15,7 @@ import (
 func orderListGetAll(t *testing.T, engine *gin.Engine, token string) (data orderListGetAllResponse) {
 	w := httptest.NewRecorder()
 
-	req, _ := http.NewRequest("GET", basepath+"/ordersList", nil)
+	req, _ := http.NewRequest("GET", basepath+"/orderList", nil)
 	testutil.SetAuthorizationHeader(req, token)
 
 	engine.ServeHTTP(w, req)

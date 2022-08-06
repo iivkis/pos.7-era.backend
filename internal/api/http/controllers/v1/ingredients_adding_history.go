@@ -1,4 +1,4 @@
-package myservice
+package controller
 
 import (
 	"net/http"
@@ -7,50 +7,44 @@ import (
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
-type IngredientsAddingHistoryOutputModel struct {
-	ID uint
+type ingredientsAddingHistoryResponseModel struct {
+	ID           uint `json:"id" mapstructure:"id"`
+	IngredientID uint `json:"ingredient_id" mapstructure:"ingredient_id"`
+	EmployeeID   uint `json:"employee_id" mapstructure:"employee_id"`
+	OutletID     uint `json:"outlet_id" mapstructure:"outlet_id"`
 
-	Count  float64 `json:"count"`  //кол-во продукта, который не сходится
-	Total  float64 `json:"total"`  //сумма, на которую не сходится
-	Status int     `json:"status"` // 1 - инвенторизация
+	Count  float64 `json:"count" mapstructure:"count"`   //кол-во продукта, который не сходится
+	Total  float64 `json:"total" mapstructure:"total"`   //сумма, на которую не сходится
+	Status int     `json:"status" mapstructure:"status"` // 1 - инвенторизация
 
-	Date int64 `json:"date"` //unixmilli
-
-	IngredientID uint `json:"ingredient_id"`
-	EmployeeID   uint `json:"employee_id"` //сотрудник, который делал инветаризацию
-	OutletID     uint `json:"outlet_id"`
+	Date int64 `json:"date" mapstructure:"date"` //unixmilli
 }
 
-type IngredientsAddingHistoryService struct {
+type ingredientsAddingHistory struct {
 	repo *repository.Repository
 }
 
-func newIngredientsAddingHistoryService(repo *repository.Repository) *IngredientsAddingHistoryService {
-	return &IngredientsAddingHistoryService{
+func newIngredientsAddingHistory(repo *repository.Repository) *ingredientsAddingHistory {
+	return &ingredientsAddingHistory{
 		repo: repo,
 	}
 }
 
-type IngredientsAddingHistoryCreateInput struct {
+type ingredientsAddingHistoryCreateBody struct {
+	IngredientID uint `json:"ingredient_id" binding:"min=1"`
+
+	Date   int64   `json:"date"`                         //unixmilli
 	Count  float64 `json:"count"`                        //кол-во продукта, который не сходится
 	Total  float64 `json:"total"`                        //сумма, на которую не сходится
 	Status int     `json:"status" binding:"min=1,max=2"` // 1 - инвенторизация
-
-	Date int64 `json:"date"` //unixmilli
-
-	IngredientID uint `json:"ingredient_id" binding:"min=1"`
 }
 
 // @Summary Добавить новый отчёт об ингредиентах
-// @param type body IngredientsAddingHistoryCreateInput false "Принимаемый объект"
-// @Accept json
-// @Produce json
-// @Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
-// @Failure 400 {object} serviceError
-// @Failure 500 {object} serviceError
+// @Param type body ingredientsAddingHistoryCreateBody false "object"
+// @Success 201 {object} DefaultOutputModel "id"
 // @Router /ingredients.History [post]
-func (s *IngredientsAddingHistoryService) Create(c *gin.Context) {
-	var input IngredientsAddingHistoryCreateInput
+func (s *ingredientsAddingHistory) Create(c *gin.Context) {
+	var input ingredientsAddingHistoryCreateBody
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
@@ -88,20 +82,17 @@ func (s *IngredientsAddingHistoryService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: model.ID})
 }
 
-type IngredientsAddingHistorytGetAllInput struct {
+type ingredientsAddingHistorytGetAllQuery struct {
 	Start uint64 `form:"start"` //in unixmilli
 	End   uint64 `form:"end"`   //in unixmilli
 }
-type IngredientsAddingHistorytGetAllOutput []IngredientsAddingHistoryOutputModel
+type ingredientsAddingHistorytGetAllResponse []ingredientsAddingHistoryResponseModel
 
 // @Summary Получить историю добавления ингредиентов
-// @Accept json
-// @Produce json
-// @Success 200 {object} IngredientsAddingHistorytGetAllOutput "возвращаемый объект"
-// @Failure 400 {object} serviceError
+// @Success 200 {object} ingredientsAddingHistorytGetAllResponse "история"
 // @Router /ingredients.History [get]
-func (s *IngredientsAddingHistoryService) GetAll(c *gin.Context) {
-	var query IngredientsAddingHistorytGetAllInput
+func (s *ingredientsAddingHistory) GetAll(c *gin.Context) {
+	var query ingredientsAddingHistorytGetAllQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
@@ -129,9 +120,9 @@ func (s *IngredientsAddingHistoryService) GetAll(c *gin.Context) {
 		return
 	}
 
-	var output = make(IngredientsAddingHistorytGetAllOutput, len(*histories))
+	var output = make(ingredientsAddingHistorytGetAllResponse, len(*histories))
 	for i, item := range *histories {
-		output[i] = IngredientsAddingHistoryOutputModel{
+		output[i] = ingredientsAddingHistoryResponseModel{
 			ID:           item.ID,
 			Count:        item.Count,
 			Total:        item.Total,

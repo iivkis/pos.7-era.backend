@@ -16,8 +16,11 @@ type combine struct {
 	Employees     *employees
 	Products      *products
 	Ingredients   *ingredients
-	OrdersList    *orderList
-	Middleware    *middleware
+	OrderInfo     *orderInfo
+	OrderList     *orderList
+	Sessions      *sessions
+
+	Middleware *middleware
 }
 
 type Controller struct {
@@ -35,7 +38,9 @@ func AddController(engine *gin.Engine, repo *repository.Repository, strcode *str
 			Employees:     newEmployees(repo),
 			Products:      newProducts(repo, &selectelS3Cloud.SelectelS3Cloud{}),
 			Ingredients:   newIngredients(repo),
-			OrdersList:    newOrderList(repo),
+			OrderInfo:     newOrderInfo(repo),
+			OrderList:     newOrderList(repo),
+			Sessions:      newSessions(repo),
 			Middleware:    newMiddleware(repo, tokenMaker),
 		},
 	}
@@ -48,7 +53,7 @@ func (c *Controller) init() {
 	r := c.Engine.Group("api/v1")
 	r.Use(c.Middleware.StdQuery())
 
-	//authorization
+	//авторизация
 	{
 		//регистрация организации и сотрудника
 		r.POST("/auth/signUp.Org", c.Authorization.SignUpOrg)
@@ -63,14 +68,14 @@ func (c *Controller) init() {
 		r.GET("/auth/confirmCode", c.Authorization.ConfirmCode)
 	}
 
-	//api для сотрудников
+	//сотудники
 	{
 		r.GET("/employees", c.Middleware.AuthOrg(), c.Employees.GetAll)
 		r.PUT("/employees/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Employees.Update)
 		r.DELETE("/employees/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Employees.Delete)
 	}
 
-	//api для торговых точек
+	//торговые точки
 	{
 		r.GET("/outlets", c.Middleware.AuthOrg(), c.Outlets.GetAll)
 		r.POST("/outlets", c.Middleware.AuthEmployee(r_owner, r_director), c.Outlets.Create)
@@ -78,7 +83,7 @@ func (c *Controller) init() {
 		r.DELETE("/outlets/:id", c.Middleware.AuthEmployee(r_owner, r_director), c.Outlets.Delete)
 	}
 
-	//categories
+	//категории
 	{
 		r.GET("/categories", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Categories.GetAll)
 		r.POST("/categories", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Categories.Create)
@@ -86,7 +91,7 @@ func (c *Controller) init() {
 		r.DELETE("/categories/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Categories.Delete)
 	}
 
-	//ingredients api
+	//ингредиенты к продуктам
 	{
 		r.POST("/ingredients", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Ingredients.Create)
 		r.GET("/ingredients", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Ingredients.GetAll)
@@ -97,7 +102,7 @@ func (c *Controller) init() {
 		// r.POST("/ingredients.Arrival", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Ingredients.Arrival)
 	}
 
-	//api для продуктов
+	//проудкты
 	{
 		r.GET("/products", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Products.GetAll)
 		r.GET("/products/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, repository.R_CASHIER), c.Products.GetOne)
@@ -106,18 +111,27 @@ func (c *Controller) init() {
 		r.DELETE("/products/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Products.Delete)
 	}
 
+	//чеки
 	{
-		r.GET("/orderList", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrdersList.GetAll)
-		r.GET("/orderList.Calc", c.Middleware.AuthEmployee(r_owner, r_director), c.OrdersList.Calc)
-		r.POST("/orderList", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrdersList.Create)
+		r.GET("/orderInfo", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrderInfo.GetAll)
+		r.POST("/orderInfo", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrderInfo.Create)
+		r.DELETE("/orderInfo/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrderInfo.Delete)
+		r.POST("/orderInfo/:id", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrderInfo.Recovery)
 	}
 
-	//api для сессий
+	//список купленных продуктов в чеке
 	{
-		r.POST("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Sessions.OpenOrClose)
-		r.GET("/sessions", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin), h.srv.Sessions.GetAll)
-		r.GET("/sessions.Last", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Sessions.GetLastForOutlet)
-		r.GET("/sessions.Last.Me", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Sessions.GetLastForMe)
-		r.GET("/sessions.Last.Closed", h.srv.Mware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), h.srv.Sessions.GetLastClosedForOutlet)
+		r.GET("/orderList", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrderList.GetAll)
+		r.GET("/orderList.Calc", c.Middleware.AuthEmployee(r_owner, r_director), c.OrderList.Calc)
+		r.POST("/orderList", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.OrderList.Create)
+	}
+
+	//смены сотрудников
+	{
+		r.POST("/sessions", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Sessions.OpenOrClose)
+		r.GET("/sessions", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Sessions.GetAll)
+		r.GET("/sessions.Last", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Sessions.GetLastForOutlet)
+		r.GET("/sessions.Last.Me", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Sessions.GetLastForMe)
+		r.GET("/sessions.Last.Closed", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Sessions.GetLastClosedForOutlet)
 	}
 }

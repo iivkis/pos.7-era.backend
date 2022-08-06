@@ -38,14 +38,14 @@ type IngredientCreateInput struct {
 	MeasureUnit   int     `json:"measure_unit" binding:"min=1,max=3"`
 }
 
-//@Summary Добавить новый ингредиент в точку
-//@param type body IngredientCreateInput false "Принимаемый объект"
-//@Accept json
-//@Produce json
-//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /ingredients [post]
+// @Summary Добавить новый ингредиент в точку
+// @param type body IngredientCreateInput false "Принимаемый объект"
+// @Accept json
+// @Produce json
+// @Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /ingredients [post]
 func (s *IngredientsService) Create(c *gin.Context) {
 	var input IngredientCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -80,13 +80,13 @@ func (s *IngredientsService) Create(c *gin.Context) {
 
 type IngredientGetAllOutput []IngredientOutputModel
 
-//@Summary Получить все ингредиенты точки
-//@Accept json
-//@Produce json
-//@Success 200 {object} IngredientGetAllOutput "возвращает все ингредиенты текущей точки"
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /ingredients [get]
+// @Summary Получить все ингредиенты точки
+// @Accept json
+// @Produce json
+// @Success 200 {object} IngredientGetAllOutput "возвращает все ингредиенты текущей точки"
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /ingredients [get]
 func (s *IngredientsService) GetAll(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
 	stdQuery := mustGetStdQuery(c)
@@ -127,14 +127,14 @@ type IngredientUpdateInput struct {
 	MeasureUnit   *int     `json:"measure_unit,omitempty"`
 }
 
-//@Summary Обновить ингредиент
-//@param type body IngredientUpdateInput false "Обновляемые поля"
-//@Success 200 {object} object "возвращает пустой объект"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /ingredients [put]
+// @Summary Обновить ингредиент
+// @param type body IngredientUpdateInput false "Обновляемые поля"
+// @Success 200 {object} object "возвращает пустой объект"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /ingredients [put]
 func (s *IngredientsService) UpdateFields(c *gin.Context) {
 	var input IngredientUpdateInput
 	if err := c.BindJSON(&input); err != nil {
@@ -193,13 +193,11 @@ func (s *IngredientsService) UpdateFields(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
-//@Summary Удаляет ингридиент из точки
-//@Accept json
-//@Produce json
-//@Success 201 {object} object "возвращает пустой объект"
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /ingredients/:id [delete]
+// @Summary Удаляет ингридиент из точки
+// @Accept json
+// @Produce json
+// @Success 201 {object} object "возвращает пустой объект"
+// @Router /ingredients/:id [delete]
 func (s *IngredientsService) Delete(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
 	stdQuery := mustGetStdQuery(c)
@@ -242,14 +240,14 @@ type IngredientArrivalInput struct {
 	Date         int64   `json:"date" binding:"min=1"`
 }
 
-//@Summary Поступление ингредиентов в точку
-//@param type body []IngredientArrivalInput false "Принимаемый объект"
-//@Accept json
-//@Produce json
-//@Success 201 {object} object "возвращает пустой объект
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /ingredients.Arrival [post]
+// @Summary Поступление ингредиентов в точку
+// @param type body []IngredientArrivalInput false "Принимаемый объект"
+// @Accept json
+// @Produce json
+// @Success 201 {object} object "возвращает пустой объект
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /ingredients.Arrival [post]
 func (s *IngredientsService) Arrival(c *gin.Context) {
 	var input []IngredientArrivalInput
 	if err := c.ShouldBindJSON(&input); err != nil {

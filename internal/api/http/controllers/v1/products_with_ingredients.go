@@ -1,4 +1,4 @@
-package myservice
+package controller
 
 import (
 	"net/http"
@@ -8,40 +8,37 @@ import (
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
-type PWIOutputModel struct {
-	ID               uint    `json:"id"`
-	CountTakeForSell float64 `json:"count_take_for_sell"`
-	ProductID        uint    `json:"product_id"`
-	IngredientID     uint    `json:"ingredient_id"`
-	OutletID         uint    `json:"outlet_id"`
+type productWithIngredientsResponseModel struct {
+	ID           uint `json:"id" mapstructure:"id"`
+	IngredientID uint `json:"ingredient_id" mapstructure:"ingredient_id"`
+	ProductID    uint `json:"product_id" mapstructure:"product_id"`
+	OutletID     uint `json:"outlet_id" mapstructure:"outlet_id"`
+
+	CountTakeForSell float64 `json:"count_take_for_sell" mapstructure:"count_take_for_sell"`
 }
 
-type ProductsWithIngredientsService struct {
+type ProductsWithIngredients struct {
 	repo *repository.Repository
 }
 
-func newProductsWithIngredientsService(repo *repository.Repository) *ProductsWithIngredientsService {
-	return &ProductsWithIngredientsService{
+func newProductsWithIngredients(repo *repository.Repository) *ProductsWithIngredients {
+	return &ProductsWithIngredients{
 		repo: repo,
 	}
 }
 
-type PWICreateInput struct {
+type ProductsWithIngredientsCreateBody struct {
 	CountTakeForSell float64 `json:"count_take_for_sell"`
 	ProductID        uint    `json:"product_id" binding:"min=1"`
 	IngredientID     uint    `json:"ingredient_id" binding:"min=1"`
 }
 
 // @Summary Добавить связь продукта и ингридиента в точку
-// @param type body PWICreateInput false "Принимаемый объект"
+// @param type body ProductsWithIngredientsCreateBody false "object"
 // @Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
-// @Accept json
-// @Produce json
-// @Failure 400 {object} serviceError
-// @Failure 500 {object} serviceError
 // @Router /pwis [post]
-func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
-	var input PWICreateInput
+func (s *ProductsWithIngredients) Create(c *gin.Context) {
+	var input ProductsWithIngredientsCreateBody
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
@@ -78,22 +75,18 @@ func (s *ProductsWithIngredientsService) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: pwiModel.ID})
 }
 
-type PWIGetAllQuery struct {
+type ProductsWithIngredientsGetAllQuery struct {
 	ProductID uint `form:"product_id"`
 }
 
-type PWIGetAllOutput []PWIOutputModel
+type ProductsWithIngredientsGetAllResponse []productWithIngredientsResponseModel
 
 // @Summary Получить список связей продуктов и ингредиентов в точке
-// @param type query PWIGetAllQuery false "Принимаемый объект"
-// @Success 200 {object} PWIGetAllOutput "Список связей продуктов и ингредиентов точки"
-// @Accept json
-// @Produce json
-// @Failure 400 {object} serviceError
-// @Failure 500 {object} serviceError
+// @Param type query ProductsWithIngredientsGetAllQuery false "query"
+// @Success 200 {object} ProductsWithIngredientsGetAllResponse "список связей мужду продуктами и ингредиентами"
 // @Router /pwis [get]
-func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
-	var query PWIGetAllQuery
+func (s *ProductsWithIngredients) GetAll(c *gin.Context) {
+	var query ProductsWithIngredientsGetAllQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
@@ -123,9 +116,9 @@ func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
 		return
 	}
 
-	output := make(PWIGetAllOutput, len(*pwis))
+	output := make(ProductsWithIngredientsGetAllResponse, len(*pwis))
 	for i, pwi := range *pwis {
-		output[i] = PWIOutputModel{
+		output[i] = productWithIngredientsResponseModel{
 			ID:               pwi.ID,
 			CountTakeForSell: pwi.CountTakeForSell,
 			ProductID:        pwi.ProductID,
@@ -138,13 +131,9 @@ func (s *ProductsWithIngredientsService) GetAll(c *gin.Context) {
 }
 
 // @Summary Удалить связь из точки
-// @Success 200 {object} object "пустой объект"
-// @Accept json
-// @Produce json
-// @Failure 400 {object} serviceError
-// @Failure 500 {object} serviceError
+// @Success 200 {object} object "object"
 // @Router /pwis/:id [delete]
-func (s *ProductsWithIngredientsService) Delete(c *gin.Context) {
+func (s *ProductsWithIngredients) Delete(c *gin.Context) {
 	pwiID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -166,18 +155,17 @@ func (s *ProductsWithIngredientsService) Delete(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
-type PWIUpdateFields struct {
-	CountTakeForSell float64 `json:"count_take_for_sell"`
+type ProductsWithIngredientsUpdate struct {
 	ProductID        uint    `json:"product_id"`
+	CountTakeForSell float64 `json:"count_take_for_sell"`
 }
 
 // @Summary Обновить связь
-// @param type body PWIUpdateFields false "Обновляемые поля"
-// @Accept json
+// @Param type body PWIUpdateFields false "Обновляемые поля"
 // @Success 200 {object} object "возвращает пустой объект"
 // @Router /pwis/:id [put]
-func (s *ProductsWithIngredientsService) UpdateFields(c *gin.Context) {
-	var input PWIUpdateFields
+func (s *ProductsWithIngredients) UpdateFields(c *gin.Context) {
+	var input ProductsWithIngredientsUpdate
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return

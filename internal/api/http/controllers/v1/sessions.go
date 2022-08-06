@@ -14,23 +14,23 @@ type sessions struct {
 }
 
 type sessionsResponseModel struct {
-	ID         uint `json:"id"`
-	EmployeeID uint `json:"employee_id"`
-	OutletID   uint `json:"outlet_id"`
+	ID         uint `json:"id" mapstructure:"id"`
+	EmployeeID uint `json:"employee_id" mapstructure:"employee_id"`
+	OutletID   uint `json:"outlet_id" mapstructure:"outlet_id"`
 
-	СashEarned float64 `json:"cash_earned"` //заработок за наличную оплату
-	BankEarned float64 `json:"bank_earned"` //заработок по оплате через карту
+	CashEarned float64 `json:"cash_earned" mapstructure:"cash_earned"` //заработок за наличную оплату
+	BankEarned float64 `json:"bank_earned" mapstructure:"bank_earned"` //заработок по оплате через карту
 
-	NumberOfReceipts int `json:"number_of_receipts"` //количество чеков
+	NumberOfReceipts int `json:"number_of_receipts" mapstructure:"number_of_receipts"` //количество чеков
 
-	CashOpen  float64 `json:"cash_open"`  //баланс в момент открытия кассы
-	CashClose float64 `json:"cash_close"` //баланс в момент закрытия кассы
+	CashOpen  float64 `json:"cash_open" mapstructure:"cash_open"`   //баланс в момент открытия кассы
+	CashClose float64 `json:"cash_close" mapstructure:"cash_close"` //баланс в момент закрытия кассы
 
-	DateOpen  int64 `json:"date_open"`  //unixmilli
-	DateClose int64 `json:"date_close"` //unixmilli
+	DateOpen  int64 `json:"date_open" mapstructure:"date_open"`   //UnixMilli
+	DateClose int64 `json:"date_close" mapstructure:"date_close"` //UnixMilli
 }
 
-func newSessionsService(repo *repository.Repository) *sessions {
+func newSessions(repo *repository.Repository) *sessions {
 	return &sessions{
 		repo: repo,
 	}
@@ -104,7 +104,7 @@ func (s *sessions) OpenOrClose(c *gin.Context) {
 				return
 			}
 
-			NumberOfReceipts, err := s.repo.OrdersInfo.Count(&repository.OrderInfoModel{SessionID: lastOpenEmployeeSession.ID})
+			numberOfReceipts, err := s.repo.OrdersInfo.Count(&repository.OrderInfoModel{SessionID: lastOpenEmployeeSession.ID})
 			if err != nil {
 				NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 				return
@@ -115,7 +115,7 @@ func (s *sessions) OpenOrClose(c *gin.Context) {
 				CashSessionClose: body.Cash,
 				BankEarned:       body.BankEarned,
 				CashEarned:       body.CashEarned,
-				NumberOfReceipts: int(NumberOfReceipts),
+				NumberOfReceipts: int(numberOfReceipts),
 			}
 
 			if err := s.repo.Sessions.Close(claims.EmployeeID, &sess); err != nil {
@@ -186,7 +186,7 @@ func (s *sessions) GetAll(c *gin.Context) {
 			CashOpen:  sess.CashSessionOpen,
 			CashClose: sess.CashSessionClose,
 
-			СashEarned:       sess.CashEarned,
+			CashEarned:       sess.CashEarned,
 			BankEarned:       sess.BankEarned,
 			NumberOfReceipts: sess.NumberOfReceipts,
 
@@ -226,7 +226,7 @@ func (s *sessions) GetLastClosedForOutlet(c *gin.Context) {
 		CashOpen:  sess.CashSessionOpen,
 		CashClose: sess.CashSessionClose,
 
-		СashEarned:       sess.CashEarned,
+		CashEarned:       sess.CashEarned,
 		BankEarned:       sess.BankEarned,
 		NumberOfReceipts: sess.NumberOfReceipts,
 
@@ -265,7 +265,7 @@ func (s *sessions) GetLastForOutlet(c *gin.Context) {
 		CashOpen:  sess.CashSessionOpen,
 		CashClose: sess.CashSessionClose,
 
-		СashEarned:       sess.CashEarned,
+		CashEarned:       sess.CashEarned,
 		BankEarned:       sess.BankEarned,
 		NumberOfReceipts: sess.NumberOfReceipts,
 
@@ -296,7 +296,7 @@ func (s *sessions) GetLastForMe(c *gin.Context) {
 		CashOpen:  sess.CashSessionOpen,
 		CashClose: sess.CashSessionClose,
 
-		СashEarned:       sess.CashEarned,
+		CashEarned:       sess.CashEarned,
 		BankEarned:       sess.BankEarned,
 		NumberOfReceipts: sess.NumberOfReceipts,
 
