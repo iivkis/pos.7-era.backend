@@ -286,7 +286,13 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 		}
 
 		if input.CategoryID != nil {
-			if !s.repo.Categories.Exists(&repository.CategoryModel{ID: *input.CategoryID, OutletID: claims.OutletID}) {
+			outletID := claims.OutletID
+
+			if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+				outletID = stdQuery.OutletID
+			}
+
+			if !s.repo.Categories.Exists(&repository.CategoryModel{ID: *input.CategoryID, OutletID: outletID}) {
 				NewResponse(c, http.StatusBadRequest, errIncorrectInputData("incorrect `category_id`"))
 				return
 			}
@@ -308,10 +314,6 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 
 // @Summary Удалить продукт в точке
 // @Success 200 {object} object "возвращает пустой объект"
-// @Accept json
-// @Produce json
-// @Failure 400 {object} serviceError
-// @Failure 500 {object} serviceError
 // @Router /products/:id [delete]
 func (s *ProductsService) Delete(c *gin.Context) {
 	productID, err := strconv.Atoi(c.Param("id"))
