@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
@@ -28,17 +29,18 @@ func orderListGetAll(t *testing.T, engine *gin.Engine, token string) (data order
 	return
 }
 
-func orderListCreate(t *testing.T, engine *gin.Engine, token string) (data DefaultOutputModel) {
+func orderListCreate(t *testing.T, engine *gin.Engine, token string, sessionID uint) (data DefaultOutputModel) {
 	w := httptest.NewRecorder()
 
-	product := productsCreate(t, engine, token)
+	productID := productsCreate(t, engine, token).ID
+	orderInfoID := orderInfoCreate(t, engine, token, sessionID).ID
 
 	body := gin.H{
-		"product_id":    product.ID,
-		"order_info_id": 0,
-		"session_id":    0,
+		"product_id":    productID,
+		"order_info_id": orderInfoID,
+		"session_id":    sessionID,
 
-		"count":         rand.Float64() * 20,
+		"count":         testutil.RandomInt(1, 100),
 		"product_name":  testutil.RandomString(10),
 		"product_price": rand.Float64() * 100,
 	}
@@ -47,12 +49,13 @@ func orderListCreate(t *testing.T, engine *gin.Engine, token string) (data Defau
 	testutil.SetAuthorizationHeader(req, token)
 
 	engine.ServeHTTP(w, req)
-	require.Equal(t, http.StatusCreated, w.Code)
 
 	var response Response
 	testutil.Unmarshal(w.Body, &response)
 	mapstructure.Decode(response.Data, &data)
+	log.Println(response)
 
+	require.Equal(t, http.StatusCreated, w.Code)
 	require.NotEqual(t, data.ID, 0)
 
 	orderList := orderListGetAll(t, engine, token)[0]
@@ -75,58 +78,6 @@ func TestOrderListGetAll(t *testing.T) {
 func TestOrderListCreate(t *testing.T) {
 	engine := newController(t)
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
-	orderListCreate(t, engine, tokenOwner)
+	sessionID := sessionsOpen(t, engine, tokenOwner).ID
+	orderListCreate(t, engine, tokenOwner, sessionID)
 }
-
-// func TestIngredientsUpdate(t *testing.T) {
-// 	engine := newController(t)
-// 	w := httptest.NewRecorder()
-
-// 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
-
-// 	newIngredient := ingredientsCreate(t, engine, tokenOwner)
-// 	ingredientID := strconv.Itoa(int(newIngredient.ID))
-
-// 	body := gin.H{
-// 		"name":           testutil.RandomString(10),
-// 		"count":          rand.Float64() * 20,
-// 		"purchase_price": rand.Float64() * 100,
-// 		"measure_unit":   1 + rand.Intn(2),
-// 	}
-
-// 	req, _ := http.NewRequest("PUT", basepath+"/ingredients/"+ingredientID, testutil.Marshal(body))
-// 	testutil.SetAuthorizationHeader(req, tokenOwner)
-
-// 	engine.ServeHTTP(w, req)
-// 	require.Equal(t, http.StatusOK, w.Code)
-
-// 	var response Response
-// 	testutil.Unmarshal(w.Body, &response)
-
-// 	ingredient := ingredientsGetAll(t, engine, tokenOwner)[0]
-// 	require.Equal(t, ingredient.Name, body["name"])
-// 	require.Equal(t, ingredient.Count, body["count"])
-// 	require.Equal(t, ingredient.PurchasePrice, body["purchase_price"])
-// 	require.Equal(t, ingredient.MeasureUnit, body["measure_unit"])
-// }
-
-// func TestIngredientsDelete(t *testing.T) {
-// 	engine, w := newController(t), httptest.NewRecorder()
-
-// 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
-
-// 	newIngredient := ingredientsCreate(t, engine, tokenOwner)
-// 	ingredientID := strconv.Itoa(int(newIngredient.ID))
-
-// 	ingredients := ingredientsGetAll(t, engine, tokenOwner)
-// 	require.NotEqual(t, len(ingredients), 0)
-
-// 	req, _ := http.NewRequest("DELETE", basepath+"/ingredients/"+ingredientID, nil)
-// 	testutil.SetAuthorizationHeader(req, tokenOwner)
-
-// 	engine.ServeHTTP(w, req)
-// 	require.Equal(t, http.StatusOK, w.Code)
-
-// 	ingredients = ingredientsGetAll(t, engine, tokenOwner)
-// 	require.Equal(t, len(ingredients), 0)
-// }

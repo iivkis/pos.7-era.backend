@@ -17,28 +17,28 @@ type productWithIngredientsResponseModel struct {
 	CountTakeForSell float64 `json:"count_take_for_sell" mapstructure:"count_take_for_sell"`
 }
 
-type ProductsWithIngredients struct {
+type productsWithIngredients struct {
 	repo *repository.Repository
 }
 
-func newProductsWithIngredients(repo *repository.Repository) *ProductsWithIngredients {
-	return &ProductsWithIngredients{
+func newProductsWithIngredients(repo *repository.Repository) *productsWithIngredients {
+	return &productsWithIngredients{
 		repo: repo,
 	}
 }
 
-type ProductsWithIngredientsCreateBody struct {
+type productsWithIngredientsCreateBody struct {
 	CountTakeForSell float64 `json:"count_take_for_sell"`
 	ProductID        uint    `json:"product_id" binding:"min=1"`
 	IngredientID     uint    `json:"ingredient_id" binding:"min=1"`
 }
 
 // @Summary Добавить связь продукта и ингридиента в точку
-// @param type body ProductsWithIngredientsCreateBody false "object"
+// @param type body productsWithIngredientsCreateBody false "object"
 // @Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 // @Router /pwis [post]
-func (s *ProductsWithIngredients) Create(c *gin.Context) {
-	var input ProductsWithIngredientsCreateBody
+func (s *productsWithIngredients) Create(c *gin.Context) {
+	var input productsWithIngredientsCreateBody
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
@@ -75,18 +75,18 @@ func (s *ProductsWithIngredients) Create(c *gin.Context) {
 	NewResponse(c, http.StatusCreated, DefaultOutputModel{ID: pwiModel.ID})
 }
 
-type ProductsWithIngredientsGetAllQuery struct {
+type productsWithIngredientsGetAllQuery struct {
 	ProductID uint `form:"product_id"`
 }
 
-type ProductsWithIngredientsGetAllResponse []productWithIngredientsResponseModel
+type productsWithIngredientsGetAllResponse []productWithIngredientsResponseModel
 
 // @Summary Получить список связей продуктов и ингредиентов в точке
-// @Param type query ProductsWithIngredientsGetAllQuery false "query"
-// @Success 200 {object} ProductsWithIngredientsGetAllResponse "список связей мужду продуктами и ингредиентами"
+// @Param type query productsWithIngredientsGetAllQuery false "query"
+// @Success 200 {object} productsWithIngredientsGetAllResponse "список связей мужду продуктами и ингредиентами"
 // @Router /pwis [get]
-func (s *ProductsWithIngredients) GetAll(c *gin.Context) {
-	var query ProductsWithIngredientsGetAllQuery
+func (s *productsWithIngredients) GetAll(c *gin.Context) {
+	var query productsWithIngredientsGetAllQuery
 	if err := c.ShouldBindQuery(&query); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
@@ -116,7 +116,7 @@ func (s *ProductsWithIngredients) GetAll(c *gin.Context) {
 		return
 	}
 
-	output := make(ProductsWithIngredientsGetAllResponse, len(*pwis))
+	output := make(productsWithIngredientsGetAllResponse, len(*pwis))
 	for i, pwi := range *pwis {
 		output[i] = productWithIngredientsResponseModel{
 			ID:               pwi.ID,
@@ -133,7 +133,7 @@ func (s *ProductsWithIngredients) GetAll(c *gin.Context) {
 // @Summary Удалить связь из точки
 // @Success 200 {object} object "object"
 // @Router /pwis/:id [delete]
-func (s *ProductsWithIngredients) Delete(c *gin.Context) {
+func (s *productsWithIngredients) Delete(c *gin.Context) {
 	pwiID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
@@ -155,7 +155,7 @@ func (s *ProductsWithIngredients) Delete(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
-type ProductsWithIngredientsUpdate struct {
+type productsWithIngredientsUpdate struct {
 	ProductID        uint    `json:"product_id"`
 	CountTakeForSell float64 `json:"count_take_for_sell"`
 }
@@ -164,8 +164,8 @@ type ProductsWithIngredientsUpdate struct {
 // @Param type body PWIUpdateFields false "Обновляемые поля"
 // @Success 200 {object} object "возвращает пустой объект"
 // @Router /pwis/:id [put]
-func (s *ProductsWithIngredients) UpdateFields(c *gin.Context) {
-	var input ProductsWithIngredientsUpdate
+func (s *productsWithIngredients) Update(c *gin.Context) {
+	var input productsWithIngredientsUpdate
 	if err := c.ShouldBindJSON(&input); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return

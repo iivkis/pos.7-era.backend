@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/internal/selectelS3Cloud"
+	"github.com/iivkis/pos.7-era.backend/internal/s3cloud"
 	"gorm.io/gorm"
 )
 
@@ -30,10 +30,10 @@ type ProductOutputModel struct {
 
 type ProductsService struct {
 	repo    *repository.Repository
-	s3cloud *selectelS3Cloud.SelectelS3Cloud
+	s3cloud *s3cloud.SelectelS3Cloud
 }
 
-func newProductsService(repo *repository.Repository, s3cloud *selectelS3Cloud.SelectelS3Cloud) *ProductsService {
+func newProductsService(repo *repository.Repository, s3cloud *s3cloud.SelectelS3Cloud) *ProductsService {
 	return &ProductsService{
 		repo:    repo,
 		s3cloud: s3cloud,
@@ -51,14 +51,14 @@ type ProductCreateInput struct {
 	CategoryID     uint    `json:"category_id"`
 }
 
-//@Summary Добавить новый продукт в точку
-//@param type body ProductCreateInput false "Принимаемый объект"
-//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /products [post]
+// @Summary Добавить новый продукт в точку
+// @param type body ProductCreateInput false "Принимаемый объект"
+// @Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /products [post]
 func (s *ProductsService) Create(c *gin.Context) {
 	var input ProductCreateInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -104,13 +104,13 @@ func (s *ProductsService) Create(c *gin.Context) {
 
 type ProductGetAllOutput []ProductOutputModel
 
-//@Summary Список продуктов точки
-//@Success 200 {object} ProductGetAllOutput "возвращает список пордуктов точки"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /products [get]
+// @Summary Список продуктов точки
+// @Success 200 {object} ProductGetAllOutput "возвращает список пордуктов точки"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /products [get]
 func (s *ProductsService) GetAll(c *gin.Context) {
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
@@ -158,13 +158,13 @@ func (s *ProductsService) GetAll(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-//@Summary Продукт точки
-//@Success 200 {object} ProductOutputModel "возвращает один продукт из точки"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /products/:id [get]
+// @Summary Продукт точки
+// @Success 200 {object} ProductOutputModel "возвращает один продукт из точки"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /products/:id [get]
 func (s *ProductsService) GetOne(c *gin.Context) {
 	productID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -293,13 +293,13 @@ type ProductUpdateInput struct {
 	CategoryID     *uint    `json:"category_id,omitempty"`
 }
 
-//@Summary Обновить продукт в точке
-//@param type body ProductUpdateInput false "Обновляемые поля"
-//@Success 200 {object} object "возвращает пустой объект"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Router /products/:id [put]
+// @Summary Обновить продукт в точке
+// @param type body ProductUpdateInput false "Обновляемые поля"
+// @Success 200 {object} object "возвращает пустой объект"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Router /products/:id [put]
 func (s *ProductsService) UpdateFields(c *gin.Context) {
 	productID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -376,13 +376,13 @@ func (s *ProductsService) UpdateFields(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
-//@Summary Удалить продукт в точке
-//@Success 200 {object} object "возвращает пустой объект"
-//@Accept json
-//@Produce json
-//@Failure 400 {object} serviceError
-//@Failure 500 {object} serviceError
-//@Router /products/:id [delete]
+// @Summary Удалить продукт в точке
+// @Success 200 {object} object "возвращает пустой объект"
+// @Accept json
+// @Produce json
+// @Failure 400 {object} serviceError
+// @Failure 500 {object} serviceError
+// @Router /products/:id [delete]
 func (s *ProductsService) Delete(c *gin.Context) {
 	productID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

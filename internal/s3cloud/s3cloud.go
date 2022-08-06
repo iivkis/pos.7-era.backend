@@ -1,4 +1,4 @@
-package selectelS3Cloud
+package s3cloud
 
 import (
 	"log"
@@ -11,7 +11,7 @@ import (
 
 type SelectelS3Cloud struct {
 	sess   *session.Session
-	cndURI string
+	cdnURI string
 }
 
 func NewSelectelS3Cloud(accessKeyID string, secretKey string, cdnURI string) *SelectelS3Cloud {
@@ -35,7 +35,7 @@ func NewSelectelS3Cloud(accessKeyID string, secretKey string, cdnURI string) *Se
 
 	return &SelectelS3Cloud{
 		sess:   sess,
-		cndURI: cdnURI,
+		cdnURI: cdnURI,
 	}
 }
 
@@ -48,8 +48,8 @@ func (s3 *SelectelS3Cloud) GetURIFromFileID(fileID string) string {
 		return ""
 	}
 
-	if s3.cndURI != "" {
-		return s3.cndURI + "/" + fileID
+	if s3.cdnURI != "" {
+		return s3.cdnURI + "/" + fileID
 	}
 
 	return "https://720408.selcdn.ru/" + config.Env.SelecletS3BacketName + "/" + fileID

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -29,15 +28,11 @@ func orderInfoGetAll(t *testing.T, engine *gin.Engine, token string) (data order
 	return
 }
 
-func orderInfoCreate(t *testing.T, engine *gin.Engine, token string) (data DefaultOutputModel) {
+func orderInfoCreate(t *testing.T, engine *gin.Engine, token string, sessionID uint) (data DefaultOutputModel) {
 	w := httptest.NewRecorder()
 
-	session := sessionsOpen(t, engine, token)
-
-	log.Println(session)
-
 	body := gin.H{
-		"session_id":    session.ID,
+		"session_id":    sessionID,
 		"pay_type":      testutil.RandomInt(0, 2),
 		"employee_name": testutil.RandomString(20),
 		"date":          time.Now().UnixMilli(),
@@ -59,7 +54,7 @@ func orderInfoCreate(t *testing.T, engine *gin.Engine, token string) (data Defau
 func TestOrderInfoCreate(t *testing.T) {
 	engine := newController(t)
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
-	orderInfoCreate(t, engine, tokenOwner)
+	orderInfoCreate(t, engine, tokenOwner, sessionsOpen(t, engine, tokenOwner).ID)
 }
 
 func TestOrderInfoGetAll(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/internal/selectelS3Cloud"
+	"github.com/iivkis/pos.7-era.backend/internal/s3cloud"
 	"gorm.io/gorm"
 )
 
@@ -30,10 +30,13 @@ type productResponseModel struct {
 
 type products struct {
 	repo    *repository.Repository
-	s3cloud *selectelS3Cloud.SelectelS3Cloud
+	s3cloud *s3cloud.SelectelS3Cloud
 }
 
-func newProducts(repo *repository.Repository, s3cloud *selectelS3Cloud.SelectelS3Cloud) *products {
+func newProducts(
+	repo *repository.Repository,
+	s3cloud *s3cloud.SelectelS3Cloud,
+) *products {
 	return &products{
 		repo:    repo,
 		s3cloud: s3cloud,

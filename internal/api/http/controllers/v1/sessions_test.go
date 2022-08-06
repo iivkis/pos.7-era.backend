@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -35,6 +36,8 @@ func sessionsOpen(t *testing.T, engine *gin.Engine, token string) (data sessions
 
 	require.NotEmpty(t, data.ID)
 	require.NotEmpty(t, data.EmployeeID)
+
+	log.Println(response)
 
 	return
 }

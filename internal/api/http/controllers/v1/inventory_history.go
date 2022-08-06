@@ -7,7 +7,7 @@ import (
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
 )
 
-type InventoryHistoryResponseModel struct {
+type inventoryHistoryResponseModel struct {
 	ID         uint `json:"id" mapstructure:"id"`
 	EmployeeID uint `json:"employee_id" mapstructure:"employee_id"`
 	OutletID   uint `json:"outlet_id" mapstructure:"outlet_id"`
@@ -30,7 +30,7 @@ type inventoryHistoryCreateBody struct {
 }
 
 // @Summary Добавить историю инвентаризации
-// @param type body InventoryHistoryCreateInput false "object"
+// @param type body inventoryHistoryCreateBody false "object"
 // @Success 201 {object} DefaultOutputModel "id"
 // @Router /inventoryHistory [post]
 func (s *inventoryHistory) Create(c *gin.Context) {
@@ -62,7 +62,7 @@ type inventoryHistoryGetAllQuery struct {
 	End   uint64 `form:"end"`   //in unixmilli
 }
 
-type inventoryHistoryGetAllResponse []InventoryHistoryResponseModel
+type inventoryHistoryGetAllResponse []inventoryHistoryResponseModel
 
 // @Summary Получить всю историю инвернтаризации
 // @param type query inventoryHistoryGetAllQuery false "Принимаемый объект"
@@ -100,7 +100,7 @@ func (s *inventoryHistory) GetAll(c *gin.Context) {
 
 	var output inventoryHistoryGetAllResponse = make(inventoryHistoryGetAllResponse, len(*invetoryHistoryList))
 	for i, item := range *invetoryHistoryList {
-		output[i] = InventoryHistoryResponseModel{
+		output[i] = inventoryHistoryResponseModel{
 			ID:         item.ID,
 			Date:       item.Date,
 			EmployeeID: item.EmployeeID,

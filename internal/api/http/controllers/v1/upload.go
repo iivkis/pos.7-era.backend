@@ -11,7 +11,7 @@ import (
 
 	"github.com/iivkis/pos.7-era.backend/internal/config"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/internal/selectelS3Cloud"
+	"github.com/iivkis/pos.7-era.backend/internal/s3cloud"
 )
 
 var uploadPhotoACT = uploadAllowedContentType{
@@ -21,10 +21,10 @@ var uploadPhotoACT = uploadAllowedContentType{
 
 type upload struct {
 	repo    *repository.Repository
-	s3cloud *selectelS3Cloud.SelectelS3Cloud
+	s3cloud *s3cloud.SelectelS3Cloud
 }
 
-func newUpload(repo *repository.Repository, s3cloud *selectelS3Cloud.SelectelS3Cloud) *upload {
+func newUpload(repo *repository.Repository, s3cloud *s3cloud.SelectelS3Cloud) *upload {
 	return &upload{
 		repo:    repo,
 		s3cloud: s3cloud,
@@ -35,20 +35,16 @@ func (s *upload) generateID() string {
 	return uuid.New().String() + uuid.New().String()
 }
 
-type uploadPhotoQuery struct {
-	Photo string `form:"photo"`
-}
-
 type uploadPhotoResponse struct {
 	PhotoID  string `json:"photo_id" mapstructure:"photo_id"`
 	PhotoURI string `json:"photo_uri" mapstructure:"photo_uri"`
 }
 
 // @Summary Загрузить фотографию на сервер
-// @Param type query uploadPhotoQuery false "query"
+// @Param photo body string true "изображение"
 // @Success 201 {object} UploadPhotoOutput "возвращает id фоторгафии в хранилище, ссылку на фотографию"
 // @Router /upload.Photo [post]
-func (s *upload) uploadPhoto(c *gin.Context) {
+func (s *upload) UploadPhoto(c *gin.Context) {
 	file, header, err := c.Request.FormFile("photo")
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errUploadFile(err.Error()))

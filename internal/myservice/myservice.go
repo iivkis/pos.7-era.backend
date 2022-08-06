@@ -2,7 +2,7 @@ package myservice
 
 import (
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/internal/selectelS3Cloud"
+	"github.com/iivkis/pos.7-era.backend/internal/s3cloud"
 	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
 	"github.com/iivkis/pos.7-era.backend/pkg/mailagent"
 	"github.com/iivkis/strcode"
@@ -32,7 +32,7 @@ type MyService struct {
 	Upload                   *UploadService
 }
 
-func NewMyService(repo *repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent, authjwt *authjwt.AuthJWT, s3cloud *selectelS3Cloud.SelectelS3Cloud) MyService {
+func NewMyService(repo *repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent, authjwt *authjwt.AuthJWT, s3cloud *s3cloud.SelectelS3Cloud) MyService {
 	return MyService{
 		Mware:                    newMiddlewareService(repo, authjwt),
 		Authorization:            newAuthorizationService(repo, strcode, mailagent, authjwt),

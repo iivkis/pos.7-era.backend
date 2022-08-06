@@ -1,5 +1,6 @@
 package controller
 
+// в структуре храняться разрешенные к загрузке на сервер типы файлов (image/jpeg, image/png и т.д.)
 type uploadAllowedContentType map[string]struct{}
 
 func (u uploadAllowedContentType) Add(contentType string) {
