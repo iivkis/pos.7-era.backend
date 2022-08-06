@@ -392,12 +392,27 @@ func (s *ProductsService) Delete(c *gin.Context) {
 
 	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
 
-	where := &repository.ProductModel{ID: uint(productID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	where1 := &repository.ProductWithIngredientModel{ProductID: uint(productID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
-		where.OutletID = stdQuery.OutletID
+		where1.OutletID = stdQuery.OutletID
 	}
 
-	if err := s.repo.Products.Delete(where); err != nil {
+	if err := s.repo.ProductsWithIngredients.Delete(where1); err != nil {
+		if dberr, ok := isDatabaseError(err); ok {
+			switch dberr.Number {
+			case 1451:
+				NewResponse(c, http.StatusBadRequest, errForeignKey("the pwis has not deleted communications"))
+				return
+			}
+		}
+	}
+
+	where2 := &repository.ProductModel{ID: uint(productID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
+		where1.OutletID = stdQuery.OutletID
+	}
+
+	if err := s.repo.Products.Delete(where2); err != nil {
 		if dberr, ok := isDatabaseError(err); ok {
 			switch dberr.Number {
 			case 1451:
