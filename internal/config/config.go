@@ -2,7 +2,9 @@ package config
 
 import (
 	"flag"
+	"log"
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -30,12 +32,17 @@ func loadFlags() {
 func loadEnv(rootpath string) {
 	viper.SetConfigType("env")
 	viper.AddConfigPath(rootpath)
-	viper.SetConfigName(".env")
-
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err != nil {
-		panic(err)
+	if _, err := os.Stat(filepath.Join(rootpath, ".env")); err != nil {
+		log.Println(err)
+	} else {
+		viper.SetConfigName(".env")
+
+		if err := viper.ReadInConfig(); err != nil {
+			panic(err)
+		}
+
 	}
 
 	if err := viper.Unmarshal(&Env); err != nil {
