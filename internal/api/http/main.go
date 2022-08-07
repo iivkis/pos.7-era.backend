@@ -28,22 +28,22 @@ func New(
 	postman *mailagent.MailAgent,
 	tokenMaker *authjwt.AuthJWT,
 	s3cloud *s3cloud.SelectelS3Cloud,
-
 ) *apihttp {
 	api := &apihttp{
 		repo:       repo,
 		strcode:    strcode,
 		postman:    postman,
 		tokenMaker: tokenMaker,
+		s3cloud:    s3cloud,
 	}
 
-	api.engine = gin.Default()
 	api.init()
-
 	return api
 }
 
 func (api *apihttp) init() {
+	api.engine = gin.Default()
+
 	api.engine.Use(cors.New(cors.Config{
 		AllowAllOrigins:  true,
 		AllowCredentials: true,

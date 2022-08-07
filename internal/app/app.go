@@ -34,9 +34,6 @@ func Launch() {
 	_repo := repository.NewRepository(_authjwt)
 
 	api := apihttp.New(_repo, _strcode, _mailagent, _authjwt, _s3cloud)
-	// _service := myservice.NewMyService(_repo, _strcode, _mailagent, _authjwt, _s3cloud)
-	// _handler := handler.NewHttpHandler(_service)
-	// _server := server.NewServer(_handler)
 
 	//run server
 	var done = make(chan string)
@@ -44,9 +41,6 @@ func Launch() {
 		if err := api.Engine().Run(":" + *config.Flags.Port); err != nil {
 			done <- err.Error()
 		}
-		// if err := _server.Listen(*config.Flags.Port); err != nil {
-		// 	done <- err.Error()
-		// }
 	}()
 
 	log.Println("| SERVER UP |")
