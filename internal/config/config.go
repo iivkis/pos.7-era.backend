@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	"github.com/spf13/viper"
@@ -34,15 +35,21 @@ func loadEnv(rootpath string) {
 	viper.AddConfigPath(rootpath)
 	viper.AutomaticEnv()
 
-	if _, err := os.Stat(filepath.Join(rootpath, ".env")); err != nil {
-		log.Println(err)
+	for _, env := range os.Environ() {
+		split := strings.Split(env, "=")
+		viper.SetDefault(split[0], split[1])
+	}
+
+	if _, err := os.Stat(filepath.Join(rootpath, ".env")); os.IsNotExist(err) {
+		log.Print(".env file not found")
+	} else if err != nil {
+		panic(err)
 	} else {
 		viper.SetConfigName(".env")
 
 		if err := viper.ReadInConfig(); err != nil {
 			panic(err)
 		}
-
 	}
 
 	if err := viper.Unmarshal(&Env); err != nil {
