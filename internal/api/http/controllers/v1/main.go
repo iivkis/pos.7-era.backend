@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"time"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
 	"github.com/iivkis/pos.7-era.backend/internal/s3cloud"
@@ -74,7 +77,12 @@ func AddController(
 
 func (c *Controller) init() {
 	r := c.Engine.Group("api/v1")
-	r.Use(c.Middleware.StdQuery())
+
+	//middleware
+	{
+		r.Use(c.cors())
+		r.Use(c.Middleware.StdQuery())
+	}
 
 	//авторизация
 	{
@@ -208,4 +216,14 @@ func (c *Controller) init() {
 	{
 		r.POST("/upload.Photo", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Upload.UploadPhoto)
 	}
+}
+
+func (c *Controller) cors() gin.HandlerFunc {
+	return cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowCredentials: true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		MaxAge:           12 * time.Hour,
+	})
 }

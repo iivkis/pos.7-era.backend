@@ -1,17 +1,19 @@
 package server
 
-import "github.com/iivkis/pos.7-era.backend/internal/handler"
-
-type Server struct {
-	httphandler handler.HttpHandler
+type Runner interface {
+	Run(addr ...string) error
 }
 
-func NewServer(httphandler handler.HttpHandler) Server {
+type Server struct {
+	runner Runner
+}
+
+func NewServer(runner Runner) Server {
 	return Server{
-		httphandler: httphandler,
+		runner: runner,
 	}
 }
 
-func (s *Server) Listen(port string) error {
-	return s.httphandler.Init().Run(":" + port)
+func (s *Server) Run(host, port string) error {
+	return s.runner.Run(host + ":" + port)
 }
