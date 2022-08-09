@@ -12,7 +12,7 @@ func (h *HttpHandler) connectApiV1(r *gin.RouterGroup) {
 		c.String(http.StatusOK, "all okey!")
 	})
 
-	r.Use(h.srv.Mware.StdQuery())
+	r.Use(h.srv.Mware.StandartQuery())
 
 	//authorization
 	{

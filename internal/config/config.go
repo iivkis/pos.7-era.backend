@@ -4,20 +4,25 @@ import (
 	"flag"
 	"log"
 	"os"
-	"path/filepath"
 	"strings"
 	"sync"
 
 	"github.com/spf13/viper"
 )
 
-var once sync.Once
+var (
+	onceFlags sync.Once
+	onceFiles sync.Once
+)
 
 func Load(rootpath string) {
-	once.Do(func() {
+	onceFlags.Do(func() {
 		loadFlags()
+	})
+
+	onceFiles.Do(func() {
 		loadEnv(rootpath)
-		// loadJSON("./config.json")
+		loadJSON(rootpath)
 	})
 }
 
@@ -25,64 +30,52 @@ func loadFlags() {
 	port, _ := os.LookupEnv("PORT")
 
 	Flags.Port = flag.String("port", port, "server port (default from env `PORT`)")
-	Flags.Main = flag.Bool("main", false, "main server make db migration, invites cleaning and other functions")
+	Flags.Main = flag.Bool("main", false, "make db migration, invites cleaning.")
 
 	flag.Parse()
 }
 
 func loadEnv(rootpath string) {
-	viper.SetConfigType("env")
-	viper.AddConfigPath(rootpath)
-	viper.AutomaticEnv()
+	vp := viper.New()
+
+	vp.SetConfigType("env")
+
+	vp.AddConfigPath(rootpath)
+	vp.SetConfigName(".env")
+
+	vp.AutomaticEnv()
 
 	for _, env := range os.Environ() {
 		split := strings.Split(env, "=")
-		viper.SetDefault(split[0], split[1])
+		vp.SetDefault(split[0], split[1])
 	}
 
-	if _, err := os.Stat(filepath.Join(rootpath, ".env")); os.IsNotExist(err) {
-		log.Print(".env file not found")
-	} else if err != nil {
-		panic(err)
-	} else {
-		viper.SetConfigName(".env")
-
-		if err := viper.ReadInConfig(); err != nil {
+	if err := vp.ReadInConfig(); err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Println("`.env` file not found. Hmm.. Am I on Heroku now?")
+		} else {
 			panic(err)
 		}
 	}
 
-	if err := viper.Unmarshal(&Env); err != nil {
+	if err := vp.Unmarshal(&Env); err != nil {
 		panic(err)
 	}
 }
 
-// func loadJSON(configFilePath string) {
-// 	f, err := os.OpenFile(configFilePath, os.O_RDONLY, 0o777)
-// 	if err != nil {
-// 		panic(err)
-// 	}
+func loadJSON(rootpath string) {
+	vp := viper.New()
 
-// 	b, err := ioutil.ReadAll(f)
-// 	if err != nil {
-// 		panic(err)
-// 	}
+	vp.SetConfigType("json")
 
-// 	var data map[string]string
-// 	if err := json.Unmarshal(b, &data); err != nil {
-// 		panic(err)
-// 	}
+	vp.AddConfigPath(rootpath)
+	vp.SetConfigName("config.json")
 
-// 	getField := func(fieldName string) string {
-// 		d, ok := data[fieldName]
-// 		if !ok {
-// 			panic(fmt.Sprintf("%s undefined", fieldName))
-// 		}
-// 		return d
-// 	}
+	if err := vp.ReadInConfig(); err != nil {
+		panic(err)
+	}
 
-// 	//require fields
-// 	{
-// 		File.EmailTemplatesDir = getField("email_tmpl_dir")
-// 	}
-// }
+	if err := vp.Unmarshal(&File); err != nil {
+		panic(err)
+	}
+}

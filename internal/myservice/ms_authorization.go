@@ -8,26 +8,26 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/config"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
-	"github.com/iivkis/pos.7-era.backend/pkg/mailagent"
+	"github.com/iivkis/pos.7-era.backend/internal/tokenmaker"
+	"github.com/iivkis/pos.7-era.backend/pkg/postman"
 	"github.com/iivkis/strcode"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type AuthorizationService struct {
-	repo      *repository.Repository
-	strcode   *strcode.Strcode
-	mailagent *mailagent.MailAgent
-	authjwt   *authjwt.AuthJWT
+	repo       *repository.Repository
+	strcode    *strcode.Strcode
+	postman    *postman.Postman
+	tokenmaker *tokenmaker.TokenMaker
 }
 
-func newAuthorizationService(repo *repository.Repository, strcode *strcode.Strcode, mailagent *mailagent.MailAgent, authjwt *authjwt.AuthJWT) *AuthorizationService {
+func newAuthorizationService(repo *repository.Repository, strcode *strcode.Strcode, mailagent *postman.Postman, tokenmaker *tokenmaker.TokenMaker) *AuthorizationService {
 	return &AuthorizationService{
-		repo:      repo,
-		strcode:   strcode,
-		mailagent: mailagent,
-		authjwt:   authjwt,
+		repo:       repo,
+		strcode:    strcode,
+		postman:    mailagent,
+		tokenmaker: tokenmaker,
 	}
 }
 
@@ -38,14 +38,14 @@ type SignUpOrgInput struct {
 	InviteCode string `json:"invite_code" binding:"max=9"`
 }
 
-//@Summary Регистрация организации
-//@Description Метод позволяет зарегистрировать организацию
-//@Param json body SignUpOrgInput true "Объект для регитсрации огранизации."
-//@Accept json
-//@Produce json
-//@Success 201 {object} object "Возвращаемый объект при регистрации огранизации"
-//@Failure 401 {object} serviceError
-//@Router /auth/signUp.Org [post]
+// @Summary Регистрация организации
+// @Description Метод позволяет зарегистрировать организацию
+// @Param json body SignUpOrgInput true "Объект для регитсрации огранизации."
+// @Accept json
+// @Produce json
+// @Success 201 {object} object "Возвращаемый объект при регистрации огранизации"
+// @Failure 401 {object} serviceError
+// @Router /auth/signUp.Org [post]
 func (s *AuthorizationService) SignUpOrg(c *gin.Context) {
 	var input SignUpOrgInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -140,14 +140,14 @@ type SignUpEmployeeInput struct {
 	RoleID   int    `json:"role_id" binding:"min=1"`
 }
 
-//@Summary Регистрация сотрудника
-//@Description Метод позволяет зарегистрировать ссотрудника. Работает только с токеном организации.
-//@Param json body SignUpEmployeeInput true "Объект для регитсрации сотрудника."
-//@Accept json
-//@Produce json
-//@Success 201 {object} object "Возвращаемый объект при регистрации сотрудника"
-//@Failure 400 {object} serviceError
-//@Router /auth/signUp.Employee [post]
+// @Summary Регистрация сотрудника
+// @Description Метод позволяет зарегистрировать ссотрудника. Работает только с токеном организации.
+// @Param json body SignUpEmployeeInput true "Объект для регитсрации сотрудника."
+// @Accept json
+// @Produce json
+// @Success 201 {object} object "Возвращаемый объект при регистрации сотрудника"
+// @Failure 400 {object} serviceError
+// @Router /auth/signUp.Employee [post]
 func (s *AuthorizationService) SignUpEmployee(c *gin.Context) {
 	var input SignUpEmployeeInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -220,14 +220,14 @@ type SignInOrgOutput struct {
 	Token string `json:"token"`
 }
 
-//@Summary Вход для организации
-//@Description Метод позволяет войти в аккаунт организации.
-//@Param json body SignInOrgInput true "Объект для входа в огранизацию."
-//@Accept json
-//@Produce json
-//@Success 200 {object} SignInOrgOutput "Возвращает `jwt токен` при успешной авторизации"
-//@Failure 401 {object} serviceError
-//@Router /auth/signIn.Org [post]
+// @Summary Вход для организации
+// @Description Метод позволяет войти в аккаунт организации.
+// @Param json body SignInOrgInput true "Объект для входа в огранизацию."
+// @Accept json
+// @Produce json
+// @Success 200 {object} SignInOrgOutput "Возвращает `jwt токен` при успешной авторизации"
+// @Failure 401 {object} serviceError
+// @Router /auth/signIn.Org [post]
 func (s *AuthorizationService) SignInOrg(c *gin.Context) {
 	var input SignInOrgInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -249,11 +249,11 @@ func (s *AuthorizationService) SignInOrg(c *gin.Context) {
 		return
 	}
 
-	claims := authjwt.OrganizationClaims{
+	claims := tokenmaker.OrganizationClaims{
 		OrganizationID: org.ID,
 	}
 
-	token, err := s.authjwt.SignInOrganization(&claims)
+	token, err := s.tokenmaker.CreateOrganizationToken(&claims)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 		return
@@ -273,14 +273,14 @@ type SignInEmployeeOutput struct {
 	Affiliate bool   `json:"affiliate"` // является ли организация филиалом
 }
 
-//@Summary Вход для сотрудника
-//@Description Метод позволяет войти в аккаунт сотрудника. Работает только с токеном огранизации.
-//@Param json body SignInEmployeeInput true "Объект для входа в огранизацию."
-//@Accept json
-//@Produce json
-//@Success 200 {object} SignInEmployeeOutput "Возвращает `jwt токен` при успешной авторизации"
-//@Failure 401 {object} serviceError
-//@Router /auth/signIn.Employee [post]
+// @Summary Вход для сотрудника
+// @Description Метод позволяет войти в аккаунт сотрудника. Работает только с токеном огранизации.
+// @Param json body SignInEmployeeInput true "Объект для входа в огранизацию."
+// @Accept json
+// @Produce json
+// @Success 200 {object} SignInEmployeeOutput "Возвращает `jwt токен` при успешной авторизации"
+// @Failure 401 {object} serviceError
+// @Router /auth/signIn.Employee [post]
 func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 	var input SignInEmployeeInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -301,14 +301,14 @@ func (s *AuthorizationService) SignInEmployee(c *gin.Context) {
 	}
 
 	//create new claims
-	newEmployeeClaims := authjwt.EmployeeClaims{
+	newEmployeeClaims := tokenmaker.EmployeeClaims{
 		OrganizationID: claims.OrganizationID,
 		OutletID:       empl.OutletID,
 		EmployeeID:     empl.ID,
 		Role:           empl.Role,
 	}
 
-	token, err := s.authjwt.SignInEmployee(&newEmployeeClaims)
+	token, err := s.tokenmaker.CreateEmployeeToken(&newEmployeeClaims)
 	if err != nil {
 		NewResponse(c, http.StatusUnauthorized, errUnknown(err.Error()))
 		return
@@ -326,10 +326,10 @@ type SendCodeInputQuery struct {
 	Email string `form:"email" binding:"required"`
 }
 
-//@Summary Отправка кода подтверждения почты
-//@param email query string false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
-//@Success 200 {object} object "возвращает пустой объект"
-//@Router /auth/sendCode [get]
+// @Summary Отправка кода подтверждения почты
+// @param email query string false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
+// @Success 200 {object} object "возвращает пустой объект"
+// @Router /auth/sendCode [get]
 func (s *AuthorizationService) SendCode(c *gin.Context) {
 	var inputQ SendCodeInputQuery
 	if err := c.ShouldBindQuery(&inputQ); err != nil {
@@ -344,7 +344,7 @@ func (s *AuthorizationService) SendCode(c *gin.Context) {
 	}
 
 	//отправка письма с ссылкой для подтверждения
-	if err := s.mailagent.SendTemplate(inputQ.Email, "confirm_code.html", mailagent.Value{
+	if err := s.postman.SendTemplate(inputQ.Email, "confirm_code.html", postman.Value{
 		"code":     s.strcode.Encode(inputQ.Email),
 		"host":     config.Env.OutHost,
 		"port":     config.Env.OutPort,
@@ -361,10 +361,10 @@ type AuthConfirmCodeQuery struct {
 	Code string `form:"code" binding:"required"`
 }
 
-//@Summary Проверка кода подтверждения
-//@param type query AuthConfirmCodeQuery false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
-//@Success 200 {object} object "возвращает пустой объект"
-//@Router /auth/confirmCode [get]
+// @Summary Проверка кода подтверждения
+// @param type query AuthConfirmCodeQuery false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
+// @Success 200 {object} object "возвращает пустой объект"
+// @Router /auth/confirmCode [get]
 func (s *AuthorizationService) ConfirmCode(c *gin.Context) {
 	var inputQ AuthConfirmCodeQuery
 	if err := c.ShouldBindQuery(&inputQ); err != nil {

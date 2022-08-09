@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/iivkis/pos.7-era.backend/internal/config"
-	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
+	"github.com/iivkis/pos.7-era.backend/internal/tokenmaker"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -28,7 +28,7 @@ type Repository struct {
 	Invitation               *InvitationRepo
 }
 
-func NewRepository(authjwt *authjwt.AuthJWT) *Repository {
+func NewRepository(authjwt *tokenmaker.TokenMaker) *Repository {
 	url := fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=True", config.Env.DatabaseLogin, config.Env.DatabasePassword, config.Env.DatabaseIP, config.Env.DatabaseName)
 
 	db, err := gorm.Open(mysql.Open(url), &gorm.Config{})

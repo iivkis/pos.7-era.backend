@@ -5,18 +5,18 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
+	"github.com/iivkis/pos.7-era.backend/internal/tokenmaker"
 )
 
 type middleware struct {
-	repo    *repository.Repository
-	authjwt *authjwt.AuthJWT
+	repo       *repository.Repository
+	tokenMaker *tokenmaker.TokenMaker
 }
 
-func newMiddleware(repo *repository.Repository, authjwt *authjwt.AuthJWT) *middleware {
+func newMiddleware(repo *repository.Repository, authjwt *tokenmaker.TokenMaker) *middleware {
 	return &middleware{
-		repo:    repo,
-		authjwt: authjwt,
+		repo:       repo,
+		tokenMaker: authjwt,
 	}
 }
 
@@ -29,7 +29,7 @@ func (s *middleware) AuthOrg() func(*gin.Context) {
 			return
 		}
 
-		claims, err := s.authjwt.ParseOrganizationToken(token)
+		claims, err := s.tokenMaker.ParseOrganizationToken(token)
 		if err != nil {
 			NewResponse(c, http.StatusUnauthorized, errParsingJWT(err.Error()))
 			c.Abort()
@@ -61,7 +61,7 @@ func (s *middleware) AuthEmployee(allowedRoles ...string) func(*gin.Context) {
 		}
 
 		//парсинг токена
-		claims, err := s.authjwt.ParseEmployeeToken(token)
+		claims, err := s.tokenMaker.ParseEmployeeToken(token)
 		if err != nil {
 			NewResponse(c, http.StatusUnauthorized, errParsingJWT(err.Error()))
 			c.Abort()
@@ -79,18 +79,18 @@ func (s *middleware) AuthEmployee(allowedRoles ...string) func(*gin.Context) {
 	}
 }
 
-type MiddlewareStdQueryInput struct {
-	OutletID uint `form:"outlet_id"`
-	OrgID    uint `form:"org_id"`
+type MiddlewareStandartQuery struct {
+	OutletID uint `form:"outlet_id" binding:"min=0"`
+	OrgID    uint `form:"org_id" binding:"min=0"`
 
-	Offset int `form:"offset"`
-	Limit  int `form:"limit"`
+	Offset int `form:"offset" binding:"min=0"`
+	Limit  int `form:"limit" binding:"min=0"`
 }
 
-//Standart Query
-func (s *middleware) StdQuery() func(*gin.Context) {
+// Standart Query
+func (s *middleware) StandartQuery() func(*gin.Context) {
 	return func(c *gin.Context) {
-		var query MiddlewareStdQueryInput
+		var query MiddlewareStandartQuery
 		if err := c.ShouldBindQuery(&query); err != nil {
 			NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 			c.Abort()

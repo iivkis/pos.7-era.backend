@@ -1,3 +1,3 @@
 {
-    "email_tmpl_dir": "./email_tmpl"
+    "email_templates": "./email_templates"
 }

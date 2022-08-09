@@ -5,11 +5,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/iivkis/pos.7-era.backend/internal/components"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/internal/s3cloud"
-	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
-	"github.com/iivkis/pos.7-era.backend/pkg/mailagent"
-	"github.com/iivkis/strcode"
 )
 
 type combine struct {
@@ -38,36 +35,28 @@ type Controller struct {
 	combine
 }
 
-func AddController(
-	engine *gin.Engine,
-	repo *repository.Repository,
-	strcode *strcode.Strcode,
-	postman *mailagent.MailAgent,
-	tokenMaker *authjwt.AuthJWT,
-	s3cloud *s3cloud.SelectelS3Cloud,
-) *Controller {
-
+func AddController(comp components.Components) *Controller {
 	controllers := &Controller{
-		Engine: engine,
+		Engine: comp.Engine,
 		combine: combine{
-			Authorization:            newAuthorization(repo, strcode, postman, tokenMaker),
-			Outlets:                  newOutlets(repo),
-			Categories:               newCategories(repo),
-			Employees:                newEmployees(repo),
-			Products:                 newProducts(repo, s3cloud),
-			Ingredients:              newIngredients(repo),
-			IngredientsAddingHistory: newIngredientsAddingHistory(repo),
-			ProductsWithIngredients:  newProductsWithIngredients(repo),
-			OrderInfo:                newOrderInfo(repo),
-			OrderList:                newOrderList(repo),
-			Orders:                   newOrders(repo),
-			InventoryHistory:         newInventoryHistory(repo),
-			InventoryList:            newInventoryList(repo),
-			Invitation:               newInvitation(repo),
-			Sessions:                 newSessions(repo),
-			Upload:                   newUpload(repo, s3cloud),
-			CashChanges:              newCashChanges(repo),
-			Middleware:               newMiddleware(repo, tokenMaker),
+			Authorization:            newAuthorization(comp.Repo, comp.Strcode, comp.Postman, comp.TokenMaker),
+			Outlets:                  newOutlets(comp.Repo),
+			Categories:               newCategories(comp.Repo),
+			Employees:                newEmployees(comp.Repo),
+			Products:                 newProducts(comp.Repo, comp.S3cloud),
+			Ingredients:              newIngredients(comp.Repo),
+			IngredientsAddingHistory: newIngredientsAddingHistory(comp.Repo),
+			ProductsWithIngredients:  newProductsWithIngredients(comp.Repo),
+			OrderInfo:                newOrderInfo(comp.Repo),
+			OrderList:                newOrderList(comp.Repo),
+			Orders:                   newOrders(comp.Repo),
+			InventoryHistory:         newInventoryHistory(comp.Repo),
+			InventoryList:            newInventoryList(comp.Repo),
+			Invitation:               newInvitation(comp.Repo),
+			Sessions:                 newSessions(comp.Repo),
+			Upload:                   newUpload(comp.Repo, comp.S3cloud),
+			CashChanges:              newCashChanges(comp.Repo),
+			Middleware:               newMiddleware(comp.Repo, comp.TokenMaker),
 		},
 	}
 
@@ -81,7 +70,7 @@ func (c *Controller) init() {
 	//middleware
 	{
 		r.Use(c.cors())
-		r.Use(c.Middleware.StdQuery())
+		r.Use(c.Middleware.StandartQuery())
 	}
 
 	//авторизация

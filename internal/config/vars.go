@@ -28,5 +28,5 @@ var Env struct {
 }
 
 var File struct {
-	EmailTemplatesDir string
+	EmailTemplates string `mapstructure:"email_templates"`
 }

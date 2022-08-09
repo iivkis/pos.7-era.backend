@@ -7,7 +7,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
 	"gorm.io/gorm"
 )
 
@@ -32,12 +31,12 @@ func newEmployees(repo *repository.Repository) *employees {
 
 type employeesGetAllResponse []EmployeeOutputModel
 
-//@Summary Список всех сотрудников организации
-//@Description Метод позволяет получить список всех сотрудников организации
-//@Produce json
-//@Success 200 {object} employeesGetAllResponse "Возвращает массив сотрудников"
-//@Failure 500 {object} serviceError
-//@Router /employees [get]
+// @Summary Список всех сотрудников организации
+// @Description Метод позволяет получить список всех сотрудников организации
+// @Produce json
+// @Success 200 {object} employeesGetAllResponse "Возвращает массив сотрудников"
+// @Failure 500 {object} serviceError
+// @Router /employees [get]
 func (s *employees) GetAll(c *gin.Context) {
 	claims, stdQuery := mustGetOrganizationClaims(c), mustGetStdQuery(c)
 
@@ -76,13 +75,13 @@ type EmployeeUpdateBody struct {
 	RoleID   int    `json:"role_id"`
 }
 
-//@Summary Позволяет обновить поля сотрудника
-//@param type body EmployeeUpdateBody false "Принимаемый объект"
-//@Accept json
-//@Produce json
-//@Success 200 {object} object "возвращает пустой объект"
-//@Failure 400 {object} serviceError
-//@Router /employees/:id [put]
+// @Summary Позволяет обновить поля сотрудника
+// @param type body EmployeeUpdateBody false "Принимаемый объект"
+// @Accept json
+// @Produce json
+// @Success 200 {object} object "возвращает пустой объект"
+// @Failure 400 {object} serviceError
+// @Router /employees/:id [put]
 func (s *employees) Update(c *gin.Context) {
 	var input EmployeeUpdateBody
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -101,7 +100,7 @@ func (s *employees) Update(c *gin.Context) {
 		return
 	}
 
-	claims := c.MustGet("claims").(*authjwt.EmployeeClaims)
+	claims := mustGetEmployeeClaims(c)
 
 	editedEmployee, err := s.repo.Employees.FindFirst(&repository.EmployeeModel{Model: gorm.Model{ID: uint(employeeID)}, OrgID: claims.OrganizationID})
 	if err != nil {
@@ -198,14 +197,14 @@ func (s *employees) Update(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
-//@Summary Позволяет удалить сотрудника
-//@Accept json
-//@Produce json
-//@Success 200 {object} object "возвращает пустой объект"
-//@Failure 400 {object} serviceError
-//@Router /employees/:id [delete]
+// @Summary Позволяет удалить сотрудника
+// @Accept json
+// @Produce json
+// @Success 200 {object} object "возвращает пустой объект"
+// @Failure 400 {object} serviceError
+// @Router /employees/:id [delete]
 func (s *employees) Delete(c *gin.Context) {
-	claims := c.MustGet("claims").(*authjwt.EmployeeClaims)
+	claims := mustGetEmployeeClaims(c)
 
 	employeeID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {

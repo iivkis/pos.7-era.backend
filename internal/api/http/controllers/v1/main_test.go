@@ -2,16 +2,10 @@ package controller
 
 import (
 	"testing"
-	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/iivkis/pos.7-era.backend/internal/components"
 	"github.com/iivkis/pos.7-era.backend/internal/config"
-	"github.com/iivkis/pos.7-era.backend/internal/repository"
-	"github.com/iivkis/pos.7-era.backend/internal/s3cloud"
-	"github.com/iivkis/pos.7-era.backend/internal/servutil"
-	"github.com/iivkis/pos.7-era.backend/pkg/authjwt"
-	"github.com/iivkis/pos.7-era.backend/pkg/mailagent"
-	"github.com/iivkis/strcode"
 	"github.com/stretchr/testify/require"
 )
 
@@ -19,21 +13,7 @@ const basepath = "/api/v1"
 
 func newController(t *testing.T) *gin.Engine {
 	config.Load("./../../../../../")
-
-	ENGINE := gin.Default()
-
-	tokenMaker := authjwt.NewAuthJWT([]byte(config.Env.TokenSecretKey))
-
-	strcode, err := strcode.NewStrcode(config.Env.TokenSecretKey, ":", time.Hour*24)
-	servutil.PanicIfErr(err)
-
-	postman := mailagent.NewMailAgent(config.Env.EmailLogin, config.Env.EmailPassword)
-
-	s3cloud := s3cloud.NewSelectelS3Cloud(config.Env.SelectelS3AccessKey, config.Env.SelectelS3SecretKey, "https://cb027f6f-0eed-40c8-8f6a-7fbc35d7224b.selcdn.net")
-	repo := repository.NewRepository(tokenMaker)
-
-	c := AddController(ENGINE, repo, strcode, postman, tokenMaker, s3cloud)
-
+	c := AddController(components.New())
 	return c.Engine
 }
 
