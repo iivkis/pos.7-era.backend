@@ -25,7 +25,7 @@ func New() Components {
 	engine := gin.Default()
 
 	// отправка email писем
-	postman := postman.NewMailAgent(config.Env.EmailLogin, config.Env.EmailPassword)
+	postman := postman.NewPosman(config.Env.EmailLogin, config.Env.EmailPassword)
 
 	// шифрование строки
 	strcode, err := strcode.NewStrcode(config.Env.TokenSecretKey, ":", time.Hour*24)

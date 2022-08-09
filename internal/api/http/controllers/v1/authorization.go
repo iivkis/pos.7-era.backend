@@ -39,8 +39,7 @@ type authSignUpOrgBody struct {
 }
 
 // @Summary Регистрация организации
-// @Description Метод позволяет зарегистрировать организацию
-// @Param json body authSignUpOrgBody true "Объект для регитсрации огранизации."
+// @Param json body authSignUpOrgBody true "object"
 // @Success 201 {object} object "object"
 // @Router /auth/signUp.Org [post]
 func (s *authorization) SignUpOrg(c *gin.Context) {
@@ -138,7 +137,7 @@ type authSignUpEmployeeBody struct {
 }
 
 // @Summary Регистрация сотрудника
-// @Param json body authSignUpEmployeeBody true "Объект для регитсрации сотрудника."
+// @Param type body authSignUpEmployeeBody true "object"
 // @Success 201 {object} object "object"
 // @Router /auth/signUp.Employee [post]
 func (s *authorization) SignUpEmployee(c *gin.Context) {
@@ -214,12 +213,8 @@ type authSignInOrgResponse struct {
 }
 
 // @Summary Вход для организации
-// @Description Метод позволяет войти в аккаунт организации.
-// @Param json body authSignInOrgBody true "Объект для входа в огранизацию."
-// @Accept json
-// @Produce json
-// @Success 200 {object} authSignInOrgResponse "Возвращает `jwt токен` при успешной авторизации"
-// @Failure 401 {object} serviceError
+// @Param type body authSignInOrgBody true "object"
+// @Success 200 {object} authSignInOrgResponse "Возвращает токен при успешной авторизации"
 // @Router /auth/signIn.Org [post]
 func (s *authorization) SignInOrg(c *gin.Context) {
 	var input authSignInOrgBody
@@ -267,12 +262,9 @@ type authSignInEmployeeResponse struct {
 }
 
 // @Summary Вход для сотрудника
-// @Description Метод позволяет войти в аккаунт сотрудника. Работает только с токеном огранизации.
+// @Description необходим токен организации
 // @Param json body authSignInEmployeeBody true "Объект для входа в огранизацию."
-// @Accept json
-// @Produce json
-// @Success 200 {object} authSignInEmployeeResponse "Возвращает `jwt токен` при успешной авторизации"
-// @Failure 401 {object} serviceError
+// @Success 200 {object} authSignInEmployeeResponse "Возвращает токен при успешной авторизации"
 // @Router /auth/signIn.Employee [post]
 func (s *authorization) SignInEmployee(c *gin.Context) {
 	var input authSignInEmployeeBody
@@ -315,30 +307,29 @@ func (s *authorization) SignInEmployee(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-type SendCodeInputQuery struct {
-	Email string `form:"email" binding:"required"`
+type authSendCodeQuery struct {
+	Email string `form:"email" binding:"required" example:"email@exmp.ru"`
 }
 
 // @Summary Отправка кода подтверждения почты
-// @param email query string false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
+// @Param type query authSendCodeQuery true "object"
 // @Success 200 {object} object "возвращает пустой объект"
 // @Router /auth/sendCode [get]
 func (s *authorization) SendCode(c *gin.Context) {
-	var inputQ SendCodeInputQuery
-	if err := c.ShouldBindQuery(&inputQ); err != nil {
+	var query authSendCodeQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	//проверка на сущ. email в БД
-	if !s.repo.Organizations.EmailExists(inputQ.Email) {
+	if !s.repo.Organizations.EmailExists(query.Email) {
 		NewResponse(c, http.StatusBadRequest, errEmailNotFound())
 		return
 	}
 
 	//отправка письма с ссылкой для подтверждения
-	if err := s.postman.SendTemplate(inputQ.Email, "confirm_code.html", postman.Value{
-		"code":     s.strcode.Encode(inputQ.Email),
+	if err := s.postman.SendTemplate(query.Email, "confirm_code.html", postman.Value{
+		"code":     s.strcode.Encode(query.Email),
 		"host":     config.Env.OutHost,
 		"port":     config.Env.OutPort,
 		"protocol": config.Env.OutProtocol,
@@ -350,22 +341,22 @@ func (s *authorization) SendCode(c *gin.Context) {
 	NewResponse(c, http.StatusOK, nil)
 }
 
-type AuthConfirmCodeQuery struct {
+type authConfirmCodeQuery struct {
 	Code string `form:"code" binding:"required"`
 }
 
 // @Summary Проверка кода подтверждения
-// @param type query AuthConfirmCodeQuery false "адрес на который будет отправлено письмо (например: email@exmp.ru)"
+// @param type query authConfirmCodeQuery true "object"
 // @Success 200 {object} object "возвращает пустой объект"
 // @Router /auth/confirmCode [get]
 func (s *authorization) ConfirmCode(c *gin.Context) {
-	var inputQ AuthConfirmCodeQuery
-	if err := c.ShouldBindQuery(&inputQ); err != nil {
+	var query authConfirmCodeQuery
+	if err := c.ShouldBindQuery(&query); err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	email, err := s.strcode.Decode(inputQ.Code)
+	email, err := s.strcode.Decode(query.Code)
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectConfirmCode(err.Error()))
 		return

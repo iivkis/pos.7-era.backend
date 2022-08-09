@@ -19,7 +19,7 @@ type Postman struct {
 
 type Value map[string]interface{}
 
-func NewMailAgent(username string, password string) *Postman {
+func NewPosman(username string, password string) *Postman {
 	return &Postman{
 		sender: username,
 
@@ -41,7 +41,7 @@ func (p *Postman) LoadTemplatesFromDir(dir string) error {
 				return err
 			}
 			p.templates[f.Name()] = templ
-			fmt.Printf("[mailagent] template `%s` loaded\r\n", f.Name())
+			fmt.Printf("[postman] template `%s` loaded\r\n", f.Name())
 		}
 	}
 	return err
