@@ -6,7 +6,7 @@ import (
 )
 
 //@BasePath /api/v1
-//@Title POS-Ninja Backend API
+//@Title POS 7Era Backend API
 //@Contact.Email razmolodinivan@mail.ru
 //@Version 0.2.0
 

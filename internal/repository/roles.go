@@ -2,7 +2,6 @@ package repository
 
 //roles
 const (
-	R_ROOT     = "root" // используется только внутри приложения. Пользователи не могут иметь роль root.
 	R_OWNER    = "owner"
 	R_DIRECTOR = "director"
 	R_ADMIN    = "admin"

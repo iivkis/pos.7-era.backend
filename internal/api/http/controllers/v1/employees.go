@@ -69,34 +69,31 @@ func (s *employees) GetAll(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-type EmployeeUpdateBody struct {
+type employeeUpdateBody struct {
 	Name     string `json:"name"`
 	Password string `json:"password" binding:"max=6"`
-	RoleID   int    `json:"role_id"`
+	RoleID   int    `json:"role_id" binding:"min=0"`
 }
 
-// @Summary Позволяет обновить поля сотрудника
-// @param type body EmployeeUpdateBody false "Принимаемый объект"
-// @Accept json
-// @Produce json
-// @Success 200 {object} object "возвращает пустой объект"
-// @Failure 400 {object} serviceError
+// @Summary Обновить поля сотрудника
+// @Param type body employeeUpdateBody false "object"
+// @Success 200 {object} object "object"
 // @Router /employees/:id [put]
 func (s *employees) Update(c *gin.Context) {
-	var input EmployeeUpdateBody
-	if err := c.ShouldBindJSON(&input); err != nil {
-		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
-		return
-	}
-
-	if input.RoleID != 0 && !repository.RoleIsExists(repository.RoleIDToName(input.RoleID)) {
-		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("undefined role"))
-		return
-	}
-
 	employeeID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	var body employeeUpdateBody
+	if err := c.ShouldBindJSON(&body); err != nil {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+		return
+	}
+
+	if !repository.RoleIsExists(repository.RoleIDToName(body.RoleID)) {
+		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("undefined role"))
 		return
 	}
 
@@ -118,14 +115,14 @@ func (s *employees) Update(c *gin.Context) {
 	case repository.R_OWNER:
 		if claims.EmployeeID == editedEmployee.ID {
 			updatedFields = &repository.EmployeeModel{
-				Name:     input.Name,
-				Password: input.Password,
+				Name:     body.Name,
+				Password: body.Password,
 			}
 		} else if editedEmployee.HasRole(repository.R_DIRECTOR, repository.R_ADMIN, repository.R_CASHIER) {
 			updatedFields = &repository.EmployeeModel{
-				Name:     input.Name,
-				Password: input.Password,
-				Role:     repository.RoleIDToName(input.RoleID),
+				Name:     body.Name,
+				Password: body.Password,
+				Role:     repository.RoleIDToName(body.RoleID),
 			}
 		} else {
 			NewResponse(c, http.StatusBadRequest, errPermissionDenided())
@@ -140,13 +137,13 @@ func (s *employees) Update(c *gin.Context) {
 	case repository.R_DIRECTOR:
 		if claims.EmployeeID == editedEmployee.ID {
 			updatedFields = &repository.EmployeeModel{
-				Password: input.Password,
+				Password: body.Password,
 			}
 		} else if editedEmployee.HasRole(repository.R_ADMIN, repository.R_CASHIER) {
 			updatedFields = &repository.EmployeeModel{
-				Name:     input.Name,
-				Password: input.Password,
-				Role:     repository.RoleIDToName(input.RoleID),
+				Name:     body.Name,
+				Password: body.Password,
+				Role:     repository.RoleIDToName(body.RoleID),
 			}
 		} else {
 			NewResponse(c, http.StatusBadRequest, errPermissionDenided())
@@ -167,13 +164,13 @@ func (s *employees) Update(c *gin.Context) {
 
 		if claims.EmployeeID == editedEmployee.ID {
 			updatedFields = &repository.EmployeeModel{
-				Password: input.Password,
+				Password: body.Password,
 			}
 		} else if editedEmployee.HasRole(repository.R_CASHIER) {
 			updatedFields = &repository.EmployeeModel{
-				Name:     input.Name,
-				Password: input.Password,
-				Role:     repository.RoleIDToName(input.RoleID),
+				Name:     body.Name,
+				Password: body.Password,
+				Role:     repository.RoleIDToName(body.RoleID),
 			}
 		} else {
 			NewResponse(c, http.StatusBadRequest, errPermissionDenided())
