@@ -15,10 +15,11 @@ type orderInfoResponseModel struct {
 	SessionID uint `json:"session_id" mapstructure:"session_id"`
 	OutletID  uint `json:"outlet_id" mapstructure:"outlet_id"`
 
-	PayType      int    `json:"pay_type" mapstructure:"pay_type"`
 	Date         int64  `json:"date" mapstructure:"date"`
+	PayType      int    `json:"pay_type" mapstructure:"pay_type"`
 	EmployeeName string `json:"employee_name" mapstructure:"employee_name"`
-	IsDelete     bool   `json:"is_delete" mapstructure:"is_delete"`
+
+	IsDelete bool `json:"is_delete" mapstructure:"is_delete"`
 }
 
 type orderInfo struct {
@@ -32,10 +33,11 @@ func newOrderInfo(repo *repository.Repository) *orderInfo {
 }
 
 type orderInfoCreateBody struct {
-	SessionID    uint   `json:"session_id" binding:"min=1"`
-	PayType      int    `json:"pay_type" binding:"min=0,max=2"`
-	EmployeeName string `json:"employee_name" binding:"required"`
+	SessionID uint `json:"session_id" binding:"min=1"`
+
 	Date         int64  `json:"date" binding:"min=1"`
+	PayType      int    `json:"pay_type" binding:"min=0,max=1"`
+	EmployeeName string `json:"employee_name" binding:"required"`
 }
 
 // @Summary Добавить orderInfo (список завершенных заказов)

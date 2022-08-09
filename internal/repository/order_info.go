@@ -11,7 +11,7 @@ type OrderInfoModel struct {
 
 	Date int64
 
-	PayType      int // 0 - наличные, 1 - безналичные, 2 - смешанный
+	PayType      int // 0 - наличные, 1 - безналичные
 	EmployeeName string
 
 	SessionModel      SessionModel      `gorm:"foreignKey:SessionID"`
