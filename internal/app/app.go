@@ -7,6 +7,7 @@ import (
 	"log"
 
 	controllerV1 "github.com/iivkis/pos.7-era.backend/internal/api/http/controllers/v1"
+	"github.com/iivkis/pos.7-era.backend/internal/api/http/swagdocs"
 	"github.com/iivkis/pos.7-era.backend/internal/components"
 	"github.com/iivkis/pos.7-era.backend/internal/config"
 	"github.com/iivkis/pos.7-era.backend/internal/server"
@@ -18,9 +19,12 @@ func Launch() {
 	//все компоненты необходимые для работы сервера
 	components := components.New()
 
-	// вешаем контроллеры на обработчик
+	// вешаем документацию
+	swagdocs.Setup(components.Engine)
+
+	// вешаем контроллеры
 	{
-		controllerV1.AddController(components)
+		controllerV1.Setup(components)
 	}
 
 	// создаем сервер и запускаем

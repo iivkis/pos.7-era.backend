@@ -35,7 +35,7 @@ type Controller struct {
 	combine
 }
 
-func AddController(comp components.Components) *Controller {
+func Setup(comp components.Components) *Controller {
 	controllers := &Controller{
 		Engine: comp.Engine,
 		combine: combine{

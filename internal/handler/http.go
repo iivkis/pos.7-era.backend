@@ -50,7 +50,7 @@ func (h *HttpHandler) Init() *gin.Engine {
 	root.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 
 	root.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "pos.7-era.backend (version: 0.1-alpha)")
+		c.String(http.StatusOK, "pos.7-era.backend (version: 0.2-alpha)")
 	})
 
 	api := root.Group("/api")

@@ -13,7 +13,7 @@ const basepath = "/api/v1"
 
 func newController(t *testing.T) *gin.Engine {
 	config.Load("./../../../../../")
-	c := AddController(components.New())
+	c := Setup(components.New())
 	return c.Engine
 }
 
