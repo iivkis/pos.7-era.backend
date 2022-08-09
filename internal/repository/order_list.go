@@ -4,22 +4,20 @@ import "gorm.io/gorm"
 
 type OrderListModel struct {
 	gorm.Model
-	ProductName string
-
-	ProductPrice float64
-	Count        int
 
 	ProductID   uint
 	OrderInfoID uint
 	SessionID   uint
+	OutletID    uint
+	OrgID       uint
 
-	OutletID uint
-	OrgID    uint
+	ProductName  string
+	ProductPrice float64
+	Count        int
 
-	ProductModel   ProductModel   `gorm:"foreignKey:ProductID"`
-	OrderInfoModel OrderInfoModel `gorm:"foreignKey:OrderInfoID"`
-	SessionModel   SessionModel   `gorm:"foreignKey:SessionID"`
-
+	ProductModel      ProductModel      `gorm:"foreignKey:ProductID"`
+	OrderInfoModel    OrderInfoModel    `gorm:"foreignKey:OrderInfoID"`
+	SessionModel      SessionModel      `gorm:"foreignKey:SessionID"`
 	OutletModel       OutletModel       `gorm:"foreignKey:OutletID"`
 	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`
 }
@@ -34,7 +32,6 @@ func newOrderListRepo(db *gorm.DB) *OrderListRepo {
 	}
 }
 
-//actual
 func (r *OrderListRepo) Create(m *OrderListModel) (err error) {
 	return r.db.Create(m).Error
 }
@@ -54,8 +51,8 @@ func (r *OrderListRepo) FindForCalculation(where *OrderListModel) (result *[]Ord
 	return
 }
 
-func (r *OrderListRepo) Updates(where *OrderListModel, updatedFields *OrderListModel) error {
-	return r.db.Where(where).Updates(updatedFields).Error
+func (r *OrderListRepo) Updates(where *OrderListModel, updates *OrderListModel) error {
+	return r.db.Where(where).Updates(updates).Error
 }
 
 func (r *OrderListRepo) Delete(where *OrderListModel) (err error) {

@@ -32,15 +32,15 @@ func newCashChanges(repo *repository.Repository) *cashChanges {
 }
 
 type cashChangesCreateBody struct {
-	Date      int64   `json:"date"` //unixmilli
-	Total     float64 `json:"total"`
-	Reason    string  `json:"reason" binding:"required"`
-	Comment   string  `json:"comment"`
-	SessionID uint    `json:"session_id"`
+	SessionID uint `json:"session_id"`
+
+	Date    int64   `json:"date"` //unixmilli
+	Total   float64 `json:"total"`
+	Reason  string  `json:"reason" binding:"required"`
+	Comment string  `json:"comment"`
 }
 
 // @Summary Добавить информацию о снятии\вкладе денежных средств
-// @Description параметр `date` указывается в формате unixmilli
 // @Param type body cashChangesCreateBody false "Принимаемый объект"
 // @Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
 // @Router /cashChanges [post]

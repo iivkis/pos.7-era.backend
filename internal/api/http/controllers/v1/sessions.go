@@ -21,13 +21,13 @@ type sessionsResponseModel struct {
 	CashEarned float64 `json:"cash_earned" mapstructure:"cash_earned"` //заработок за наличную оплату
 	BankEarned float64 `json:"bank_earned" mapstructure:"bank_earned"` //заработок по оплате через карту
 
-	NumberOfReceipts int `json:"number_of_receipts" mapstructure:"number_of_receipts"` //количество чеков
-
 	CashOpen  float64 `json:"cash_open" mapstructure:"cash_open"`   //баланс в момент открытия кассы
 	CashClose float64 `json:"cash_close" mapstructure:"cash_close"` //баланс в момент закрытия кассы
 
 	DateOpen  int64 `json:"date_open" mapstructure:"date_open"`   //UnixMilli
 	DateClose int64 `json:"date_close" mapstructure:"date_close"` //UnixMilli
+
+	NumberOfReceipts int `json:"number_of_receipts" mapstructure:"number_of_receipts"` //количество чеков
 }
 
 func newSessions(repo *repository.Repository) *sessions {

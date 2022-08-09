@@ -5,18 +5,18 @@ import "gorm.io/gorm"
 type OrderInfoModel struct {
 	gorm.Model
 
+	SessionID uint
+	OutletID  uint
+	OrgID     uint
+
+	Date int64
+
 	PayType      int // 0 - наличные, 1 - безналичные, 2 - смешанный
-	Date         int64
 	EmployeeName string
-	SessionID    uint
 
-	OrgID    uint
-	OutletID uint
-
-	SessionModel SessionModel `gorm:"foreignKey:SessionID"`
-
-	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`
+	SessionModel      SessionModel      `gorm:"foreignKey:SessionID"`
 	OutletModel       OutletModel       `gorm:"foreignKey:OutletID"`
+	OrganizationModel OrganizationModel `gorm:"foreignKey:OrgID"`
 }
 
 type OrderInfoRepo struct {
