@@ -36,102 +36,155 @@ func newSessions(repo *repository.Repository) *sessions {
 	}
 }
 
-type sessionsOpenOrCloseBody struct {
-	Action string `json:"action" binding:"required"` // "open" or "close"
-
-	Date int64   `json:"date" binding:"min=1"`
-	Cash float64 `json:"cash"`
-
-	CashEarned float64 `json:"cash_earned"`
-	BankEarned float64 `json:"bank_earned"`
+type sessionsActionBody struct {
+	Action string  `json:"action" binding:"required"` // "open" or "close"
+	Date   int64   `json:"date" binding:"min=1"`
+	Cash   float64 `json:"cash"`
 }
 
-type sessionsOpenOrCloseResponse struct {
+type sessionsActionResponse struct {
 	ID         uint `json:"id" mapstructure:"id"`
 	EmployeeID uint `json:"employee_id" mapstructure:"employee_id"`
+}
+
+func (s *sessions) open(ctx *gin.Context, body *sessionsActionBody) {
+	claims := mustGetEmployeeClaims(ctx)
+
+	sess := repository.SessionModel{
+		EmployeeID: claims.EmployeeID,
+		OutletID:   claims.OutletID,
+		OrgID:      claims.OrganizationID,
+
+		DateOpen:        body.Date,
+		CashSessionOpen: body.Cash,
+	}
+
+	if err := s.repo.Sessions.Open(&sess); err != nil {
+		if errors.Is(err, repository.ErrSessionAlreadyOpen) {
+			NewResponse(ctx, http.StatusBadRequest, errRecordAlreadyExists(err.Error()))
+		} else {
+			NewResponse(ctx, http.StatusBadRequest, errUnknown(err.Error()))
+		}
+		return
+	}
+
+	if err := s.repo.Employees.SetOnline(claims.EmployeeID); err != nil {
+		NewResponse(ctx, http.StatusInternalServerError, errUnknown(err.Error()))
+		return
+	}
+
+	response := sessionsActionResponse{
+		ID:         sess.ID,
+		EmployeeID: sess.EmployeeID,
+	}
+
+	NewResponse(ctx, http.StatusOK, response)
+}
+
+func (s *sessions) close(ctx *gin.Context, body *sessionsActionBody) {
+	claims := mustGetEmployeeClaims(ctx)
+
+	lastOpen, err := s.repo.Sessions.GetLastOpenByEmployeeID(claims.EmployeeID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			NewResponse(ctx, http.StatusBadRequest, errRecordNotFound("undefined open session"))
+		} else {
+			NewResponse(ctx, http.StatusBadRequest, errUnknown(err.Error()))
+		}
+		return
+	}
+
+	var numberOfReceipts int64
+	{
+		err := s.repo.Store().
+			Model(&repository.OrderInfoModel{}).
+			Where(&repository.OrderInfoModel{
+				SessionID: lastOpen.ID,
+			}).
+			Count(&numberOfReceipts).Error
+
+		if err != nil {
+			NewResponse(ctx, http.StatusInternalServerError, errUnknown(err.Error()))
+			return
+		}
+	}
+
+	var cashEarned, bankEarned float64
+	{
+		var orders []struct {
+			PayType      int
+			ProductPrice float64
+			Count        int
+		}
+
+		err := s.repo.Store().
+			Table("order_list_models as ol").
+			Select("ol.product_price, ol.count, oi.pay_type").
+			Joins("JOIN order_info_models AS oi ON ol.order_info_id = oi.id").
+			Find(&orders, &repository.OrderListModel{
+				SessionID: lastOpen.ID,
+			}).Error
+
+		if err != nil {
+			NewResponse(ctx, http.StatusInternalServerError, errUnknown(err.Error()))
+			return
+		}
+
+		for _, order := range orders {
+			earned := float64(order.Count) * order.ProductPrice
+
+			switch order.PayType {
+			case 0: //нал
+				cashEarned += earned
+			case 1: //карта
+				bankEarned += earned
+			}
+		}
+
+	}
+
+	sess := repository.SessionModel{
+		DateClose:        body.Date,
+		CashSessionClose: body.Cash,
+
+		CashEarned: cashEarned,
+		BankEarned: bankEarned,
+
+		NumberOfReceipts: int(numberOfReceipts),
+	}
+
+	if err := s.repo.Sessions.Close(claims.EmployeeID, &sess); err != nil {
+		NewResponse(ctx, http.StatusInternalServerError, errUnknown(err.Error()))
+		return
+	}
+
+	if err := s.repo.Employees.SetOffline(claims.EmployeeID); err != nil {
+		NewResponse(ctx, http.StatusInternalServerError, errUnknown(err.Error()))
+		return
+	}
+
+	NewResponse(ctx, http.StatusOK, sessionsActionResponse{ID: sess.ID, EmployeeID: sess.EmployeeID})
 }
 
 // @Summary Открыть или закрыть сессию в точке
 // @Description Поле `action` принимает два параметра: `open` (для открытия сессии) и `close` (для закрытия сессии)
 // @Param type body sessionsOpenOrCloseBody false "object"
-// @Success 200 {object} sessionsOpenOrCloseResponse "object"
+// @Success 200 {object} sessionsActionResponse "object"
 // @Router /sessions [post]
-func (s *sessions) OpenOrClose(c *gin.Context) {
-	var body sessionsOpenOrCloseBody
-	if err := c.ShouldBindJSON(&body); err != nil {
-		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
+func (s *sessions) Action(ctx *gin.Context) {
+	var body sessionsActionBody
+	if err := ctx.ShouldBindJSON(&body); err != nil {
+		NewResponse(ctx, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
 
-	claims := mustGetEmployeeClaims(c)
-
 	switch body.Action {
 	case "open":
-		{
-			sess := repository.SessionModel{
-				CashSessionOpen: body.Cash,
-				DateOpen:        body.Date,
-				EmployeeID:      claims.EmployeeID,
-				OutletID:        claims.OutletID,
-				OrgID:           claims.OrganizationID,
-			}
-			if err := s.repo.Sessions.Open(&sess); err != nil {
-				if errors.Is(err, repository.ErrSessionAlreadyOpen) {
-					NewResponse(c, http.StatusBadRequest, errRecordAlreadyExists(err.Error()))
-					return
-				}
-				NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
-				return
-			}
-
-			if err := s.repo.Employees.SetOnline(claims.EmployeeID); err != nil {
-				NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
-				return
-			}
-
-			NewResponse(c, http.StatusOK, sessionsOpenOrCloseResponse{ID: sess.ID, EmployeeID: sess.EmployeeID})
-		}
-
+		s.open(ctx, &body)
 	case "close":
-		{
-			lastOpenEmployeeSession, err := s.repo.Sessions.GetLastOpenByEmployeeID(claims.EmployeeID)
-			if err != nil {
-				if errors.Is(err, gorm.ErrRecordNotFound) {
-					NewResponse(c, http.StatusBadRequest, errRecordNotFound("undefined open session"))
-					return
-				}
-				NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
-				return
-			}
-
-			numberOfReceipts, err := s.repo.OrdersInfo.Count(&repository.OrderInfoModel{SessionID: lastOpenEmployeeSession.ID})
-			if err != nil {
-				NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
-				return
-			}
-
-			sess := repository.SessionModel{
-				DateClose:        body.Date,
-				CashSessionClose: body.Cash,
-				BankEarned:       body.BankEarned,
-				CashEarned:       body.CashEarned,
-				NumberOfReceipts: int(numberOfReceipts),
-			}
-
-			if err := s.repo.Sessions.Close(claims.EmployeeID, &sess); err != nil {
-				NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
-				return
-			}
-
-			if err := s.repo.Employees.SetOffline(claims.EmployeeID); err != nil {
-				NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
-				return
-			}
-			NewResponse(c, http.StatusOK, sessionsOpenOrCloseResponse{ID: sess.ID, EmployeeID: sess.EmployeeID})
-		}
+		s.close(ctx, &body)
 	default:
-		NewResponse(c, http.StatusBadRequest, errIncorrectInputData("action can be only `open` or `close` value"))
-		return
+		NewResponse(ctx, http.StatusBadRequest, errIncorrectInputData("action can be only `open` or `close` value"))
 	}
 }
 
@@ -161,7 +214,10 @@ func (s *sessions) GetAll(c *gin.Context) {
 	}
 
 	if claims.HasRole(repository.R_OWNER) {
-		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{OrgID: claims.OrganizationID, AffiliateOrgID: stdQuery.OrgID}) {
+		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{
+			OrgID:          claims.OrganizationID,
+			AffiliateOrgID: stdQuery.OrgID,
+		}) {
 			where.OrgID = stdQuery.OrgID
 		}
 	}

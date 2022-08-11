@@ -153,7 +153,7 @@ func (s *orderList) GetAll(c *gin.Context) {
 }
 
 type orderListCalcResponse struct {
-	Total float64 `json:"total"`
+	Total float64 `json:"total" mapstructure:"total"`
 }
 
 // @Summary  Посчитать сумму продаж за определенный период
@@ -180,7 +180,10 @@ func (s *orderList) Calc(c *gin.Context) {
 	}
 
 	if claims.HasRole(repository.R_OWNER) {
-		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{OrgID: claims.OrganizationID, AffiliateOrgID: stdQuery.OrgID}) {
+		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{
+			OrgID:          claims.OrganizationID,
+			AffiliateOrgID: stdQuery.OrgID,
+		}) {
 			where.OrgID = stdQuery.OrgID
 		}
 	}
@@ -189,15 +192,15 @@ func (s *orderList) Calc(c *gin.Context) {
 		where.OutletID = stdQuery.OutletID
 	}
 
-	models, err := s.repo.OrdersList.FindForCalculation(where)
+	list, err := s.repo.OrdersList.FindForCalculation(where)
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
 	}
 
-	output := orderListCalcResponse{}
-	for _, item := range *models {
-		output.Total += item.ProductPrice * float64(item.Count)
+	response := orderListCalcResponse{}
+	for _, item := range *list {
+		response.Total += item.ProductPrice * float64(item.Count)
 	}
 
-	NewResponse(c, http.StatusOK, output)
+	NewResponse(c, http.StatusOK, response)
 }

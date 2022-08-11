@@ -1,8 +1,6 @@
 package controller
 
 import (
-	"log"
-	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -32,17 +30,18 @@ func orderListGetAll(t *testing.T, engine *gin.Engine, token string) (data order
 func orderListCreate(t *testing.T, engine *gin.Engine, token string, sessionID uint) (data DefaultOutputModel) {
 	w := httptest.NewRecorder()
 
-	productID := productsCreate(t, engine, token).ID
+	productsCreate(t, engine, token)
+	product := productsGetAll(t, engine, token)[0]
 	orderInfoID := orderInfoCreate(t, engine, token, sessionID).ID
 
 	body := gin.H{
-		"product_id":    productID,
+		"product_id":    product.ID,
 		"order_info_id": orderInfoID,
 		"session_id":    sessionID,
 
 		"count":         testutil.RandomInt(1, 100),
 		"product_name":  testutil.RandomString(10),
-		"product_price": rand.Float64() * 100,
+		"product_price": product.Price,
 	}
 
 	req, _ := http.NewRequest("POST", basepath+"/orderList", testutil.Marshal(body))
@@ -53,18 +52,35 @@ func orderListCreate(t *testing.T, engine *gin.Engine, token string, sessionID u
 	var response Response
 	testutil.Unmarshal(w.Body, &response)
 	mapstructure.Decode(response.Data, &data)
-	log.Println(response)
 
 	require.Equal(t, http.StatusCreated, w.Code)
 	require.NotEqual(t, data.ID, 0)
 
-	orderList := orderListGetAll(t, engine, token)[0]
-	require.Equal(t, orderList.ProductID, body["product_id"])
-	require.Equal(t, orderList.OrderInfoID, body["order_info_id"])
-	require.Equal(t, orderList.SessionID, body["session_id"])
-	require.Equal(t, orderList.Count, body["count"])
-	require.Equal(t, orderList.ProductPrice, body["product_price"])
-	require.Equal(t, orderList.ProductName, body["product_name"])
+	orderList := orderListGetAll(t, engine, token)
+	orderListLast := orderList[len(orderList)-1]
+
+	require.Equal(t, orderListLast.ProductID, body["product_id"])
+	require.Equal(t, orderListLast.OrderInfoID, body["order_info_id"])
+	require.Equal(t, orderListLast.SessionID, body["session_id"])
+	require.Equal(t, orderListLast.Count, body["count"])
+	require.Equal(t, orderListLast.ProductPrice, body["product_price"])
+	require.Equal(t, orderListLast.ProductName, body["product_name"])
+
+	return
+}
+
+func orderListCalculation(t *testing.T, engine *gin.Engine, token string) (data orderListCalcResponse) {
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest("GET", basepath+"/orderList.Calc", nil)
+	testutil.SetAuthorizationHeader(req, token)
+
+	engine.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+
+	var response Response
+	testutil.Unmarshal(w.Body, &response)
+	mapstructure.Decode(response.Data, &data)
 
 	return
 }
@@ -80,4 +96,21 @@ func TestOrderListCreate(t *testing.T) {
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
 	sessionID := sessionsOpen(t, engine, tokenOwner).ID
 	orderListCreate(t, engine, tokenOwner, sessionID)
+}
+
+func TestOrderListCalculation(t *testing.T) {
+	engine := newController(t)
+
+	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
+	sessionID := sessionsOpen(t, engine, tokenOwner).ID
+
+	orderListCreate(t, engine, tokenOwner, sessionID)
+	orderListCreate(t, engine, tokenOwner, sessionID)
+
+	orderInfoDelete(t, engine, tokenOwner, orderInfoGetAll(t, engine, tokenOwner)[0].ID) // удаляем второй чек
+
+	orderList := orderListGetAll(t, engine, tokenOwner)
+	calc := orderListCalculation(t, engine, tokenOwner)
+
+	require.Equal(t, orderList[1].ProductPrice*float64(orderList[1].Count), calc.Total)
 }

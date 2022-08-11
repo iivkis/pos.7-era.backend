@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -13,15 +12,13 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func sessionsOpen(t *testing.T, engine *gin.Engine, token string) (data sessionsOpenOrCloseResponse) {
+func sessionsOpen(t *testing.T, engine *gin.Engine, token string) (data sessionsActionResponse) {
 	w := httptest.NewRecorder()
 
 	body := gin.H{
-		"action":      "open",
-		"date":        time.Now().UnixMilli(),
-		"cash":        float64(testutil.RandomInt(1, 10000)),
-		"cash_earned": float64(testutil.RandomInt(1, 10000)),
-		"bank_earned": float64(testutil.RandomInt(1, 10000)),
+		"action": "open",
+		"date":   time.Now().UnixMilli(),
+		"cash":   float64(testutil.RandomInt(1, 10000)),
 	}
 
 	req, _ := http.NewRequest("POST", basepath+"/sessions", testutil.Marshal(body))
@@ -37,20 +34,16 @@ func sessionsOpen(t *testing.T, engine *gin.Engine, token string) (data sessions
 	require.NotEmpty(t, data.ID)
 	require.NotEmpty(t, data.EmployeeID)
 
-	log.Println(response)
-
 	return
 }
 
-func sessionsClose(t *testing.T, engine *gin.Engine, token string) (data sessionsOpenOrCloseResponse) {
+func sessionsClose(t *testing.T, engine *gin.Engine, token string) (data sessionsActionResponse) {
 	w := httptest.NewRecorder()
 
 	body := gin.H{
-		"action":      "close",
-		"date":        time.Now().UnixMilli(),
-		"cash":        float64(testutil.RandomInt(1, 10000)),
-		"cash_earned": float64(testutil.RandomInt(1, 10000)),
-		"bank_earned": float64(testutil.RandomInt(1, 10000)),
+		"action": "close",
+		"date":   time.Now().UnixMilli(),
+		"cash":   float64(testutil.RandomInt(1, 10000)),
 	}
 
 	req, _ := http.NewRequest("POST", basepath+"/sessions", testutil.Marshal(body))
@@ -92,14 +85,33 @@ func TestSessionOpen(t *testing.T) {
 func TestSessionClose(t *testing.T) {
 	engine := newController(t)
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
-	sessionsOpen(t, engine, tokenOwner)
+
+	sessionID := sessionsOpen(t, engine, tokenOwner).ID
+
+	var n = 10
+	for i := 0; i < n; i++ {
+		orderListCreate(t, engine, tokenOwner, sessionID)
+	}
+
 	sessionsClose(t, engine, tokenOwner)
+
+	calc := orderListCalculation(t, engine, tokenOwner)
+	sess := sessionsGetAll(t, engine, tokenOwner)
+
+	require.Equal(t, calc.Total, sess[0].BankEarned+sess[0].CashEarned)
 }
 
 func TestSessionsGetAll(t *testing.T) {
 	engine := newController(t)
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
-	sessionsOpen(t, engine, tokenOwner)
+
+	sessionID := sessionsOpen(t, engine, tokenOwner).ID
+
+	var n = 5
+	for i := 0; i < n; i++ {
+		orderListCreate(t, engine, tokenOwner, sessionID)
+	}
+
 	sessionsClose(t, engine, tokenOwner)
 
 	session := sessionsGetAll(t, engine, tokenOwner)[0]

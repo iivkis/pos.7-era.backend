@@ -159,7 +159,7 @@ func (c *Controller) init() {
 
 	//смены сотрудников
 	{
-		r.POST("/sessions", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Sessions.OpenOrClose)
+		r.POST("/sessions", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Sessions.Action)
 		r.GET("/sessions", c.Middleware.AuthEmployee(r_owner, r_director, r_admin), c.Sessions.GetAll)
 		r.GET("/sessions.Last", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Sessions.GetLastForOutlet)
 		r.GET("/sessions.Last.Me", c.Middleware.AuthEmployee(r_owner, r_director, r_admin, r_cashier), c.Sessions.GetLastForMe)

@@ -10,7 +10,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type Repository struct {
+type combine struct {
 	Organizations            *OrganizationsRepo
 	Employees                *EmployeesRepo
 	Outlets                  *OutletsRepo
@@ -26,6 +26,11 @@ type Repository struct {
 	InventoryList            *InventoryListRepo
 	IngredientsAddingHistory *IngredientsAddingHistoryRepo
 	Invitation               *InvitationRepo
+}
+
+type Repository struct {
+	db *gorm.DB
+	combine
 }
 
 func NewRepository(authjwt *tokenmaker.TokenMaker) *Repository {
@@ -60,20 +65,27 @@ func NewRepository(authjwt *tokenmaker.TokenMaker) *Repository {
 	}
 
 	return &Repository{
-		Organizations:            newOrganizationsRepo(db),
-		Employees:                newEmployeesRepo(db),
-		Outlets:                  newOutletsRepo(db),
-		Sessions:                 newSessionsRepo(db),
-		Categories:               newCategoriesRepo(db),
-		Products:                 newProductsRepo(db),
-		Ingredients:              newIngredientsRepo(db),
-		OrdersList:               newOrderListRepo(db),
-		OrdersInfo:               newOrderInfoRepo(db),
-		ProductsWithIngredients:  newProductsWithIngredientsRepo(db),
-		CashChanges:              newCashChangesRepo(db),
-		InventoryHistory:         newInventoryHistoryRepo(db),
-		InventoryList:            newInventoryListRepo(db),
-		IngredientsAddingHistory: newIngredientsAddingHistoryRepo(db),
-		Invitation:               newInvitationRepo(db),
+		db: db,
+		combine: combine{
+			Organizations:            newOrganizationsRepo(db),
+			Employees:                newEmployeesRepo(db),
+			Outlets:                  newOutletsRepo(db),
+			Sessions:                 newSessionsRepo(db),
+			Categories:               newCategoriesRepo(db),
+			Products:                 newProductsRepo(db),
+			Ingredients:              newIngredientsRepo(db),
+			OrdersList:               newOrderListRepo(db),
+			OrdersInfo:               newOrderInfoRepo(db),
+			ProductsWithIngredients:  newProductsWithIngredientsRepo(db),
+			CashChanges:              newCashChangesRepo(db),
+			InventoryHistory:         newInventoryHistoryRepo(db),
+			InventoryList:            newInventoryListRepo(db),
+			IngredientsAddingHistory: newIngredientsAddingHistoryRepo(db),
+			Invitation:               newInvitationRepo(db),
+		},
 	}
+}
+
+func (r *Repository) Store() *gorm.DB {
+	return r.db
 }

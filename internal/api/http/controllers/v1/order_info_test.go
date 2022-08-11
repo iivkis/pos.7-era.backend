@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"testing"
 	"time"
 
@@ -51,6 +52,16 @@ func orderInfoCreate(t *testing.T, engine *gin.Engine, token string, sessionID u
 	return
 }
 
+func orderInfoDelete(t *testing.T, engine *gin.Engine, token string, orderInfoID uint) {
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest("DELETE", basepath+"/orderInfo/"+strconv.Itoa(int(orderInfoID)), nil)
+	testutil.SetAuthorizationHeader(req, token)
+
+	engine.ServeHTTP(w, req)
+	require.Equal(t, http.StatusOK, w.Code)
+}
+
 func TestOrderInfoCreate(t *testing.T) {
 	engine := newController(t)
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
@@ -62,3 +73,7 @@ func TestOrderInfoGetAll(t *testing.T) {
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
 	orderInfoGetAll(t, engine, tokenOwner)
 }
+
+// func TestOrderInfoDelete(t *testing.T) {
+
+// }
