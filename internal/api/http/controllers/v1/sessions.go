@@ -121,6 +121,7 @@ func (s *sessions) close(ctx *gin.Context, body *sessionsActionBody) {
 			Table("order_list_models as ol").
 			Select("ol.product_price, ol.count, oi.pay_type").
 			Joins("JOIN order_info_models AS oi ON ol.order_info_id = oi.id").
+			Where("oi.deleted_at is NULL").
 			Find(&orders, &repository.OrderListModel{
 				SessionID: lastOpen.ID,
 			}).Error

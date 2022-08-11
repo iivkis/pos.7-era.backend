@@ -93,6 +93,9 @@ func TestSessionClose(t *testing.T) {
 		orderListCreate(t, engine, tokenOwner, sessionID)
 	}
 
+	orderInfos := orderInfoGetAll(t, engine, tokenOwner)
+	orderInfoDelete(t, engine, tokenOwner, orderInfos[len(orderInfos)-1].ID)
+
 	sessionsClose(t, engine, tokenOwner)
 
 	calc := orderListCalculation(t, engine, tokenOwner)
