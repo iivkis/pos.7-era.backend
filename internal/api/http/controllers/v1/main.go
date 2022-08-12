@@ -204,12 +204,4 @@ func (c *Controller) init() {
 	}
 }
 
-// func (c *Controller) cors() gin.HandlerFunc {
-// 	return cors.New(cors.Config{
-// 		AllowAllOrigins:  true,
-// 		AllowCredentials: true,
-// 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-// 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
-// 		MaxAge:           12 * time.Hour,
-// 	})
-// }
+//zFdQQC92B

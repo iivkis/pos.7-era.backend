@@ -87,12 +87,14 @@ func (s *invitation) GetAll(c *gin.Context) {
 	}
 
 	output := make(invitationGetAllResponse, len(*invites))
+
 	for i, invite := range *invites {
 		output[i] = invitationResponseModel{
 			ID:             invite.ID,
-			Code:           invite.Code,
-			ExpiresIn:      invite.ExpiresIn,
 			AffiliateOrgID: invite.AffiliateOrgID,
+
+			Code:      invite.Code,
+			ExpiresIn: invite.ExpiresIn,
 		}
 	}
 
@@ -120,6 +122,7 @@ func (s *invitation) Delete(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 		return
 	}
+
 	NewResponse(c, http.StatusOK, nil)
 }
 
@@ -132,8 +135,7 @@ type invitationGetNotActivatedResponse struct {
 // @Summary Получить неактивированные приглашения организации
 // @Accept json
 // @Produce json
-// @Success 200 {object} []InvitationGetNotActivatedOutput "возвращамый объект"
-// @Failure 400 {object} serviceError
+// @Success 200 {object} []invitationGetNotActivatedResponse "object"
 // @Router /invites.NotActivated [get]
 func (s *invitation) GetNotActivated(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
@@ -160,28 +162,27 @@ func (s *invitation) GetNotActivated(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-type invitationGetActivatedFieldOutlets struct {
-	ID   uint   `json:"id"`
-	Name string `json:"name"`
+type invitationGetActivatedAffiliateOrgOutlet struct {
+	ID   uint   `json:"id"`   // id точки
+	Name string `json:"name"` // имя точки
 }
 
-type invitationGetActivatedFieldAffiliateOrg struct {
-	ID      uint                                 `json:"id"`
-	Name    string                               `json:"name"`
-	Outlets []invitationGetActivatedFieldOutlets `json:"outlets"`
+type invitationGetActivateAffiliateOrg struct {
+	ID      uint                                       `json:"id"`      //id филиала
+	Name    string                                     `json:"name"`    //имя филиала
+	Outlets []invitationGetActivatedAffiliateOrgOutlet `json:"outlets"` //точки филиала
 }
 
 type invitationGetActivatedResponse struct {
-	ID           uint                                    `json:"id"` //id инвайта
-	AffiliateOrg invitationGetActivatedFieldAffiliateOrg `json:"affiliate_org"`
+	ID           uint                              `json:"id"`            //id инвайта
+	AffiliateOrg invitationGetActivateAffiliateOrg `json:"affiliate_org"` //информация о филиале
 }
 
 // @Summary Получить активированные приглашения организации
 // @Accept json
 // @Produce json
 // @Success 200 {object} []InvitationGetActivatedOutput "возвращамый объект"
-// @Failure 400 {object} serviceError
-// @Router /invites.NotActivated [get]
+// @Router /invites.Activated [get]
 func (s *invitation) GetActivated(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
 
@@ -195,7 +196,8 @@ func (s *invitation) GetActivated(c *gin.Context) {
 		return
 	}
 
-	output := make([]invitationGetActivatedResponse, len(*invites))
+	response := make([]invitationGetActivatedResponse, len(*invites))
+
 	for i, invite := range *invites {
 		org, err := s.repo.Organizations.FindFirts(&repository.OrganizationModel{ID: invite.AffiliateOrgID})
 		if err != nil {
@@ -203,30 +205,30 @@ func (s *invitation) GetActivated(c *gin.Context) {
 			return
 		}
 
-		outlets, err := s.repo.Outlets.Find(&repository.OutletModel{OrgID: invite.OrgID})
+		outlets, err := s.repo.Outlets.Find(&repository.OutletModel{OrgID: org.ID})
 		if err != nil {
 			NewResponse(c, http.StatusBadRequest, errUnknown(err.Error()))
 			return
 		}
 
-		affiliateOrg := invitationGetActivatedFieldAffiliateOrg{
+		affiliateOrg := invitationGetActivateAffiliateOrg{
 			ID:      org.ID,
 			Name:    org.Name,
-			Outlets: make([]invitationGetActivatedFieldOutlets, len(*outlets)),
+			Outlets: make([]invitationGetActivatedAffiliateOrgOutlet, len(*outlets)),
 		}
 
-		for i, outlet := range *outlets {
-			affiliateOrg.Outlets[i] = invitationGetActivatedFieldOutlets{
+		for j, outlet := range *outlets {
+			affiliateOrg.Outlets[j] = invitationGetActivatedAffiliateOrgOutlet{
 				ID:   outlet.ID,
 				Name: outlet.Name,
 			}
 		}
 
-		output[i] = invitationGetActivatedResponse{
+		response[i] = invitationGetActivatedResponse{
 			ID:           invite.ID,
 			AffiliateOrg: affiliateOrg,
 		}
 	}
 
-	NewResponse(c, http.StatusOK, output)
+	NewResponse(c, http.StatusOK, response)
 }
