@@ -1,9 +1,6 @@
 package controller
 
 import (
-	"time"
-
-	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/components"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
@@ -65,11 +62,11 @@ func Setup(comp components.Components) *Controller {
 }
 
 func (c *Controller) init() {
-	r := c.Engine.Group("api/v1")
+	r := c.Engine.Group("/api/v1")
 
 	//middleware
 	{
-		r.Use(c.cors())
+		// r.Use(c.cors())
 		r.Use(c.Middleware.StandartQuery())
 	}
 
@@ -207,12 +204,12 @@ func (c *Controller) init() {
 	}
 }
 
-func (c *Controller) cors() gin.HandlerFunc {
-	return cors.New(cors.Config{
-		AllowAllOrigins:  true,
-		AllowCredentials: true,
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
-		MaxAge:           12 * time.Hour,
-	})
-}
+// func (c *Controller) cors() gin.HandlerFunc {
+// 	return cors.New(cors.Config{
+// 		AllowAllOrigins:  true,
+// 		AllowCredentials: true,
+// 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+// 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+// 		MaxAge:           12 * time.Hour,
+// 	})
+// }

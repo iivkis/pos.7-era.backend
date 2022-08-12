@@ -3,6 +3,7 @@ package components
 import (
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/iivkis/pos.7-era.backend/internal/config"
 	"github.com/iivkis/pos.7-era.backend/internal/repository"
@@ -23,6 +24,14 @@ type Components struct {
 
 func New() Components {
 	engine := gin.Default()
+
+	engine.Use(cors.New(cors.Config{
+		AllowAllOrigins:  true,
+		AllowCredentials: true,
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Authorization"},
+		MaxAge:           12 * time.Hour,
+	}))
 
 	// отправка email писем
 	postman := postman.NewPosman(config.Env.EmailLogin, config.Env.EmailPassword)
