@@ -28,11 +28,11 @@ type categoriesCreateBody struct {
 	Name string `json:"name" binding:"required,max=150"`
 }
 
-//@Summary Добавить новую категорию к точке
-//@param type body categoriesCreateBody false "Принимаемый объект"
-//@Accept json
-//@Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
-//@Router /categories [post]
+// @Summary Добавить новую категорию к точке
+// @param type body categoriesCreateBody false "Принимаемый объект"
+// @Accept json
+// @Success 201 {object} DefaultOutputModel "возвращает id созданной записи"
+// @Router /categories [post]
 func (s *categories) Create(c *gin.Context) {
 	var body categoriesCreateBody
 	if err := c.ShouldBindJSON(&body); err != nil {
@@ -40,7 +40,7 @@ func (s *categories) Create(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	categoryModel := repository.CategoryModel{
 		Name:     body.Name,
@@ -64,14 +64,14 @@ func (s *categories) Create(c *gin.Context) {
 
 type categoriesGetAllResponse []CategoryOutputModel
 
-//@Summary Список всех категорий организации для владельца и точки для админа/кассира
-//@Produce json
-//@Success 200 {object} categoriesGetAllResponse "Возвращает массив категорий"
-//@Failure 500 {object} serviceError
-//@Router /categories [get]
+// @Summary Список всех категорий организации для владельца и точки для админа/кассира
+// @Produce json
+// @Success 200 {object} categoriesGetAllResponse "Возвращает массив категорий"
+// @Failure 500 {object} serviceError
+// @Router /categories [get]
 func (s *categories) GetAll(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	stdQuery := mustGetStandartQuery(c)
 
 	where := &repository.CategoryModel{
 		OrgID:    claims.OrganizationID,
@@ -106,12 +106,12 @@ func (s *categories) GetAll(c *gin.Context) {
 	NewResponse(c, http.StatusOK, output)
 }
 
-//@Summary Удалить категоирю из точки
-//@Description Метод позволяет удалить категоирю из точки
-//@Produce json
-//@Success 200 {object} object "возвращает пустой объект"
-//@Failure 500 {object} serviceError
-//@Router /categories/:id [delete]
+// @Summary Удалить категоирю из точки
+// @Description Метод позволяет удалить категоирю из точки
+// @Produce json
+// @Success 200 {object} object "возвращает пустой объект"
+// @Failure 500 {object} serviceError
+// @Router /categories/:id [delete]
 func (s *categories) Delete(c *gin.Context) {
 	catID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -120,7 +120,7 @@ func (s *categories) Delete(c *gin.Context) {
 	}
 
 	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	stdQuery := mustGetStandartQuery(c)
 
 	where := &repository.CategoryModel{ID: uint(catID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
@@ -146,12 +146,12 @@ type CategoryUpdateFieldsInput struct {
 	Name string `json:"name"`
 }
 
-//@Summary Обновить поля категории
-//@param type body CategoryUpdateFieldsInput false "Принимаемый объект"
-//@Accept json
-//@Produce json
-//@Success 200 {object} object "возвращает пустой объект"
-//@Router /categories/:id [put]
+// @Summary Обновить поля категории
+// @param type body CategoryUpdateFieldsInput false "Принимаемый объект"
+// @Accept json
+// @Produce json
+// @Success 200 {object} object "возвращает пустой объект"
+// @Router /categories/:id [put]
 func (s *categories) UpdateFields(c *gin.Context) {
 	var input CategoryUpdateFieldsInput
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -166,7 +166,7 @@ func (s *categories) UpdateFields(c *gin.Context) {
 	}
 
 	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	stdQuery := mustGetStandartQuery(c)
 
 	where := &repository.CategoryModel{
 		ID:       uint(catID),

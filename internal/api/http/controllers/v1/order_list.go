@@ -111,7 +111,7 @@ func (s *orderList) GetAll(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.OrderListModel{
 		OrgID:       claims.OrganizationID,
@@ -169,7 +169,7 @@ func (s *orderList) Calc(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.OrderListModel{
 		OrgID:       claims.OrganizationID,

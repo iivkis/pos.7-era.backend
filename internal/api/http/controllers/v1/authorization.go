@@ -148,7 +148,7 @@ func (s *authorization) SignUpEmployee(c *gin.Context) {
 	}
 
 	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	stdQuery := mustGetStandartQuery(c)
 
 	employeeModel := repository.EmployeeModel{
 		Name:     input.Name,

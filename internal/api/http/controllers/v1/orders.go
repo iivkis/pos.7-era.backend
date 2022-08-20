@@ -144,7 +144,7 @@ func (s *orders) GetAll(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	whereOrderInfo := &repository.OrderInfoModel{
 		OrgID:     claims.OrganizationID,

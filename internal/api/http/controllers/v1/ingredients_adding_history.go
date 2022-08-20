@@ -50,7 +50,7 @@ func (s *ingredientsAddingHistory) Create(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	model := repository.IngredientsAddingHistoryModel{
 		Count:        input.Count,
@@ -97,7 +97,7 @@ func (s *ingredientsAddingHistory) GetAll(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.IngredientsAddingHistoryModel{
 		OrgID:    claims.OrganizationID,

@@ -72,7 +72,7 @@ func (s *products) Create(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	newProduct := repository.ProductModel{
 		CategoryID: body.CategoryID,
@@ -119,7 +119,7 @@ type productGetAllResponse []productResponseModel
 // @Failure 500 {object} serviceError
 // @Router /products [get]
 func (s *products) GetAll(c *gin.Context) {
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.ProductModel{
 		OrgID:    claims.OrganizationID,
@@ -179,7 +179,7 @@ func (s *products) GetOne(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.ProductModel{
 		ID:       uint(productID),
@@ -250,7 +250,7 @@ func (s *products) Update(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.ProductModel{
 		ID:       uint(productID),
@@ -334,7 +334,7 @@ func (s *products) Delete(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.ProductModel{ID: uint(productID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {

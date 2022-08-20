@@ -207,24 +207,22 @@ func (s *sessions) GetAll(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 		return
 	}
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.SessionModel{
-		OrgID:    claims.OrganizationID,
 		OutletID: claims.OutletID,
 	}
 
-	if claims.HasRole(repository.R_OWNER) {
-		if stdQuery.OrgID != 0 && s.repo.Invitation.Exists(&repository.InvitationModel{
-			OrgID:          claims.OrganizationID,
-			AffiliateOrgID: stdQuery.OrgID,
-		}) {
-			where.OrgID = stdQuery.OrgID
+	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) && stdQuery.OutletID != 0 {
+		if ok, err := s.repo.HasAccessToOutlet(claims.OrganizationID, stdQuery.OutletID); ok {
+			where.OutletID = stdQuery.OutletID
+		} else if err != nil {
+			NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))
+			return
+		} else {
+			NewResponse(c, http.StatusForbidden, errPermissionDenided())
+			return
 		}
-	}
-
-	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
-		where.OutletID = stdQuery.OutletID
 	}
 
 	sessions, err := s.repo.Sessions.FindWithPeriod(query.Start, query.End, where)
@@ -260,7 +258,7 @@ func (s *sessions) GetAll(c *gin.Context) {
 // @Success 200 {object} sessionsResponseModel "Возвращает последнюю закрытую сессию точки продаж"
 // @Router /sessions.Last.Closed [get]
 func (s *sessions) GetLastClosedForOutlet(c *gin.Context) {
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	outletID := claims.OutletID
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
@@ -299,7 +297,7 @@ func (s *sessions) GetLastClosedForOutlet(c *gin.Context) {
 // @Success 200 {object} sessionsResponseModel "Возвращает последнюю закрытую сессию точки продаж"
 // @Router /sessions.Last [get]
 func (s *sessions) GetLastForOutlet(c *gin.Context) {
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	outletID := claims.OutletID
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {

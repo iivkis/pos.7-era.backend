@@ -129,3 +129,20 @@ func (r *InvitationRepo) CountNotActivated(ordID interface{}) (n int64, err erro
 	err = r.db.Model(&InvitationModel{}).Where("expires_in IS NOT NULL AND org_id = ?", ordID).Count(&n).Error
 	return
 }
+
+func (r *InvitationRepo) HasAccessToOutlet(orgID uint, outletID uint) (bool, error) {
+	var n int64
+
+	err := r.db.
+		Table("outlet_models").
+		Joins("JOIN invitation_models ON outlet_models.org_id = invitation_models.affiliate_org_id").
+		Where("outlet_models.id = ? AND invitation_models.org_id = ?", outletID, orgID).
+		Count(&n).
+		Error
+
+	if n > 0 {
+		return true, nil
+	}
+
+	return false, err
+}

@@ -53,7 +53,7 @@ func (s *ingredients) Create(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	ingredient := repository.IngredientModel{
 		Name:          body.Name,
@@ -85,7 +85,7 @@ type ingredientGetAllResponse []IngredientOutputModel
 // @Router /ingredients [get]
 func (s *ingredients) GetAll(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	stdQuery := mustGetStandartQuery(c)
 
 	where := &repository.IngredientModel{
 		OrgID:    claims.OrganizationID,
@@ -144,7 +144,7 @@ func (s *ingredients) UpdateFields(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.IngredientModel{
 		ID:       uint(idx),
@@ -198,7 +198,7 @@ func (s *ingredients) UpdateFields(c *gin.Context) {
 // @Router /ingredients/:id [delete]
 func (s *ingredients) Delete(c *gin.Context) {
 	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	stdQuery := mustGetStandartQuery(c)
 
 	ingredientID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -274,7 +274,7 @@ func (s *ingredients) Arrival(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	ingredients := make([]*repository.IngredientModel, len(input))
 

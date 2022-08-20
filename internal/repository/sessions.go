@@ -39,9 +39,9 @@ func newSessionsRepo(db *gorm.DB) *SessionsRepo {
 	}
 }
 
-//Open - открывает новую сессию, если предыдущие сессии закрыты
-//если найдена запись с открытой сессией, то возвращаем ошибку о том, что одновременно можно открыть только одну сессию
-//иначе создаем новую сессию
+// Open - открывает новую сессию, если предыдущие сессии закрыты
+// если найдена запись с открытой сессией, то возвращаем ошибку о том, что одновременно можно открыть только одну сессию
+// иначе создаем новую сессию
 func (r *SessionsRepo) Open(m *SessionModel) error {
 	ok, err := r.HasOpenSession(m.EmployeeID)
 	if err != nil {
@@ -61,7 +61,7 @@ func (r *SessionsRepo) Open(m *SessionModel) error {
 
 //actual
 
-//при закрытие сессии обновляем поля
+// при закрытие сессии обновляем поля
 // cash_session_close и date_close
 func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
 	if err := r.db.Model(&SessionModel{}).Where("employee_id = ? AND date_close = 0", employeeID).Updates(sess).Error; err != nil {
@@ -70,13 +70,13 @@ func (r *SessionsRepo) Close(employeeID interface{}, sess *SessionModel) error {
 	return r.db.Model(&SessionModel{}).Where("employee_id = ?", employeeID).Last(sess).Error
 }
 
-//Возвращает последнюю сессию сотрудника
+// Возвращает последнюю сессию сотрудника
 func (r *SessionsRepo) GetLastOpenByEmployeeID(employeeID interface{}) (model SessionModel, err error) {
 	err = r.db.Where("employee_id = ? AND date_close = 0", employeeID).Last(&model).Error
 	return
 }
 
-//Возвращает последнюю закрытую сессию для точки продаж
+// Возвращает последнюю закрытую сессию для точки продаж
 func (r *SessionsRepo) GetLastClosedForOutlet(outletID uint) (model SessionModel, err error) {
 	err = r.db.Where("outlet_id = ? AND date_close <> 0", outletID).Last(&model).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
@@ -85,7 +85,7 @@ func (r *SessionsRepo) GetLastClosedForOutlet(outletID uint) (model SessionModel
 	return
 }
 
-//Возвращает последнюю сессию для точки продаж
+// Возвращает последнюю сессию для точки продаж
 func (r *SessionsRepo) GetLastForEmployeeByID(employeeID uint) (model SessionModel, err error) {
 	err = r.db.Where("employee_id = ?", employeeID).Last(&model).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {
@@ -94,7 +94,7 @@ func (r *SessionsRepo) GetLastForEmployeeByID(employeeID uint) (model SessionMod
 	return
 }
 
-//Возвращает последнюю сессию для точки продаж
+// Возвращает последнюю сессию для точки продаж
 func (r *SessionsRepo) GetLastForOutlet(outletID uint) (model SessionModel, err error) {
 	err = r.db.Where("outlet_id = ?", outletID).Last(&model).Error
 	if err != nil && errors.Is(err, gorm.ErrRecordNotFound) {

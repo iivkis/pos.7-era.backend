@@ -104,7 +104,7 @@ func (s *orderInfo) GetAll(c *gin.Context) {
 		NewResponse(c, http.StatusBadRequest, errIncorrectInputData(err.Error()))
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.OrderInfoModel{
 		OrgID:     claims.OrganizationID,
@@ -147,7 +147,7 @@ func (s *orderInfo) Delete(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.OrderInfoModel{
 		Model:    gorm.Model{ID: uint(orderInfoID)},
@@ -200,7 +200,7 @@ func (s *orderInfo) Recovery(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.OrderInfoModel{
 		Model:    gorm.Model{ID: uint(orderInfoID)},

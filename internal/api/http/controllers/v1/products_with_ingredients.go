@@ -45,7 +45,7 @@ func (s *productsWithIngredients) Create(c *gin.Context) {
 	}
 
 	claims := mustGetEmployeeClaims(c)
-	stdQuery := mustGetStdQuery(c)
+	stdQuery := mustGetStandartQuery(c)
 
 	pwiModel := &repository.ProductWithIngredientModel{
 		CountTakeForSell: input.CountTakeForSell,
@@ -92,7 +92,7 @@ func (s *productsWithIngredients) GetAll(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.ProductWithIngredientModel{
 		ProductID: query.ProductID,
@@ -140,7 +140,7 @@ func (s *productsWithIngredients) Delete(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.ProductWithIngredientModel{ID: uint(pwiID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
@@ -177,7 +177,7 @@ func (s *productsWithIngredients) Update(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.ProductWithIngredientModel{ID: uint(pwiID), OrgID: claims.OrganizationID, OutletID: claims.OutletID}
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {

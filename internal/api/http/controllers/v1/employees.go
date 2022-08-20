@@ -38,12 +38,23 @@ type employeesGetAllResponse []EmployeeOutputModel
 // @Failure 500 {object} serviceError
 // @Router /employees [get]
 func (s *employees) GetAll(c *gin.Context) {
-	claims, stdQuery := mustGetOrganizationClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetOrganizationClaims(c), mustGetStandartQuery(c)
 
-	employees, err := s.repo.Employees.Find(&repository.EmployeeModel{
-		OrgID:    claims.OrganizationID,
-		OutletID: stdQuery.OutletID,
-	})
+	where := &repository.EmployeeModel{
+		OrgID: claims.OrganizationID,
+	}
+
+	if stdQuery.OutletID != 0 {
+		if ok, _ := s.repo.HasAccessToOutlet(claims.OrganizationID, stdQuery.OutletID); ok {
+			where.OrgID = 0
+			where.OutletID = stdQuery.OutletID
+		} else {
+			NewResponse(c, http.StatusForbidden, errPermissionDenided())
+			return
+		}
+	}
+
+	employees, err := s.repo.Employees.Find(where)
 
 	if err != nil {
 		NewResponse(c, http.StatusInternalServerError, errUnknown(err.Error()))

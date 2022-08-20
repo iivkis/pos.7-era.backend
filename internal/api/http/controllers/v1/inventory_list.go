@@ -110,7 +110,7 @@ func (s *inventoryList) GetAll(c *gin.Context) {
 		return
 	}
 
-	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStdQuery(c)
+	claims, stdQuery := mustGetEmployeeClaims(c), mustGetStandartQuery(c)
 
 	where := &repository.InventoryListModel{
 		OrgID:              claims.OrganizationID,

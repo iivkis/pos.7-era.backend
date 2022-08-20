@@ -13,6 +13,6 @@ func mustGetOrganizationClaims(c *gin.Context) *tokenmaker.OrganizationClaims {
 	return c.MustGet("claims").(*tokenmaker.OrganizationClaims)
 }
 
-func mustGetStdQuery(c *gin.Context) *MiddlewareStandartQuery {
+func mustGetStandartQuery(c *gin.Context) *MiddlewareStandartQuery {
 	return c.MustGet("std_query").(*MiddlewareStandartQuery)
 }
