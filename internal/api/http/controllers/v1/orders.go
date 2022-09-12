@@ -10,17 +10,17 @@ import (
 )
 
 type ordersInfoResponse struct {
-	SessionID uint `json:"session_id" binding:"min=1"`
+	SessionID uint `json:"session_id"`
 	OutletID  uint `json:"outlet_id"`
 
-	EmployeeName string `json:"employee_name" binding:"required"`
-	PayType      int    `json:"pay_type" binding:"min=0,max=2"`
-	Date         int64  `json:"date" binding:"min=1"` //UnixMilli
+	EmployeeName string `json:"employee_name"`
+	PayType      int    `json:"pay_type"`
+	Date         int64  `json:"date"` //UnixMilli
 	IsDelete     bool   `json:"is_delete"`
 }
 
 type ordersListResponse struct {
-	ProductID    uint    `json:"product_id" binding:"min=1"`
+	ProductID    uint    `json:"product_id"`
 	ProductName  string  `json:"product_name"`
 	ProductPrice float64 `json:"product_price"`
 	Count        int     `json:"count"`
