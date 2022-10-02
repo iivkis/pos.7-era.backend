@@ -153,7 +153,17 @@ func (s *orders) GetAll(c *gin.Context) {
 	}
 
 	if claims.HasRole(repository.R_OWNER, repository.R_DIRECTOR) {
-		whereOrderInfo.OutletID = stdQuery.OutletID
+		if stdQuery.OutletID != 0 {
+			if ok, _ := s.repo.Invitation.HasAccessToOutlet(claims.OrganizationID, stdQuery.OutletID); ok {
+				whereOrderInfo.OrgID = 0
+				whereOrderInfo.OutletID = stdQuery.OutletID
+			}
+		}
+
+		if query.SessionID != 0 {
+			whereOrderInfo.OrgID = 0
+			whereOrderInfo.OutletID = 0
+		}
 	}
 
 	orderInfos, err := s.repo.OrdersInfo.FindUnscoped(whereOrderInfo)
