@@ -94,6 +94,7 @@ func (s *sessions) close(ctx *gin.Context, body *sessionsActionBody) {
 		return
 	}
 
+	//считаем кол-во чеков за сессию
 	var numberOfReceipts int64
 	{
 		err := s.repo.Store().
@@ -109,6 +110,7 @@ func (s *sessions) close(ctx *gin.Context, body *sessionsActionBody) {
 		}
 	}
 
+	//считаем заработок по карте и наличной оплатой
 	var cashEarned, bankEarned float64
 	{
 		var orders []struct {

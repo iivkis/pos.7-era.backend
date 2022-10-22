@@ -6,16 +6,6 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-// var errlog *log.Logger
-
-// func init() {
-// 	f, err := os.Create("err_unknown.log")
-// 	if err != nil {
-// 		panic(err)
-// 	}
-// 	errlog = log.New(f, fmt.Sprintf("[port: %s] ", *config.Flags.Port), 0)
-// }
-
 type serviceError struct {
 	Code  uint16 `json:"code"`
 	Error string `json:"error"`
@@ -67,7 +57,7 @@ var (
 	errForeignKey          = newServiceError(207, "foreign key error")
 )
 
-//300-399 - ошибки связанные с токеном и доступом
+// 300-399 - ошибки связанные с токеном и доступом
 var (
 	errParsingJWT        = newServiceError(300, "jwt token parsing error")
 	errUndefinedJWT      = newServiceError(301, "jwt token undefined in header `Authorization`")

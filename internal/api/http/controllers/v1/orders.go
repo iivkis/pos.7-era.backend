@@ -15,6 +15,7 @@ type ordersInfoResponse struct {
 
 	EmployeeName string `json:"employee_name"`
 	PayType      int    `json:"pay_type"`
+	Discount     int    `json:"discount"`
 	Date         int64  `json:"date"` //UnixMilli
 	IsDelete     bool   `json:"is_delete"`
 }
@@ -47,6 +48,7 @@ type ordersCreateBody struct {
 		SessionID    uint   `json:"session_id" binding:"min=1"`
 		EmployeeName string `json:"employee_name" binding:"required"`
 		PayType      int    `json:"pay_type" binding:"min=0,max=2"`
+		Discount     int    `json:"discount" binding:"min=0,max=100"`
 		Date         int64  `json:"date" binding:"min=1"` //UnixMilli
 	} `json:"info"`
 
@@ -91,6 +93,7 @@ func (s *orders) Create(c *gin.Context) {
 		OrgID:     claims.OrganizationID,
 		OutletID:  claims.OutletID,
 
+		Discount:     body.Info.Discount,
 		PayType:      body.Info.PayType,
 		Date:         body.Info.Date,
 		EmployeeName: body.Info.EmployeeName,
@@ -110,7 +113,7 @@ func (s *orders) Create(c *gin.Context) {
 			OrgID:       claims.OrganizationID,
 
 			ProductName:  item.ProductName,
-			ProductPrice: item.ProductPrice,
+			ProductPrice: item.ProductPrice - (item.ProductPrice * float64(body.Info.Discount) / 100), //цена с учетом скидки
 			Count:        item.Count,
 		}
 
@@ -188,6 +191,7 @@ func (s *orders) GetAll(c *gin.Context) {
 
 				EmployeeName: item.EmployeeName,
 				PayType:      item.PayType,
+				Discount:     item.Discount,
 				Date:         item.Date,
 				IsDelete:     !item.DeletedAt.Time.IsZero(),
 			},

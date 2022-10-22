@@ -12,6 +12,7 @@ type OrderInfoModel struct {
 	Date int64
 
 	PayType      int // 0 - наличные, 1 - безналичные
+	Discount     int
 	EmployeeName string
 
 	SessionModel      SessionModel      `gorm:"foreignKey:SessionID"`
@@ -29,7 +30,6 @@ func newOrderInfoRepo(db *gorm.DB) *OrderInfoRepo {
 	}
 }
 
-//actual
 func (r *OrderInfoRepo) Create(model *OrderInfoModel) error {
 	return r.db.Create(model).Error
 }

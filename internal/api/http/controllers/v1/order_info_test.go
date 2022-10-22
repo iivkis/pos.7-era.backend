@@ -73,7 +73,3 @@ func TestOrderInfoGetAll(t *testing.T) {
 	tokenOwner := employeeGetOwnerToken(t, engine, orgGetToken(t, engine))
 	orderInfoGetAll(t, engine, tokenOwner)
 }
-
-// func TestOrderInfoDelete(t *testing.T) {
-
-// }
